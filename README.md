@@ -207,6 +207,22 @@ agentic handoff confirm <predecessor-id>
 agentic handoff takeover <predecessor-id> 123 my-new-branch
 ```
 
+### Crew Operations (Optional)
+
+```bash
+# List available crews
+agentic crews list
+
+# Get crew information
+agentic crews info <package> <crew>
+
+# Run a crew
+agentic crews run <package> <crew> --input "Create a QuestComponent"
+
+# Run with custom timeout
+agentic crews run <package> <crew> --input "Complex task" --timeout 600000
+```
+
 ## Configuration
 
 ### Configuration File
