@@ -1,6 +1,10 @@
 # Build output
 dist/
 
+# Documentation build
+docs/_build/
+docs/api/python/_autosummary/
+
 # Dependencies
 node_modules/
 

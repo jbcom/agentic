@@ -1,0 +1,53 @@
+/* Custom styles for agentic-control documentation */
+
+/* Improve code block styling */
+.highlight {
+    border-radius: 4px;
+}
+
+/* Better table styling */
+table.docutils {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+table.docutils td, table.docutils th {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+}
+
+/* Module/class headers */
+dl.py.class > dt,
+dl.py.function > dt,
+dl.py.method > dt,
+dl.js.class > dt,
+dl.js.function > dt,
+dl.js.method > dt {
+    background-color: #f8f8f8;
+    padding: 8px;
+    border-radius: 4px;
+    border-left: 3px solid #2980b9;
+}
+
+/* Parameter lists */
+.field-list {
+    margin-bottom: 1em;
+}
+
+/* Admonitions */
+.admonition {
+    border-radius: 4px;
+}
+
+/* Mermaid diagrams */
+.mermaid {
+    text-align: center;
+    margin: 1em 0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 768px) {
+    .wy-nav-content {
+        padding: 1em;
+    }
+}
