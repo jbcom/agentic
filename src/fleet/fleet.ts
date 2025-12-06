@@ -68,6 +68,7 @@ export class Fleet {
     private useDirectApi: boolean;
     private crewTool: any | null = null;
     private crewToolInitialized = false;
+    private crewToolInitPromise: Promise<void> | null = null;
 
     constructor(config: FleetConfig = {}) {
         this.archivePath = config.archivePath ?? './memory-bank/recovery';
@@ -91,20 +92,35 @@ export class Fleet {
     }
 
     private async initCrewTool(): Promise<void> {
+        // If already initialized, return immediately
         if (this.crewToolInitialized) return;
-        this.crewToolInitialized = true;
 
-        try {
-            const { getCrewsConfig } = await import('../core/config.js');
-            const crewsConfig = getCrewsConfig();
-            if (crewsConfig) {
-                const { CrewTool } = await import('../crews/crew-tool.js');
-                this.crewTool = new CrewTool(crewsConfig);
-            }
-        } catch {
-            // Crew tool not available
-            this.crewTool = null;
+        // If initialization is in progress, await the existing promise
+        if (this.crewToolInitPromise) {
+            return this.crewToolInitPromise;
         }
+
+        // Start initialization and track the promise
+        this.crewToolInitPromise = (async () => {
+            try {
+                const { getCrewsConfig } = await import('../core/config.js');
+                const crewsConfig = getCrewsConfig();
+                if (crewsConfig) {
+                    const { CrewTool } = await import('../crews/crew-tool.js');
+                    this.crewTool = new CrewTool(crewsConfig);
+                } else {
+                    this.crewTool = null;
+                }
+            } catch {
+                // Crew tool not available
+                this.crewTool = null;
+            } finally {
+                // Only set initialized flag after async work completes
+                this.crewToolInitialized = true;
+            }
+        })();
+
+        return this.crewToolInitPromise;
     }
 
     /**
