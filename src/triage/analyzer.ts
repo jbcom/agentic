@@ -177,7 +177,7 @@ export class Analyzer {
     private apiKey: string;
     private repo: string | undefined;
     private providerFn: ModelFactory | null = null;
-    private crewTool: any | null = null;
+    private crewTool: CrewTool | null = null;
     private crewToolInitialized = false;
 
     constructor(options: AnalyzerOptions = {}) {
