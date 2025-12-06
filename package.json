@@ -62,9 +62,9 @@
     "cosmiconfig": "9.0.0",
     "env-var": "^7.5.0",
     "simple-git": "^3.30.0",
-    "typedoc": "^0.28.15",
     "zod": "^4.1.13"
   },
+  "peerDependencies": {
   "peerDependencies": {
     "@ai-sdk/anthropic": "^2.0.53",
     "@ai-sdk/azure": "^2.0.78",
