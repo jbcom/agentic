@@ -15,7 +15,11 @@ sys.path.insert(0, os.path.abspath("../python/src"))
 project = "agentic-control"
 copyright = "2025, Jon Bogaty"
 author = "Jon Bogaty"
-release = "1.1.0"
+# Get version from package.json
+import json
+with open("../package.json") as f:
+    package_data = json.load(f)
+    release = package_data["version"]
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
