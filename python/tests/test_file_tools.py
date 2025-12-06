@@ -36,7 +36,7 @@ class TestGetWorkspaceRoot:
 
         # Create otterfall package
         otterfall = temp_workspace / "packages" / "otterfall"
-        otterfall.mkdir(parents=True)
+        otterfall.mkdir(parents=True, exist_ok=True)
 
         with patch(
             "crew_agents.tools.file_tools._find_workspace_root",
