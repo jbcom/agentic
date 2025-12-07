@@ -30,10 +30,6 @@
       "types": "./dist/handoff/index.d.ts",
       "import": "./dist/handoff/index.js"
     },
-    "./sandbox": {
-      "types": "./dist/sandbox/index.d.ts",
-      "import": "./dist/sandbox/index.js"
-    },
     "./core": {
       "types": "./dist/core/index.d.ts",
       "import": "./dist/core/index.js"

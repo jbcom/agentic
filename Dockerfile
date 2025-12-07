@@ -1,15 +1,27 @@
 # =============================================================================
-# jbcom/agentic-control - Optimized for Cursor Background Agents & Agentic CI
+# jbcom/agentic-control - Containerized AI Agent Fleet Management
 # =============================================================================
-# Multi-stage build for a production-ready agentic control container
+# Multi-stage build for running agentic-control in isolated environments
+#
+# Purpose: Provides a containerized environment for the agentic-control toolkit
+# - Fleet management (Cursor cloud agents)
+# - Triage and recovery
+# - Agent-to-agent communication
+# - GitHub integration
+# - All CLI commands available
 #
 # Features:
 # - Node.js 22 LTS (main runtime)
-# - Python 3.13 (companion package + agent tooling)
+# - Python 3.13 (companion CrewAI package)
 # - UV for fast Python package management
 # - PNPM for Node package management
 # - GitHub CLI, Git, and common CI tools
 # - Rootless execution support
+#
+# Usage:
+# - docker run jbcom/agentic-control fleet list
+# - docker run jbcom/agentic-control triage quick "analyze this"
+# - Use in CI/CD for automated agent orchestration
 #
 # Tags published:
 # - latest, x.y.z, x.y, x (semantic versions)
@@ -102,18 +114,12 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 
 # Set up environment
 ENV NODE_ENV=production
-ENV UV_SYSTEM_PYTHON=1
+ENV UV_SYSTEM_python=1
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
 ENV VERSION=${VERSION}
 
-# Sandbox-specific directories
-ENV AGENTIC_WORKSPACE=/workspace
-ENV AGENTIC_OUTPUT=/output
-RUN mkdir -p ${AGENTIC_WORKSPACE} ${AGENTIC_OUTPUT} && \
-    chown agent:agent ${AGENTIC_WORKSPACE} ${AGENTIC_OUTPUT}
-
-# Create workspace directory
+# Create workspace directory for operations
 WORKDIR /app
 
 # Copy package files for dependency installation
@@ -145,9 +151,6 @@ RUN ln -sf /app/dist/cli.js /usr/local/bin/agentic && \
 
 # Switch to non-root user
 USER agent
-
-# Volumes for workspace and output
-VOLUME ["/workspace", "/output"]
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
