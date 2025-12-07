@@ -114,7 +114,7 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | d
 
 # Set up environment
 ENV NODE_ENV=production
-ENV UV_SYSTEM_python=1
+ENV UV_SYSTEM_PYTHON=1
 ENV PNPM_HOME=/usr/local/share/pnpm
 ENV PATH="${PNPM_HOME}:${PATH}"
 ENV VERSION=${VERSION}
