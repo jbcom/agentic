@@ -1,7 +1,9 @@
-/* Custom styles for agentic-control documentation */
+/* Custom CSS for Sphinx documentation */
+/* Synced from jbcom-control-center */
 
-/* Improve code block styling */
+/* Improve code block readability */
 .highlight {
+    background: #f8f8f8;
     border-radius: 4px;
 }
 
@@ -13,41 +15,15 @@ table.docutils {
 
 table.docutils td, table.docutils th {
     padding: 8px 12px;
-    border: 1px solid #ddd;
+    border: 1px solid #e1e4e5;
 }
 
-/* Module/class headers */
-dl.py.class > dt,
-dl.py.function > dt,
-dl.py.method > dt,
-dl.js.class > dt,
-dl.js.function > dt,
-dl.js.method > dt {
-    background-color: #f8f8f8;
-    padding: 8px;
-    border-radius: 4px;
-    border-left: 3px solid #2980b9;
+/* Improve sidebar navigation */
+.wy-nav-content {
+    max-width: 900px;
 }
 
-/* Parameter lists */
-.field-list {
-    margin-bottom: 1em;
-}
-
-/* Admonitions */
+/* Better admonition styling */
 .admonition {
     border-radius: 4px;
-}
-
-/* Mermaid diagrams */
-.mermaid {
-    text-align: center;
-    margin: 1em 0;
-}
-
-/* Responsive adjustments */
-@media screen and (max-width: 768px) {
-    .wy-nav-content {
-        padding: 1em;
-    }
 }
