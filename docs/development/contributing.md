@@ -1,88 +1,71 @@
 # Contributing
 
-Thank you for your interest in contributing to agentic-control!
+Thank you for your interest in contributing to PACKAGE_NAME!
 
 ## Development Setup
 
-### TypeScript Core
-
 ```bash
-# Install dependencies
-pnpm install
+# Clone the repository
+git clone https://github.com/jbcom/PACKAGE_NAME.git
+cd PACKAGE_NAME
 
-# Build
-pnpm run build
-
-# Run tests
-pnpm run test
-
-# Format code
-pnpm run format
-
-# Lint
-pnpm run lint
+# Install with all development dependencies
+uv sync --all-extras
 ```
 
-### Python CrewAI
+## Running Tests
 
 ```bash
-cd python
-
-# Install dependencies with uv
-uv sync --extra tests --extra docs
-
 # Run tests
-uv run pytest tests/ -v
+uv run pytest
 
-# Lint and format
-uvx ruff check --fix src/ tests/
-uvx ruff format src/ tests/
+# Run with coverage
+uv run pytest --cov=PACKAGE_NAME
 ```
 
 ## Code Style
 
-### TypeScript
+This project uses:
+- [Ruff](https://docs.astral.sh/ruff/) for linting and formatting
+- Type hints throughout
 
-- Use Prettier for formatting
-- Follow ESLint rules
-- Use TypeScript strict mode
+```bash
+# Check code style
+uv run ruff check .
+uv run ruff format --check .
 
-### Python
+# Auto-fix issues
+uv run ruff check --fix .
+uv run ruff format .
+```
 
-- Use Ruff for linting and formatting
-- Follow PEP 8 guidelines
-- Use type hints throughout
+## Building Documentation
+
+```bash
+# Install docs dependencies
+uv sync --extra docs
+
+# Build docs
+cd docs
+uv run sphinx-build -b html . _build/html
+
+# Or use make
+make html
+```
+
+## Pull Request Process
+
+1. Create a feature branch from `main`
+2. Make your changes with tests
+3. Ensure CI passes (lint + tests)
+4. Submit PR - an AI agent will review and merge
 
 ## Commit Messages
 
-Use conventional commits format:
-
-- `feat(fleet): new fleet feature` → minor version bump
-- `feat(crew): Python crew feature` → minor version bump
-- `fix(triage): bug fix` → patch version bump
-- `docs: update documentation` → no version bump
-- `chore: maintenance tasks` → no version bump
-
-## Pull Requests
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Ensure tests pass
-5. Submit a pull request
-
-## Documentation
-
-### Building Documentation
-
-```bash
-# From the project root
-uv run --project python sphinx-build -b html docs docs/_build/html
-```
-
-### Documentation Standards
-
-- Use Google-style docstrings for Python
-- Use TSDoc comments for TypeScript
-- Include examples where helpful
-- Keep documentation up to date with code changes
+Use conventional commits:
+- `feat:` New features
+- `fix:` Bug fixes
+- `docs:` Documentation changes
+- `refactor:` Code refactoring
+- `test:` Test changes
+- `chore:` Maintenance tasks
