@@ -1,28 +1,33 @@
 # Configuration file for the Sphinx documentation builder.
-#
-# For the full list of built-in configuration values, see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
+# Synced from jbcom-control-center - customize as needed
 
 import os
 import sys
 
-# Add Python source to path for autodoc
-sys.path.insert(0, os.path.abspath("../python/src"))
+# Add source to path for autodoc
+sys.path.insert(0, os.path.abspath("../src"))
 
 # -- Project information -----------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-
-project = "agentic-control"
+# TODO: Update these for your project
+project = "PACKAGE_NAME"
 copyright = "2025, Jon Bogaty"
 author = "Jon Bogaty"
-# Get version from package.json
-import json
-with open("../package.json") as f:
-    package_data = json.load(f)
-    release = package_data["version"]
+
+# Try to get version from pyproject.toml or package.json
+try:
+    import tomllib
+    with open("../pyproject.toml", "rb") as f:
+        data = tomllib.load(f)
+        release = data.get("project", {}).get("version", "0.0.0")
+except Exception:
+    try:
+        import json
+        with open("../package.json") as f:
+            release = json.load(f).get("version", "0.0.0")
+    except Exception:
+        release = "0.0.0"
 
 # -- General configuration ---------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
     # Python documentation
@@ -32,12 +37,10 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
-    # TypeScript/JavaScript documentation
-    "sphinx_js",
     # Markdown support
     "myst_parser",
-    # Diagrams
-    "sphinxcontrib.mermaid",
+    # Diagrams (optional - requires sphinxcontrib-mermaid)
+    # "sphinxcontrib.mermaid",
 ]
 
 templates_path = ["_templates"]
@@ -50,14 +53,11 @@ source_suffix = {
 }
 
 # -- Options for HTML output -------------------------------------------------
-# https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
-html_title = "agentic-control Documentation"
-html_short_title = "agentic-control"
+html_title = f"{project} Documentation"
 
-# Theme options
 html_theme_options = {
     "navigation_depth": 4,
     "collapse_navigation": False,
@@ -68,7 +68,7 @@ html_theme_options = {
 
 # -- Extension configuration -------------------------------------------------
 
-# -- autodoc settings --
+# autodoc settings
 autodoc_default_options = {
     "members": True,
     "member-order": "bysource",
@@ -80,52 +80,26 @@ autodoc_default_options = {
 autodoc_typehints = "description"
 autodoc_class_signature = "separated"
 
-# -- autosummary settings --
+# autosummary settings
 autosummary_generate = True
 
-# -- napoleon settings (Google/NumPy style docstrings) --
+# napoleon settings (Google/NumPy style docstrings)
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 napoleon_include_init_with_doc = True
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
-napoleon_use_admonition_for_examples = True
-napoleon_use_admonition_for_notes = True
-napoleon_use_admonition_for_references = True
-napoleon_use_ivar = False
 napoleon_use_param = True
 napoleon_use_rtype = True
-napoleon_preprocess_types = True
-napoleon_attr_annotations = True
 
-# -- sphinx-js settings (TypeScript documentation) --
-# Note: sphinx-js requires TypeDoc to be installed (npm install typedoc@0.28)
-js_language = "typescript"
-js_source_path = ["../src"]
-jsdoc_config_path = "../typedoc.json"
-root_for_relative_js_paths = "../src"
-
-# -- intersphinx settings --
+# intersphinx settings
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
 }
 
-# -- myst_parser settings --
+# myst_parser settings
 myst_enable_extensions = [
     "colon_fence",
     "deflist",
     "fieldlist",
-    "html_admonition",
-    "html_image",
-    "replacements",
-    "smartquotes",
-    "strikethrough",
-    "substitution",
     "tasklist",
 ]
 myst_heading_anchors = 3
-
-# -- Custom CSS --
-html_css_files = [
-    "custom.css",
-]
