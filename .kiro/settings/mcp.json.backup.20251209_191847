@@ -9,9 +9,9 @@
       "disabled": false,
       "autoApprove": []
     },
-    "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp@latest"],
+    "crew-agents": {
+      "command": "uv",
+      "args": ["run", "--directory", "python", "crew-mcp"],
       "env": {},
       "disabled": false,
       "autoApprove": []

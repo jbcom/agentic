@@ -9,58 +9,60 @@ export * from './types.js';
 
 // Token management
 export {
-    getTokenConfig,
-    setTokenConfig,
     addOrganization,
-    extractOrg,
-    getTokenEnvVar,
+    extractOrg, getConfiguredOrgs, getEnvForPRReview, getEnvForRepo, getOrgConfig, getPRReviewToken,
+    getPRReviewTokenEnvVar, getTokenConfig, getTokenEnvVar,
     getTokenForOrg,
-    getTokenForRepo,
-    getPRReviewToken,
-    getPRReviewTokenEnvVar,
-    validateTokens,
-    getOrgConfig,
-    getConfiguredOrgs,
-    getEnvForRepo,
-    getEnvForPRReview,
-    hasTokenForOrg,
-    hasTokenForRepo,
-    getTokenSummary,
+    getTokenForRepo, getTokenSummary, hasTokenForOrg,
+    hasTokenForRepo, setTokenConfig, validateTokens
 } from './tokens.js';
 
 // Configuration
 export {
-    initConfig,
     getConfig,
-    getConfigPath,
-    loadConfigFromPath,
-    setConfig,
-    resetConfig,
-    getConfigValue,
-    isVerbose,
-    getDefaultModel,
-    getFleetDefaults,
-    getTriageConfig,
-    getLogLevel,
-    getCursorApiKey,
-    getTriageApiKey,
-    getDefaultApiKeyEnvVar,
-    log,
-    type AgenticConfig,
+    getConfigPath, getConfigValue, getCursorApiKey, getDefaultApiKeyEnvVar, getDefaultModel,
+    getFleetDefaults, getLogLevel, getTriageApiKey, getTriageConfig, initConfig, isVerbose, loadConfigFromPath, log, resetConfig, setConfig, type AgenticConfig,
     type FleetConfig,
-    type TriageConfig,
+    type TriageConfig
 } from './config.js';
 
 // AI Provider loading
 export {
-    loadProvider,
-    getOrLoadProvider,
-    clearProviderCache,
-    resolveProviderOptions,
-    isValidProvider,
-    getSupportedProviders,
-    PROVIDER_CONFIG,
-    type ProviderOptions,
-    type SupportedProvider,
-    type ModelFactory,
+    PROVIDER_CONFIG, clearProviderCache, getOrLoadProvider, getSupportedProviders, isValidProvider, loadProvider, resolveProviderOptions, type ModelFactory, type ProviderOptions,
+    type SupportedProvider
 } from './providers.js';
+
+// Security utilities
+export {
+    createSafeError,
+    safeConsole,
+    sanitizeEnvironment,
+    sanitizeError
+} from './security.js';
+
+// Typed errors
+export {
+    ConfigErrorCode, ConfigurationError, DockerBuildError,
+    DockerErrorCode, SandboxError,
+    SandboxErrorCode
+} from './errors.js';
+
+// Configuration validation
+export {
+    AgenticConfigSchema,
+    validateConfig,
+    validateEnvVar,
+    validateEnvVarWithMessage,
+    validateGitRef,
+    validatePositiveInt,
+    validateRepository
+} from './validation.js';
+
+// Safe subprocess execution
+export {
+    safeDockerCommand,
+    safeGitCommand,
+    safeSpawn,
+    safeSpawnSync,
+    validateCommandArgs
+} from './subprocess.js';

@@ -8,8 +8,7 @@ import sys
 sys.path.insert(0, os.path.abspath("../src"))
 
 # -- Project information -----------------------------------------------------
-# TODO: Update these for your project
-project = "PACKAGE_NAME"
+project = "agentic-control"
 copyright = "2025, Jon Bogaty"
 author = "Jon Bogaty"
 
@@ -37,10 +36,12 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
+    # TypeScript documentation
+    "sphinx_js",
     # Markdown support
     "myst_parser",
-    # Diagrams (optional - requires sphinxcontrib-mermaid)
-    # "sphinxcontrib.mermaid",
+    # Diagrams
+    "sphinxcontrib.mermaid",
 ]
 
 templates_path = ["_templates"]
@@ -103,3 +104,7 @@ myst_enable_extensions = [
     "tasklist",
 ]
 myst_heading_anchors = 3
+
+# TypeScript API documentation
+js_source_path = '../src'
+jsdoc_config_path = '../jsdoc.json'

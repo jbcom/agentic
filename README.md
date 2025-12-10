@@ -1,26 +1,107 @@
 # agentic-control
 
-> Unified AI agent fleet management, triage, and orchestration toolkit for control centers
+> 🚀 **Unified AI agent fleet management, triage, and orchestration toolkit**
 
 [![npm version](https://badge.fury.io/js/agentic-control.svg)](https://www.npmjs.com/package/agentic-control)
+[![Docker Pulls](https://img.shields.io/docker/pulls/jbcom/agentic-control)](https://hub.docker.com/r/jbcom/agentic-control)
+[![CI](https://github.com/jbcom/agentic-control/workflows/CI/badge.svg)](https://github.com/jbcom/agentic-control/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 
-## Features
+**Transform your development workflow with AI-powered agent orchestration.** Spawn, coordinate, and manage fleets of AI agents across your repositories with intelligent token switching, advanced triage capabilities, and secure sandbox execution.
 
-- **🎯 Intelligent Token Switching** - Automatically selects the correct GitHub token based on organization
-- **🚀 Fleet Management** - Spawn, monitor, and coordinate Cursor Background Agents
-- **🔍 AI-Powered Triage** - Analyze conversations, review code, extract tasks
-- **🤝 Station-to-Station Handoff** - Seamless agent continuity across sessions
-- **🔐 Multi-Org Support** - Manage agents across multiple GitHub organizations
-- **🔌 Pluggable AI Providers** - Choose your preferred AI provider (Anthropic, OpenAI, Google, etc.)
-- **🔒 Security First** - No hardcoded values, all configuration is user-provided
+---
 
-## Installation
+## ✨ **What Makes agentic-control Special?**
+
+🎯 **Smart Token Management** - Automatically routes operations to the right GitHub tokens based on organization  
+🚀 **Fleet Orchestration** - Spawn and coordinate multiple Cursor Background Agents simultaneously  
+🔍 **AI-Powered Triage** - Analyze conversations, review code, and extract actionable insights  
+🏗️ **Sandbox Execution** - Run AI agents in isolated Docker containers for safe local development  
+🤝 **Seamless Handoffs** - Transfer work between agents with full context preservation  
+🔐 **Security First** - Token sanitization, safe subprocess execution, and zero hardcoded credentials  
+🔌 **Provider Agnostic** - Works with Anthropic, OpenAI, Google, Mistral, and Azure  
+
+---
+
+## 🎬 **Quick Demo**
 
 ```bash
-npm install -g agentic-control
-# or
+# Initialize with smart detection
+agentic init
+
+# Spawn an AI agent to fix your CI
+agentic fleet spawn "https://github.com/my-org/my-repo" \
+  "Fix the failing GitHub Actions workflow" --auto-pr
+
+# Run AI analysis in a secure sandbox
+agentic sandbox run "Analyze this codebase for security vulnerabilities" \
+  --workspace . --output ./security-report
+
+# Get AI-powered code review
+agentic triage review --base main --head feature-branch
+
+# Coordinate multiple agents on complex tasks
+agentic fleet coordinate --repo my-org/app --pr 156 \
+  --agents agent-1,agent-2,agent-3
+```
+
+## 🌟 **Core Features**
+
+### 🎯 **Intelligent Multi-Org Token Management**
+Automatically routes GitHub operations to the correct tokens based on repository organization. No more manual token switching!
+
+### 🚀 **AI Agent Fleet Management** 
+Spawn, monitor, and coordinate multiple Cursor Background Agents working simultaneously across your repositories.
+
+### 🏗️ **Secure Sandbox Execution** *(NEW!)*
+Run AI agents in isolated Docker containers with resource limits, workspace mounting, and parallel execution support.
+
+### 🔍 **Advanced AI Triage & Analysis**
+Leverage multiple AI providers (Anthropic, OpenAI, Google, Mistral) for code review, conversation analysis, and task extraction.
+
+### 🤝 **Station-to-Station Handoffs**
+Seamlessly transfer work between agents with full context preservation and automated PR management.
+
+### 🔐 **Production-Ready Security**
+- Token sanitization in all error messages
+- Safe subprocess execution without shell injection
+- Typed error classes with specific error codes
+- Non-root Docker execution
+
+## 📦 **Installation**
+
+### **Option 1: npm/pnpm (Recommended)**
+```bash
+# Install globally
 pnpm add -g agentic-control
+# or
+npm install -g agentic-control
+
+# Verify installation
+agentic --version
+```
+
+### **Option 2: Docker (Includes Python companion)**
+```bash
+# Pull the latest image
+docker pull jbcom/agentic-control:latest
+
+# Run with your environment
+docker run --rm \
+  -e GITHUB_TOKEN=$GITHUB_TOKEN \
+  -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
+  -v $(pwd):/workspace \
+  jbcom/agentic-control:latest fleet list
+```
+
+### **Option 3: Development Setup**
+```bash
+git clone https://github.com/jbcom/agentic-control.git
+cd agentic-control
+pnpm install
+pnpm run build
+pnpm run agentic --help
 ```
 
 ### Installing AI Providers
@@ -193,6 +274,34 @@ agentic triage analyze <agent-id> --create-issues
 agentic triage analyze <agent-id> --model claude-opus-4-20250514
 ```
 
+### Sandbox Execution *(NEW!)*
+
+```bash
+# Run a single AI agent in sandbox
+agentic sandbox run "Analyze this codebase and suggest performance improvements" \
+  --runtime claude \
+  --workspace . \
+  --output ./analysis-results \
+  --timeout 300
+
+# Run multiple agents in parallel
+agentic sandbox fleet \
+  "Review authentication system" \
+  "Analyze database queries" \
+  "Check for security vulnerabilities" \
+  --runtime claude \
+  --workspace . \
+  --output ./fleet-results
+
+# With custom environment and resource limits
+agentic sandbox run "Refactor the API layer" \
+  --workspace ./src/api \
+  --output ./refactor-results \
+  --memory 2048 \
+  --timeout 600 \
+  --env "NODE_ENV=development,LOG_LEVEL=debug"
+```
+
 ### Handoff Protocol
 
 ```bash
@@ -334,12 +443,44 @@ Configure a consistent identity for all PR review operations:
 export AGENTIC_PR_REVIEW_TOKEN=GITHUB_TOKEN
 ```
 
-## Programmatic Usage
+## 🎯 **Real-World Use Cases**
+
+### **🔧 Automated Code Maintenance**
+```bash
+# Spawn agents to update dependencies across multiple repos
+agentic fleet spawn "my-org/frontend" "Update React to v18 and fix breaking changes" --auto-pr
+agentic fleet spawn "my-org/backend" "Update Node.js dependencies and fix vulnerabilities" --auto-pr
+agentic fleet spawn "my-org/mobile" "Update React Native and test on latest iOS" --auto-pr
+```
+
+### **🔍 Security Auditing**
+```bash
+# Run security analysis in isolated sandbox
+agentic sandbox run "Perform comprehensive security audit focusing on authentication, authorization, and data validation" \
+  --workspace . --output ./security-audit --timeout 900
+```
+
+### **📊 Code Review Automation**
+```bash
+# AI-powered code review for all PRs
+agentic triage review --base main --head feature/user-auth
+agentic triage analyze <agent-id> --create-issues  # Auto-create follow-up issues
+```
+
+### **🚀 Release Coordination**
+```bash
+# Coordinate multiple agents for release preparation
+agentic fleet coordinate --repo my-org/app --pr 200 \
+  --agents docs-agent,test-agent,deploy-agent
+```
+
+## 💻 **Programmatic Usage**
 
 ```typescript
 import { 
   Fleet, 
   AIAnalyzer, 
+  SandboxExecutor,
   GitHubClient,
   getTokenForRepo,
   setTokenConfig,
@@ -384,6 +525,33 @@ const openaiAnalyzer = new AIAnalyzer({
   model: "gpt-4o",
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Sandbox execution
+const sandbox = new SandboxExecutor();
+const result = await sandbox.execute({
+  runtime: 'claude',
+  workspace: './src',
+  outputDir: './analysis',
+  prompt: 'Analyze this code for performance bottlenecks',
+  timeout: 300000, // 5 minutes
+  memory: 1024, // 1GB
+});
+
+// Parallel sandbox execution
+const results = await sandbox.executeFleet([
+  {
+    runtime: 'claude',
+    workspace: './frontend',
+    outputDir: './frontend-analysis',
+    prompt: 'Review React components for accessibility issues',
+  },
+  {
+    runtime: 'cursor', 
+    workspace: './backend',
+    outputDir: './backend-analysis',
+    prompt: 'Analyze API endpoints for security vulnerabilities',
+  }
+]);
 ```
 
 ## Token Switching Logic

@@ -29,8 +29,9 @@
  */
 
 import { cosmiconfigSync } from 'cosmiconfig';
-import type { TokenConfig } from './types.js';
 import { setTokenConfig } from './tokens.js';
+import type { TokenConfig } from './types.js';
+import { validateConfig } from './validation.js';
 
 // ============================================
 // Configuration Types
@@ -225,6 +226,8 @@ export function initConfig(overrides?: Partial<AgenticConfig>): AgenticConfig {
     const result = explorer.search();
 
     if (result && !result.isEmpty) {
+        // Validate configuration before using it
+        validateConfig(result.config);
         config = result.config as AgenticConfig;
         configPath = result.filepath;
     } else {
@@ -240,6 +243,9 @@ export function initConfig(overrides?: Partial<AgenticConfig>): AgenticConfig {
     if (overrides) {
         config = mergeConfig(config, overrides);
     }
+
+    // Validate final configuration
+    validateConfig(config);
 
     // Apply token configuration
     if (config.tokens) {
@@ -257,6 +263,8 @@ export function loadConfigFromPath(filepath: string): AgenticConfig {
     const result = explorer.load(filepath);
 
     if (result && !result.isEmpty) {
+        // Validate configuration before using it
+        validateConfig(result.config);
         config = result.config as AgenticConfig;
         configPath = result.filepath;
 

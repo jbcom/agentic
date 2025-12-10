@@ -18,17 +18,20 @@
 export * from './core/index.js';
 
 // Fleet management
-export { Fleet, type FleetConfig, type CoordinationConfig } from './fleet/index.js';
-export { CursorAPI, type CursorAPIOptions } from './fleet/index.js';
+export { CursorAPI, Fleet, type CoordinationConfig, type CursorAPIOptions, type FleetConfig } from './fleet/index.js';
 
 // AI Triage
 export { AIAnalyzer, type AIAnalyzerOptions } from './triage/index.js';
 
 // GitHub operations
-export { GitHubClient, cloneRepo, isValidGitRef, isValidRepoFormat } from './github/index.js';
+export { cloneRepo, GitHubClient, isValidGitRef, isValidRepoFormat } from './github/index.js';
 
 // Handoff protocols
 export { HandoffManager, type TakeoverOptions } from './handoff/index.js';
+
+// Sandbox execution
+export { ContainerManager, SandboxExecutor } from './sandbox/index.js';
+export type { ContainerConfig, ContainerResult, SandboxOptions } from './sandbox/index.js';
 
 // Version - read from package.json at runtime
 import { createRequire } from 'node:module';

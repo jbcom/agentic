@@ -8,16 +8,16 @@
  * All configuration is user-provided - no hardcoded values.
  */
 
-import { Command, Option, InvalidArgumentError } from 'commander';
-import { spawnSync } from 'node:child_process';
-import { writeFileSync, existsSync } from 'node:fs';
-import { Fleet } from './fleet/index.js';
-import { AIAnalyzer } from './triage/index.js';
-import { HandoffManager } from './handoff/index.js';
-import { getTokenSummary, validateTokens, getConfiguredOrgs, extractOrg } from './core/tokens.js';
-import { initConfig, getDefaultModel, getConfig, getFleetDefaults } from './core/config.js';
+import { Command, InvalidArgumentError, Option } from 'commander';
+import { existsSync, writeFileSync } from 'node:fs';
+import { getConfig, getDefaultModel, getFleetDefaults, initConfig } from './core/config.js';
+import { safeGitCommand } from './core/subprocess.js';
+import { extractOrg, getConfiguredOrgs, getTokenSummary, validateTokens } from './core/tokens.js';
 import type { Agent } from './core/types.js';
+import { Fleet } from './fleet/index.js';
+import { HandoffManager } from './handoff/index.js';
 import { VERSION } from './index.js';
+import { AIAnalyzer } from './triage/index.js';
 
 const program = new Command();
 
@@ -706,23 +706,15 @@ triageCmd
             const baseRef = validateGitRef(opts.base);
             const headRef = validateGitRef(opts.head);
 
-            // Use spawnSync to safely execute git diff
-            const diffProc = spawnSync('git', ['diff', `${baseRef}...${headRef}`], {
-                encoding: 'utf-8',
-                maxBuffer: 10 * 1024 * 1024, // 10MB max
-            });
+            // Use safe git command to execute git diff
+            const diffResult = safeGitCommand(['diff', `${baseRef}...${headRef}`]);
 
-            if (diffProc.error) {
-                console.error('❌ git diff failed:', diffProc.error.message);
+            if (!diffResult.success) {
+                console.error('❌ git diff failed:', diffResult.stderr || 'Unknown error');
                 process.exit(1);
             }
 
-            if (diffProc.status !== 0) {
-                console.error('❌ git diff failed:', diffProc.stderr || 'Unknown error');
-                process.exit(1);
-            }
-
-            const diff = diffProc.stdout;
+            const diff = diffResult.stdout;
 
             if (!diff.trim()) {
                 console.log('No changes to review');
@@ -924,6 +916,124 @@ handoffCmd
             console.log('✅ Takeover complete!');
         } catch (err) {
             console.error('❌ Takeover failed:', err instanceof Error ? err.message : err);
+            process.exit(1);
+        }
+    });
+
+// ============================================
+// Sandbox Commands
+// ============================================
+
+const sandboxCmd = program.command('sandbox').description('Local sandbox execution for AI agents');
+
+sandboxCmd
+    .command('run')
+    .description('Run an AI agent in a sandbox')
+    .argument('<prompt>', 'Task prompt for the agent')
+    .option('--runtime <type>', 'Runtime adapter (claude, cursor)', 'claude')
+    .option('--workspace <path>', 'Workspace directory to mount', process.cwd())
+    .option('--output <path>', 'Output directory', './sandbox-output')
+    .option('--timeout <seconds>', 'Timeout in seconds', '300')
+    .option('--memory <mb>', 'Memory limit in MB', '1024')
+    .option('--env <vars>', 'Environment variables (KEY=value,KEY2=value2)')
+    .option('--json', 'Output as JSON')
+    .action(async (prompt, opts) => {
+        try {
+            const { SandboxExecutor } = await import('./sandbox/index.js');
+            const executor = new SandboxExecutor();
+            
+            // Parse environment variables
+            const env: Record<string, string> = {};
+            if (opts.env) {
+                for (const pair of opts.env.split(',')) {
+                    const [key, value] = pair.split('=');
+                    if (key && value) {
+                        env[key.trim()] = value.trim();
+                    }
+                }
+            }
+            
+            console.log(`🏃 Running ${opts.runtime} agent in sandbox...`);
+            
+            const result = await executor.execute({
+                runtime: opts.runtime,
+                workspace: opts.workspace,
+                outputDir: opts.output,
+                prompt,
+                timeout: parseInt(opts.timeout) * 1000, // Convert to milliseconds
+                memory: parseInt(opts.memory),
+                env,
+            });
+            
+            if (opts.json) {
+                output(result, true);
+            } else {
+                console.log('\n=== Sandbox Result ===\n');
+                console.log(`Success: ${result.success ? '✅' : '❌'}`);
+                console.log(`Duration: ${result.duration}ms`);
+                console.log(`Exit Code: ${result.exitCode}`);
+                
+                if (result.output) {
+                    console.log('\n📄 Output:');
+                    console.log(result.output);
+                }
+                
+                if (result.error) {
+                    console.log('\n❌ Error:');
+                    console.log(result.error);
+                }
+            }
+        } catch (err) {
+            console.error('❌ Sandbox execution failed:', err instanceof Error ? err.message : err);
+            process.exit(1);
+        }
+    });
+
+sandboxCmd
+    .command('fleet')
+    .description('Run multiple agents in parallel sandboxes')
+    .argument('<prompts...>', 'Task prompts for agents')
+    .option('--runtime <type>', 'Runtime adapter (claude, cursor)', 'claude')
+    .option('--workspace <path>', 'Workspace directory to mount', process.cwd())
+    .option('--output <path>', 'Base output directory', './sandbox-output')
+    .option('--timeout <seconds>', 'Timeout in seconds', '300')
+    .option('--memory <mb>', 'Memory limit in MB', '1024')
+    .option('--json', 'Output as JSON')
+    .action(async (prompts, opts) => {
+        try {
+            const { SandboxExecutor } = await import('./sandbox/index.js');
+            const executor = new SandboxExecutor();
+            
+            const options = prompts.map((prompt: string, index: number) => ({
+                runtime: opts.runtime,
+                workspace: opts.workspace,
+                outputDir: `${opts.output}/agent-${index + 1}`,
+                prompt,
+                timeout: parseInt(opts.timeout) * 1000,
+                memory: parseInt(opts.memory),
+            }));
+            
+            console.log(`🏃 Running ${prompts.length} agents in parallel sandboxes...`);
+            
+            const results = await executor.executeFleet(options);
+            
+            if (opts.json) {
+                output(results, true);
+            } else {
+                console.log('\n=== Fleet Results ===\n');
+                results.forEach((result, index) => {
+                    console.log(`Agent ${index + 1}:`);
+                    console.log(`  Success: ${result.success ? '✅' : '❌'}`);
+                    console.log(`  Duration: ${result.duration}ms`);
+                    console.log(`  Exit Code: ${result.exitCode}`);
+                    console.log();
+                });
+                
+                const successful = results.filter(r => r.success).length;
+                console.log(`Summary: ${successful}/${results.length} agents completed successfully`);
+            }
+        } catch (err) {
+            console.error('❌ Fleet execution failed:', err instanceof Error ? err.message : err);
             process.exit(1);
         }
     });

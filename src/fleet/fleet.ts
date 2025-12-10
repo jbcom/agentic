@@ -12,22 +12,22 @@
  * All configuration is user-provided - no hardcoded values.
  */
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { CursorAPI, type CursorAPIOptions } from './cursor-api.js';
-import { GitHubClient } from '../github/client.js';
-import { extractOrg } from '../core/tokens.js';
 import { log } from '../core/config.js';
+import { extractOrg } from '../core/tokens.js';
 import type {
     Agent,
     AgentStatus,
     Conversation,
+    DiamondConfig,
+    PRComment,
     Repository,
     Result,
     SpawnOptions,
-    DiamondConfig,
-    PRComment,
 } from '../core/types.js';
+import { GitHubClient } from '../github/client.js';
+import { CursorAPI, type CursorAPIOptions } from './cursor-api.js';
 
 // ============================================
 // Types
@@ -62,11 +62,37 @@ export interface SpawnContext {
 // Fleet Class
 // ============================================
 
+/**
+ * Fleet management for Cursor Background Agents
+ * 
+ * Provides high-level operations for managing AI agents across multiple
+ * GitHub organizations with automatic token switching and coordination.
+ * 
+ * @example
+ * ```typescript
+ * const fleet = new Fleet();
+ * 
+ * // Spawn a new agent
+ * const result = await fleet.spawn({
+ *   repository: 'https://github.com/owner/repo',
+ *   task: 'Fix the authentication bug',
+ *   target: { autoCreatePr: true }
+ * });
+ * 
+ * // Monitor agent status
+ * const status = await fleet.status(result.data.id);
+ * ```
+ */
 export class Fleet {
     private api: CursorAPI | null;
     private archivePath: string;
     private useDirectApi: boolean;
 
+    /**
+     * Create a new Fleet instance
+     * 
+     * @param config - Fleet configuration options including API key and timeout
+     */
     constructor(config: FleetConfig = {}) {
         this.archivePath = config.archivePath ?? './memory-bank/recovery';
 

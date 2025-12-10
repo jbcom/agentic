@@ -208,7 +208,43 @@ jobs:
             ## agentic-control v${{ steps.check.outputs.new_version }}
             
             Install: `npm install agentic-control`
+            Docker: `docker pull jbcom/agentic-control:${{ steps.check.outputs.new_version }}`
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-publish:
+    name: Publish Docker Image
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [build-node, test-node, build-python, test-python]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Extract version
+        id: version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            jbcom/agentic-control:latest
+            jbcom/agentic-control:${{ steps.version.outputs.version }}
+            jbcom/agentic-control:python3.13-node22
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   release-python:
     name: Release (PyPI)

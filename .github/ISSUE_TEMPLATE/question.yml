@@ -1,0 +1,74 @@
+name: ❓ Question
+description: Ask a question about usage, configuration, or troubleshooting
+title: "[Question]: "
+labels: ["question", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about agentic-control? We're here to help! Please provide as much context as possible.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: "How do I..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      options:
+        - Installation & Setup
+        - Configuration
+        - Fleet Management
+        - AI Triage & Analysis
+        - Sandbox Execution
+        - Token Management
+        - CLI Usage
+        - Programmatic API
+        - Troubleshooting
+        - Best Practices
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: What are you trying to accomplish? What have you tried so far?
+      placeholder: "I'm trying to... and I've attempted..."
+
+  - type: textarea
+    id: current-setup
+    attributes:
+      label: Current Setup
+      description: Describe your current configuration and environment
+      placeholder: |
+        - agentic-control version: 1.1.0
+        - Installation method: npm
+        - Operating system: macOS
+        - Configuration: (relevant parts)
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output (if applicable)
+      description: If you're getting errors, please include the output (redact any tokens/secrets)
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and discussions
+          required: true
+        - label: I have checked the documentation
+          required: true
+        - label: I have redacted any sensitive information
+          required: true
