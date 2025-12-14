@@ -61,8 +61,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Run tests
-        run: pnpm run test
+      - name: Run tests with coverage
+        run: pnpm run test:coverage
+
+      - name: Report Coveralls
+        uses: coverallsapp/github-action@v2
 
   lint-node:
     name: Lint (Node.js)
