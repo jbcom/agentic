@@ -10,7 +10,7 @@ FROM node:22-slim AS node-base
 # =============================================================================
 # Stage 2: Final image with Python base + Node.js
 # =============================================================================
-FROM python:3.13-slim AS final
+FROM python:3.14-slim AS final
 
 # Install Node.js binaries from node-base
 COPY --from=node-base /usr/local/bin/node /usr/local/bin/
