@@ -460,15 +460,15 @@ fleetCmd
         output(result.data, true);
       } else {
         const s = result.data;
-        console.log('=== Fleet Summary ===\n');
-        if (s && !Array.isArray(s)) {
-          console.log(`Total:     ${s.total}`);
-          console.log(`Running:   ${s.running}`);
-          console.log(`Completed: ${s.completed}`);
-          console.log(`Failed:    ${s.failed}`);
-        } else {
-          console.log('No fleet data available.');
+        if (!s || Array.isArray(s)) {
+          console.error('❌ Invalid summary data');
+          process.exit(1);
         }
+        console.log('=== Fleet Summary ===\n');
+        console.log(`Total:     ${s.total}`);
+        console.log(`Running:   ${s.running}`);
+        console.log(`Completed: ${s.completed}`);
+        console.log(`Failed:    ${s.failed}`);
       }
     } catch (err) {
       console.error('❌ Summary failed:', err instanceof Error ? err.message : err);

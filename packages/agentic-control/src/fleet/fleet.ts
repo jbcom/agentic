@@ -34,7 +34,7 @@ import { CursorAPI, type CursorAPIOptions } from './cursor-api.js';
 // ============================================
 
 export interface FleetConfig extends CursorAPIOptions {
-  /** Path to archive conversations */
+  /** Path to archive conversations (default: ./memory-bank/recovery) */
   archivePath?: string;
 }
 
@@ -101,6 +101,8 @@ export class Fleet {
       this.api = new CursorAPI({
         apiKey: config.apiKey,
         timeout: config.timeout,
+        maxRetries: config.maxRetries,
+        retryDelay: config.retryDelay,
       });
       this.useDirectApi = true;
     } catch {
