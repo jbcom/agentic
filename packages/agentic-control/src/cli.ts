@@ -852,7 +852,9 @@ triageCmd
       if (result.allActions.length > 0) {
         console.log(`\nActions Taken (${result.allActions.length}):`);
         for (const action of result.allActions) {
-          console.log(`- [${action.success ? '✅' : '❌'}] ${action.action}: ${action.description}`);
+          console.log(
+            `- [${action.success ? '✅' : '❌'}] ${action.action}: ${action.description}`
+          );
         }
       }
 
