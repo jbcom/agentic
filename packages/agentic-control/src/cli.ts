@@ -14,7 +14,7 @@ import { Command, InvalidArgumentError, Option } from 'commander';
 import { getConfig, getDefaultModel, getFleetDefaults, initConfig } from './core/config.js';
 import { safeGitCommand } from './core/subprocess.js';
 import { extractOrg, getConfiguredOrgs, getTokenForRepo, getTokenSummary, validateTokens } from './core/tokens.js';
-import type { Agent } from './core/types.js';
+import type { Agent, Result } from './core/types.js';
 import { Fleet } from './fleet/index.js';
 import { HandoffManager } from './handoff/index.js';
 import { VERSION } from './index.js';
