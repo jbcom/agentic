@@ -24,7 +24,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: '22'
 
@@ -35,8 +35,16 @@ runs:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
         PR_NUM="${{ inputs.pr_number }}"
-        if [ -z "$PR_NUM" ]; then
-          PR_NUM=$(jq -r .pull_request.number "$GITHUB_EVENT_PATH")
+        if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "null" ]; then
+          # Safe retrieval of PR number from GITHUB_EVENT_PATH
+          if [ -f "$GITHUB_EVENT_PATH" ]; then
+            PR_NUM=$(jq -r '.pull_request.number // .number // empty' "$GITHUB_EVENT_PATH")
+          fi
+        fi
+        
+        if [ -z "$PR_NUM" ] || [ "$PR_NUM" = "null" ]; then
+          echo "❌ Error: Could not determine PR number. Please provide 'pr_number' input or run in a PR context." >&2
+          exit 1
         fi
         
         REPO="${{ inputs.repo }}"
@@ -44,4 +52,5 @@ runs:
           REPO="$GITHUB_REPOSITORY"
         fi
         
-        npx @agentic/control triage fix "$PR_NUM" --repo "$REPO" --iterations "${{ inputs.iterations }}"
+        # Use exact pinned version of @agentic/control to prevent supply chain attacks (CWE-829)
+        npx @agentic/control@1.1.0 triage fix "$PR_NUM" --repo "$REPO" --iterations "${{ inputs.iterations }}"

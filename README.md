@@ -4,7 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/@agentic/control.svg)](https://www.npmjs.com/package/@agentic/control)
 [![Docker Pulls](https://img.shields.io/docker/pulls/jbcom/@agentic/control)](https://hub.docker.com/r/jbcom/@agentic/control)
-[![CI](https://github.com/jbcom/@agentic/control/workflows/CI/badge.svg)](https://github.com/jbcom/@agentic/control/actions)
+[![CI](https://github.com/jbcom/nodejs-agentic-control/workflows/CI/badge.svg)](https://github.com/jbcom/nodejs-agentic-control/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 
@@ -85,20 +85,20 @@ agentic --version
 ### **Option 2: Docker (Includes Python companion)**
 ```bash
 # Pull the latest image
-docker pull jbcom/@agentic/control:latest
+docker pull jbcom/agentic-control:latest
 
 # Run with your environment
 docker run --rm \
   -e GITHUB_TOKEN=$GITHUB_TOKEN \
   -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
   -v $(pwd):/workspace \
-  jbcom/@agentic/control:latest fleet list
+  jbcom/agentic-control:latest fleet list
 ```
 
 ### **Option 3: Development Setup**
 ```bash
-git clone https://github.com/jbcom/@agentic/control.git
-cd @agentic/control
+git clone https://github.com/jbcom/nodejs-agentic-control.git
+cd agentic-control
 pnpm install
 pnpm run build
 pnpm run agentic --help
@@ -578,7 +578,7 @@ PR Review Operations          → Configured PR review token
 ## Architecture
 
 ```
-@agentic/control/
+agentic-control/
 ├── src/
 │   ├── core/           # Types, tokens, config
 │   │   ├── types.ts    # Shared type definitions

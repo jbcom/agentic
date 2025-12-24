@@ -21,7 +21,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: '22'
 
@@ -30,5 +30,11 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        ORCH_CMD: ${{ inputs.command }}
+        ORCH_ARGS: ${{ inputs.args }}
       run: |
-        npx @agentic/control fleet ${{ inputs.command }} ${{ inputs.args }}
+        # Use exact pinned version of @agentic/control to prevent supply chain attacks (CWE-829)
+        # and use environment variables for safe argument passing.
+        # Note: We split ORCH_ARGS into an array to avoid command injection while allowing multiple flags.
+        read -r -a ARGS_ARRAY <<< "$ORCH_ARGS"
+        npx @agentic/control@1.1.0 fleet "$ORCH_CMD" "${ARGS_ARRAY[@]}"

@@ -13,7 +13,7 @@ import { existsSync, writeFileSync } from 'node:fs';
 import { Command, InvalidArgumentError, Option } from 'commander';
 import { getConfig, getDefaultModel, getFleetDefaults, initConfig } from './core/config.js';
 import { safeGitCommand } from './core/subprocess.js';
-import { extractOrg, getConfiguredOrgs, getTokenSummary, validateTokens } from './core/tokens.js';
+import { extractOrg, getConfiguredOrgs, getTokenForRepo, getTokenSummary, validateTokens } from './core/tokens.js';
 import type { Agent } from './core/types.js';
 import { Fleet } from './fleet/index.js';
 import { HandoffManager } from './handoff/index.js';
@@ -167,7 +167,7 @@ fleetCmd
   .action(async (opts) => {
     try {
       const fleet = new Fleet();
-      let result;
+      let result: Result<Agent[]>;
 
       if (opts.running) {
         result = await fleet.running();
@@ -453,7 +453,7 @@ fleetCmd
       if (opts.json) {
         output(result.data, true);
       } else {
-        const s = result.data!;
+        const s = result.data || [];
         console.log('=== Fleet Summary ===\n');
         console.log(`Total:     ${s.total}`);
         console.log(`Running:   ${s.running}`);
@@ -770,14 +770,19 @@ triageCmd
         process.exit(1);
       }
 
+      const token = getTokenForRepo(repo);
+      if (!token) {
+        console.error(`❌ Token not found for repository "${repo}". Check your configuration or GITHUB_TOKEN environment variable.`);
+        process.exit(1);
+      }
+
       const triage = new Triage({
         github: {
-          token: process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '',
+          token,
           repo,
         },
         resolver: {
-          repo,
-          model: getDefaultModel(),
+          workingDirectory: process.cwd(),
         },
       });
 
@@ -812,14 +817,19 @@ triageCmd
         process.exit(1);
       }
 
+      const token = getTokenForRepo(repo);
+      if (!token) {
+        console.error(`❌ Token not found for repository "${repo}". Check your configuration or GITHUB_TOKEN environment variable.`);
+        process.exit(1);
+      }
+
       const triage = new Triage({
         github: {
-          token: process.env.GH_TOKEN || process.env.GITHUB_TOKEN || '',
+          token,
           repo,
         },
         resolver: {
-          repo,
-          model: getDefaultModel(),
+          workingDirectory: process.cwd(),
         },
       });
 
@@ -842,7 +852,7 @@ triageCmd
       if (result.allActions.length > 0) {
         console.log(`\nActions Taken (${result.allActions.length}):`);
         for (const action of result.allActions) {
-          console.log(`- [${action.success ? '✅' : '❌'}] ${action.action}: ${action.result}`);
+          console.log(`- [${action.success ? '✅' : '❌'}] ${action.action}: ${action.description}`);
         }
       }
 

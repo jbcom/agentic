@@ -25,7 +25,7 @@ runs:
   using: 'composite'
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
       with:
         node-version: '22'
 
@@ -34,16 +34,21 @@ runs:
       env:
         GH_TOKEN: ${{ inputs.github_token }}
         GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_HEAD: ${{ inputs.head }}
       run: |
-        ARGS=""
-        if [ -n "${{ inputs.model }}" ]; then
-          ARGS="$ARGS --model ${{ inputs.model }}"
+        declare -a ARGS
+        if [ -n "$INPUT_MODEL" ]; then
+          ARGS+=("--model" "$INPUT_MODEL")
         fi
-        if [ -n "${{ inputs.base }}" ]; then
-          ARGS="$ARGS --base ${{ inputs.base }}"
+        if [ -n "$INPUT_BASE" ]; then
+          ARGS+=("--base" "$INPUT_BASE")
         fi
-        if [ -n "${{ inputs.head }}" ]; then
-          ARGS="$ARGS --head ${{ inputs.head }}"
+        if [ -n "$INPUT_HEAD" ]; then
+          ARGS+=("--head" "$INPUT_HEAD")
         fi
         
-        npx @agentic/control triage review $ARGS
+        # Use exact pinned version of @agentic/control to prevent supply chain attacks (CWE-829)
+        # and use array for safe argument passing to prevent command injection
+        npx @agentic/control@1.1.0 triage review "${ARGS[@]}"

@@ -74,8 +74,8 @@ RUN mkdir -p "$PNPM_HOME" && echo "pnpm directory created successfully"
 
 # Copy package files for dependency installation
 COPY --chown=agent:agent package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY --chown=agent:agent packages/@agentic/control/package.json ./packages/@agentic/control/
-COPY --chown=agent:agent packages/vitest-@agentic/control/package.json ./packages/vitest-@agentic/control/
+COPY --chown=agent:agent packages/agentic-control/package.json ./packages/agentic-control/
+COPY --chown=agent:agent packages/vitest-agentic-control/package.json ./packages/vitest-agentic-control/
 
 # Install all dependencies (including devDependencies for AI SDK providers)
 # Note: devDependencies include @ai-sdk/anthropic which is needed at runtime
@@ -88,12 +88,12 @@ COPY --chown=agent:agent packages/ ./packages/
 RUN pnpm run build
 
 # Create global symlinks for CLI commands
-RUN ln -s /home/agent/packages/@agentic/control/dist/cli.js "$PNPM_HOME/agentic" && \
-    ln -s /home/agent/packages/@agentic/control/dist/cli.js "$PNPM_HOME/@agentic/control" && \
-    chmod +x /home/agent/packages/@agentic/control/dist/cli.js
+RUN ln -s /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/agentic" && \
+    ln -s /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/@agentic/control" && \
+    chmod +x /home/agent/packages/agentic-control/dist/cli.js
 
 # Verify installation
-RUN node /home/agent/packages/@agentic/control/dist/cli.js --version || echo "CLI version check skipped"
+RUN node /home/agent/packages/agentic-control/dist/cli.js --version || echo "CLI version check skipped"
 
 # =============================================================================
 # Environment setup
@@ -108,10 +108,10 @@ WORKDIR /workspace
 
 # Verify installation (use absolute paths since WORKDIR changed)
 RUN /home/agent/.local/bin/agentic-crew --help && \
-    node /home/agent/packages/@agentic/control/dist/cli.js --help
+    node /home/agent/packages/agentic-control/dist/cli.js --help
 
 # Entry point: @agentic/control CLI
-ENTRYPOINT ["node", "/home/agent/packages/@agentic/control/dist/cli.js"]
+ENTRYPOINT ["node", "/home/agent/packages/agentic-control/dist/cli.js"]
 CMD ["--help"]
 
 # =============================================================================
