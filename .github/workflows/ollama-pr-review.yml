@@ -262,7 +262,7 @@ jobs:
         run: git checkout "$HEAD_REF"
 
       - name: Download review artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@fa0b910235d5812e3796d539ec110196866037a1 # v4.1.8
         with:
           name: ollama-review
           path: /tmp

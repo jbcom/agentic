@@ -9,11 +9,11 @@
  * All configuration is user-provided - no hardcoded values.
  */
 
-import { existsSync, writeFileSync } from 'node:fs';
+import { existsSync, writeFileSync, readFileSync } from 'node:fs';
 import { Command, InvalidArgumentError, Option } from 'commander';
 import { getConfig, getDefaultModel, getFleetDefaults, initConfig } from './core/config.js';
 import { safeGitCommand } from './core/subprocess.js';
-import { extractOrg, getConfiguredOrgs, getTokenSummary, validateTokens } from './core/tokens.js';
+import { extractOrg, getConfiguredOrgs, getTokenSummary, validateTokens, getTokenForRepo } from './core/tokens.js';
 import type { Agent, Result } from './core/types.js';
 import { Fleet } from './fleet/index.js';
 import { HandoffManager } from './handoff/index.js';
@@ -86,6 +86,115 @@ function formatAgent(agent: Agent): string {
   const repo = (agent.source?.repository?.split('/').pop() ?? '?').padEnd(25);
   const name = (agent.name ?? '').slice(0, 40);
   return `${status} ${id} ${repo} ${name}`;
+}
+
+async function runTriageFix(prNumber: number, options: { repo?: string; iterations?: string }) {
+  const { Triage } = await import('./triage/triage.js');
+  const cfg = getConfig();
+  const repo = options.repo || cfg.defaultRepository;
+
+  if (!repo) {
+    throw new Error('Repository is required. Use --repo or set defaultRepository in config.');
+  }
+
+  const token = getTokenForRepo(repo);
+  if (!token) {
+    throw new Error(
+      `Token not found for repository "${repo}". Check your configuration or GITHUB_TOKEN environment variable.`
+    );
+  }
+
+  const triage = new Triage({
+    github: {
+      token,
+      repo,
+    },
+    resolver: {
+      workingDirectory: process.cwd(),
+    },
+  });
+
+  console.log(`🚀 Starting CI/PR resolution for PR #${prNumber} in ${repo}...`);
+
+  const result = await triage.runUntilReady(prNumber, {
+    maxIterations: Number.parseInt(options.iterations || '5', 10),
+    onProgress: (t, i) => {
+      console.log(`\nIteration ${i}: Status = ${t.status}`);
+      console.log(`Unaddressed feedback: ${t.feedback.unaddressed}`);
+      console.log(`Blockers: ${t.blockers.length}`);
+    },
+  });
+
+  console.log('\n=== Resolution Summary ===\n');
+  console.log(`Success: ${result.success ? '✅' : '❌'}`);
+  console.log(`Iterations: ${result.iterations}`);
+  console.log(`Final Status: ${result.finalTriage.status}`);
+
+  if (result.allActions.length > 0) {
+    console.log(`\nActions Taken (${result.allActions.length}):`);
+    for (const action of result.allActions) {
+      console.log(`- [${action.success ? '✅' : '❌'}] ${action.action}: ${action.description}`);
+    }
+  }
+
+  if (!result.success) {
+    process.exit(1);
+  }
+}
+
+async function runTriageReview(options: { base: string; head: string; model?: string }) {
+  // Validate git refs to prevent command injection
+  const baseRef = validateGitRef(options.base);
+  const headRef = validateGitRef(options.head);
+
+  // Use safe git command to execute git diff
+  const diffResult = safeGitCommand(['diff', `${baseRef}...${headRef}`]);
+
+  if (!diffResult.success) {
+    throw new Error(`git diff failed: ${diffResult.stderr || 'Unknown error'}`);
+  }
+
+  const diff = diffResult.stdout;
+
+  if (!diff.trim()) {
+    console.log('No changes to review');
+    return;
+  }
+
+  const analyzer = new AIAnalyzer({ model: options.model || getDefaultModel() });
+
+  console.log(`🔍 Reviewing diff ${baseRef}...${headRef}...`);
+
+  const review = await analyzer.reviewCode(diff);
+
+  console.log('\n=== Code Review ===\n');
+  console.log(`Ready to merge: ${review.readyToMerge ? '✅ YES' : '❌ NO'}`);
+
+  if (review.mergeBlockers.length > 0) {
+    console.log('\n🚫 Merge Blockers:');
+    for (const blocker of review.mergeBlockers) {
+      console.log(`   - ${blocker}`);
+    }
+  }
+
+  console.log(`\n📋 Issues (${review.issues.length}):`);
+  for (const issue of review.issues) {
+    const icon =
+      issue.severity === 'critical'
+        ? '🔴'
+        : issue.severity === 'high'
+          ? '🟠'
+          : issue.severity === 'medium'
+            ? '🟡'
+            : '⚪';
+    console.log(
+      `   ${icon} [${issue.category}] ${issue.file}${issue.line ? `:${issue.line}` : ''}`
+    );
+    console.log(`      ${issue.description}`);
+  }
+
+  console.log('\n📝 Overall Assessment:');
+  console.log(`   ${review.overallAssessment}`);
 }
 
 // ============================================
@@ -347,8 +456,6 @@ fleetCmd
       const defaults = getFleetDefaults();
 
       // Merge CLI options with config defaults
-      // Note: Commander sets opts.autoPr to false for --no-auto-pr, true for --auto-pr, undefined for neither
-      // We need to check if it was explicitly set (not undefined) before falling back to defaults
       const autoCreatePr =
         opts.autoPr !== undefined ? opts.autoPr : (defaults.autoCreatePr ?? false);
       const openAsCursorGithubApp = opts.asApp ?? defaults.openAsCursorGithubApp ?? false;
@@ -620,7 +727,7 @@ triageCmd
           }
           return acc;
         },
-        {} as Record<string, typeof modelsByProvider.anthropic>
+        {} as Record<string, { id: string; name: string; description: string }[]>
       );
       output(result, true);
       return;
@@ -694,61 +801,73 @@ triageCmd
   .option('--model <model>', 'Claude model to use', getDefaultModel())
   .action(async (opts) => {
     try {
-      // Validate git refs to prevent command injection
-      const baseRef = validateGitRef(opts.base);
-      const headRef = validateGitRef(opts.head);
+      await runTriageReview(opts);
+    } catch (err) {
+      console.error('❌ Review failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
 
-      // Use safe git command to execute git diff
-      const diffResult = safeGitCommand(['diff', `${baseRef}...${headRef}`]);
+triageCmd
+  .command('pr')
+  .description('AI-powered PR triage and analysis')
+  .argument('<pr-number>', 'PR number to triage', (v) => parsePositiveInt(v, 'pr-number'))
+  .option('--repo <owner/repo>', 'Repository (defaults to config)')
+  .option('--json', 'Output as JSON')
+  .action(async (prNumber, opts) => {
+    try {
+      const { Triage } = await import('./triage/triage.js');
+      const cfg = getConfig();
+      const repo = opts.repo || cfg.defaultRepository;
 
-      if (!diffResult.success) {
-        console.error('❌ git diff failed:', diffResult.stderr || 'Unknown error');
+      if (!repo) {
+        console.error('❌ Repository is required. Use --repo or set defaultRepository in config.');
         process.exit(1);
       }
 
-      const diff = diffResult.stdout;
-
-      if (!diff.trim()) {
-        console.log('No changes to review');
-        return;
-      }
-
-      const analyzer = new AIAnalyzer({ model: opts.model });
-
-      console.log(`🔍 Reviewing diff ${baseRef}...${headRef}...`);
-
-      const review = await analyzer.reviewCode(diff);
-
-      console.log('\n=== Code Review ===\n');
-      console.log(`Ready to merge: ${review.readyToMerge ? '✅ YES' : '❌ NO'}`);
-
-      if (review.mergeBlockers.length > 0) {
-        console.log('\n🚫 Merge Blockers:');
-        for (const blocker of review.mergeBlockers) {
-          console.log(`   - ${blocker}`);
-        }
-      }
-
-      console.log(`\n📋 Issues (${review.issues.length}):`);
-      for (const issue of review.issues) {
-        const icon =
-          issue.severity === 'critical'
-            ? '🔴'
-            : issue.severity === 'high'
-              ? '🟠'
-              : issue.severity === 'medium'
-                ? '🟡'
-                : '⚪';
-        console.log(
-          `   ${icon} [${issue.category}] ${issue.file}${issue.line ? `:${issue.line}` : ''}`
+      const token = getTokenForRepo(repo);
+      if (!token) {
+        console.error(
+          `❌ Token not found for repository "${repo}". Check your configuration or GITHUB_TOKEN environment variable.`
         );
-        console.log(`      ${issue.description}`);
+        process.exit(1);
       }
 
-      console.log('\n📝 Overall Assessment:');
-      console.log(`   ${review.overallAssessment}`);
+      const triage = new Triage({
+        github: {
+          token,
+          repo,
+        },
+        resolver: {
+          workingDirectory: process.cwd(),
+        },
+      });
+
+      console.log(`🔍 Triaging PR #${prNumber} in ${repo}...`);
+      const result = await triage.analyze(prNumber);
+
+      if (opts.json) {
+        output(result, true);
+      } else {
+        console.log(triage.formatTriageReport(result));
+      }
     } catch (err) {
-      console.error('❌ Review failed:', err instanceof Error ? err.message : err);
+      console.error('❌ PR triage failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+triageCmd
+  .command('fix')
+  .description('Automatically resolve issues in a Pull Request')
+  .argument('<pr-number>', 'PR number to fix', (v) => parsePositiveInt(v, 'pr-number'))
+  .option('--repo <owner/repo>', 'Repository (defaults to config)')
+  .option('--iterations <number>', 'Max iterations', '5')
+  .action(async (prNumber, opts) => {
+    try {
+      await runTriageFix(prNumber, opts);
+    } catch (err) {
+      console.error('❌ PR resolution failed:', err instanceof Error ? err.message : err);
       process.exit(1);
     }
   });
@@ -1118,7 +1237,6 @@ program
       },
       triage: {
         provider: hasAnthropicKey ? 'anthropic' : hasOpenAIKey ? 'openai' : 'anthropic',
-        // model will be set below
       },
     };
 
@@ -1126,7 +1244,6 @@ program
     if (isInteractive) {
       const { input, confirm, select } = await import('@inquirer/prompts');
 
-      // Ask for default repository if not detected
       const repoAnswer = await input({
         message: 'Default repository (owner/repo, or leave empty):',
         default: '',
@@ -1135,17 +1252,14 @@ program
         config.defaultRepository = repoAnswer;
       }
 
-      // Ask about fleet defaults
       const autoPr = await confirm({
         message: 'Auto-create PRs when agents complete?',
         default: false,
       });
       (config.fleet as Record<string, unknown>).autoCreatePr = autoPr;
 
-      // === AI PROVIDER & MODEL SELECTION ===
       console.log('\n📊 AI Triage Configuration\n');
 
-      // Select provider
       const provider = await select({
         message: 'AI provider for triage operations:',
         choices: [
@@ -1165,7 +1279,6 @@ program
       });
       (config.triage as Record<string, unknown>).provider = provider;
 
-      // Model selection
       const modelChoice = await select({
         message: 'How would you like to configure the AI model?',
         choices: [
@@ -1182,7 +1295,6 @@ program
       });
 
       let selectedModel: string | undefined;
-
       let shouldFallbackToCommon = false;
 
       if (modelChoice === 'list-cursor') {
@@ -1262,9 +1374,7 @@ program
       if (selectedModel) {
         (config.triage as Record<string, unknown>).model = selectedModel;
       }
-      // If "auto" was selected, don't set a model - let the provider use its default
 
-      // Ask for additional orgs
       console.log('\n🔐 Organization Tokens\n');
       const addOrg = await confirm({
         message: 'Add organization-specific token mappings?',
@@ -1290,7 +1400,6 @@ program
         }
       }
     } else {
-      // Non-interactive: set sensible defaults
       (config.triage as Record<string, unknown>).model = hasAnthropicKey
         ? 'claude-sonnet-4-20250514'
         : hasOpenAIKey
@@ -1301,7 +1410,6 @@ program
     writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
     console.log(`\n✅ Created ${configPath}`);
 
-    // Show summary
     const triage = config.triage as Record<string, unknown>;
     console.log('\n📋 Configuration Summary:');
     console.log(`   Provider: ${triage.provider}`);
@@ -1310,6 +1418,162 @@ program
       console.log(`   Default Repo: ${config.defaultRepository}`);
     }
     console.log(`   Auto-create PRs: ${(config.fleet as Record<string, unknown>).autoCreatePr}`);
+  });
+
+// ============================================
+// Top-level aliases for GitHub Actions
+// ============================================
+
+program
+  .command('ci-resolution')
+  .description('Alias for triage fix - Automatically resolve issues in a Pull Request')
+  .argument('[pr-number]', 'PR number to fix (detects from environment if not provided)')
+  .option('--repo <owner/repo>', 'Repository (defaults to config)')
+  .option('--iterations <number>', 'Max iterations', '5')
+  .option('--model <model>', 'AI model to use')
+  .option('--api-key <key>', 'AI API key')
+  .option('--github-token <token>', 'GitHub token')
+  .action(async (prNumber, opts) => {
+    try {
+      // Detect PR number from environment if not provided
+      let actualPrNumber = prNumber;
+      if (!actualPrNumber && process.env.GITHUB_EVENT_PATH) {
+        try {
+          const event = JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
+          actualPrNumber = event.pull_request?.number || event.number;
+        } catch (err) {
+          console.error('⚠️ Could not detect PR number from GITHUB_EVENT_PATH');
+        }
+      }
+
+      if (!actualPrNumber) {
+        console.error('❌ PR number is required as an argument or via GITHUB_EVENT_PATH');
+        process.exit(1);
+      }
+
+      // Set model/keys in env if provided via flags
+      if (opts.model) process.env.CURSOR_MODEL = opts.model;
+      if (opts.apiKey) process.env.CURSOR_API_KEY = opts.apiKey;
+      if (opts.githubToken) process.env.GITHUB_TOKEN = opts.githubToken;
+
+      await runTriageFix(Number.parseInt(actualPrNumber.toString(), 10), opts);
+    } catch (err) {
+      console.error('❌ CI resolution failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('issue-triage')
+  .description('Triage a GitHub issue using an AI agent')
+  .option('--issue-number <number>', 'Issue number to triage')
+  .option('--repo <owner/repo>', 'Repository (defaults to config)')
+  .option('--model <model>', 'AI model to use')
+  .option('--api-key <key>', 'AI API key')
+  .option('--github-token <token>', 'GitHub token')
+  .action(async (opts) => {
+    try {
+      const issueNumber = opts.issueNumber;
+      if (!issueNumber) {
+        console.error('❌ --issue-number is required');
+        process.exit(1);
+      }
+
+      const cfg = getConfig();
+      const repo = opts.repo || cfg.defaultRepository;
+      if (!repo) {
+        console.error('❌ Repository is required. Use --repo or set defaultRepository in config.');
+        process.exit(1);
+      }
+
+      // Set model/keys in env if provided via flags
+      if (opts.model) process.env.CURSOR_MODEL = opts.model;
+      if (opts.apiKey) process.env.CURSOR_API_KEY = opts.apiKey;
+      if (opts.githubToken) process.env.GITHUB_TOKEN = opts.githubToken;
+
+      const { runTask } = await import('./triage/agent.js');
+      const task = `Triage issue #${issueNumber} in repository ${repo}.
+      
+Assess the issue, suggest labels, and provide a summary of what needs to be done.
+Use the available tools to gather information and post a comment with your assessment.`;
+
+      console.log(`🚀 Starting issue triage for #${issueNumber} in ${repo}...`);
+      const result = await runTask(task);
+
+      if (result.success) {
+        console.log('✅ Issue triage complete');
+        console.log(result.result);
+      } else {
+        console.error(`❌ Issue triage failed: ${result.result}`);
+        process.exit(1);
+      }
+    } catch (err) {
+      console.error('❌ Issue triage failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('orchestrate')
+  .description('Run a full multi-agent orchestration')
+  .option('--config <path>', 'Path to orchestration configuration file')
+  .option('--model <model>', 'Default model to use')
+  .option('--api-key <key>', 'API key for the model')
+  .option('--github-token <token>', 'GitHub token')
+  .action(async (opts) => {
+    try {
+      if (!opts.config) {
+        console.error('❌ --config is required');
+        process.exit(1);
+      }
+
+      const config = JSON.parse(readFileSync(opts.config, 'utf8'));
+
+      // Set model/keys in env if provided via flags
+      if (opts.model) process.env.CURSOR_MODEL = opts.model;
+      if (opts.apiKey) process.env.CURSOR_API_KEY = opts.apiKey;
+      if (opts.githubToken) process.env.GITHUB_TOKEN = opts.githubToken;
+
+      const fleet = new Fleet();
+      console.log(`🚀 Starting orchestration from ${opts.config}...`);
+
+      if (config.pattern === 'diamond') {
+        const result = await fleet.createDiamond(config);
+        if (!result.success) {
+          console.error(`❌ Orchestration failed: ${result.error}`);
+          process.exit(1);
+        }
+        console.log('✅ Diamond pattern created successfully');
+      } else {
+        console.error(`❌ Unsupported orchestration pattern: ${config.pattern}`);
+        process.exit(1);
+      }
+    } catch (err) {
+      console.error('❌ Orchestration failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('pr-review')
+  .description('Alias for triage review - AI-powered code review of git diff')
+  .option('--base <ref>', 'Base ref for diff', 'main')
+  .option('--head <ref>', 'Head ref for diff', 'HEAD')
+  .option('--model <model>', 'AI model to use')
+  .option('--api-key <key>', 'AI API key')
+  .option('--github-token <token>', 'GitHub token')
+  .action(async (opts) => {
+    try {
+      // Set model/keys in env if provided via flags
+      if (opts.model) process.env.CURSOR_MODEL = opts.model;
+      if (opts.apiKey) process.env.CURSOR_API_KEY = opts.apiKey;
+      if (opts.githubToken) process.env.GITHUB_TOKEN = opts.githubToken;
+
+      await runTriageReview(opts);
+    } catch (err) {
+      console.error('❌ PR review failed:', err instanceof Error ? err.message : err);
+      process.exit(1);
+    }
   });
 
 // ============================================
