@@ -453,7 +453,11 @@ fleetCmd
       if (opts.json) {
         output(result.data, true);
       } else {
-        const s = result.data || [];
+        const s = result.data;
+        if (!s || Array.isArray(s)) {
+          console.error('❌ Invalid summary data');
+          process.exit(1);
+        }
         console.log('=== Fleet Summary ===\n');
         console.log(`Total:     ${s.total}`);
         console.log(`Running:   ${s.running}`);
