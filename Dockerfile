@@ -88,8 +88,9 @@ COPY --chown=agent:agent packages/ ./packages/
 RUN pnpm run build
 
 # Create global symlinks for CLI commands
-RUN ln -s /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/agentic" && \
-    ln -s /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/@agentic/control" && \
+RUN mkdir -p "$PNPM_HOME/@agentic" && \
+    ln -sf /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/agentic" && \
+    ln -sf /home/agent/packages/agentic-control/dist/cli.js "$PNPM_HOME/@agentic/control" && \
     chmod +x /home/agent/packages/agentic-control/dist/cli.js
 
 # Verify installation

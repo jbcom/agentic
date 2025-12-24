@@ -206,7 +206,7 @@ export class CursorAPI {
       if (!response.ok) {
         // Check if we should retry
         if (attempt < this.maxRetries && RETRYABLE_STATUS_CODES.includes(response.status)) {
-          const delay = this.retryDelay * Math.pow(2, attempt);
+          const delay = this.retryDelay * 2 ** attempt;
           log.warn(
             `API Error ${response.status} on ${method} ${endpoint}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
           );
@@ -253,7 +253,7 @@ export class CursorAPI {
       if (error instanceof Error && error.name === 'AbortError') {
         // Timeouts are also retryable
         if (attempt < this.maxRetries) {
-          const delay = this.retryDelay * Math.pow(2, attempt);
+          const delay = this.retryDelay * 2 ** attempt;
           log.warn(
             `Request timeout on ${method} ${endpoint}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
           );
@@ -265,7 +265,7 @@ export class CursorAPI {
 
       // Network errors are also retryable
       if (attempt < this.maxRetries) {
-        const delay = this.retryDelay * Math.pow(2, attempt);
+        const delay = this.retryDelay * 2 ** attempt;
         log.warn(
           `Network error on ${method} ${endpoint}: ${sanitizeError(error)}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
         );
