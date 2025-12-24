@@ -452,8 +452,8 @@ fleetCmd
 
       if (opts.json) {
         output(result.data, true);
-      } else {
-        const s = result.data || [];
+      } else if (result.data) {
+        const s = result.data;
         console.log('=== Fleet Summary ===\n');
         console.log(`Total:     ${s.total}`);
         console.log(`Running:   ${s.running}`);
