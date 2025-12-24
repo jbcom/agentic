@@ -28,7 +28,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agentic/triage": "workspace:*"
+    "@agentic/triage": "github:agentic-dev-library/triage#feat/sigma-scoring-and-queue"
   },
   "peerDependencies": {
     "@agentic/triage": ">=0.2.0"
