@@ -29,7 +29,11 @@ async function getRegistryData(packageName: string) {
     if (!response.ok) {
       throw new Error(`Failed to fetch registry data for ${packageName}: ${response.statusText}`);
     }
-    const data = (await response.json()) as any;
+    const data = (await response.json()) as {
+      'dist-tags': { latest: string };
+      license: string;
+      time: { modified: string };
+    };
     return {
       version: data['dist-tags'].latest,
       license: data.license,
