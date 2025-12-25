@@ -5,10 +5,20 @@
  * Adapted from cursor-fleet with enhanced error handling.
  */
 
+import { log } from '../core/config.js';
 import type { Agent, Conversation, Repository, Result } from '../core/types.js';
 
 /** Default API base URL - configurable for testing/staging */
 const DEFAULT_BASE_URL = 'https://api.cursor.com/v0';
+
+/** Retryable HTTP status codes */
+const RETRYABLE_STATUS_CODES = [429, 500, 502, 503, 504];
+
+/** Default maximum number of retries */
+const DEFAULT_MAX_RETRIES = 3;
+
+/** Default initial retry delay in milliseconds */
+const DEFAULT_RETRY_DELAY = 1000;
 
 /** Validation regex for agent IDs (alphanumeric with hyphens) */
 const AGENT_ID_PATTERN = /^[a-zA-Z0-9-]+$/;
@@ -26,6 +36,10 @@ export interface CursorAPIOptions {
   timeout?: number;
   /** API base URL (default: https://api.cursor.com/v0) */
   baseUrl?: string;
+  /** Maximum number of retries for transient errors (default: 3) */
+  maxRetries?: number;
+  /** Initial delay for exponential backoff in ms (default: 1000) */
+  retryDelay?: number;
 }
 
 /**
@@ -143,6 +157,8 @@ export class CursorAPI {
   private readonly apiKey: string;
   private readonly timeout: number;
   private readonly baseUrl: string;
+  private readonly maxRetries: number;
+  private readonly retryDelay: number;
 
   constructor(options: CursorAPIOptions = {}) {
     // Check for API key in order: options, CURSOR_API_KEY
@@ -151,6 +167,8 @@ export class CursorAPI {
     // Security: Only allow baseUrl via explicit programmatic configuration
     // Do NOT allow env var override to prevent SSRF attacks
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
+    this.maxRetries = options.maxRetries ?? DEFAULT_MAX_RETRIES;
+    this.retryDelay = options.retryDelay ?? DEFAULT_RETRY_DELAY;
 
     if (!this.apiKey) {
       throw new Error('CURSOR_API_KEY is required. Set it in environment or pass to constructor.');
@@ -167,7 +185,8 @@ export class CursorAPI {
   private async request<T>(
     endpoint: string,
     method: string = 'GET',
-    body?: object
+    body?: object,
+    attempt: number = 0
   ): Promise<Result<T>> {
     const url = `${this.baseUrl}${endpoint}`;
     const controller = new AbortController();
@@ -185,6 +204,16 @@ export class CursorAPI {
       });
 
       if (!response.ok) {
+        // Check if we should retry
+        if (attempt < this.maxRetries && RETRYABLE_STATUS_CODES.includes(response.status)) {
+          const delay = this.retryDelay * 2 ** attempt;
+          log.warn(
+            `API Error ${response.status} on ${method} ${endpoint}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return this.request<T>(endpoint, method, body, attempt + 1);
+        }
+
         const errorText = await response.text();
         let details: string;
         try {
@@ -222,8 +251,35 @@ export class CursorAPI {
       }
     } catch (error) {
       if (error instanceof Error && error.name === 'AbortError') {
+        // Timeouts are also retryable
+        if (attempt < this.maxRetries) {
+          const delay = this.retryDelay * 2 ** attempt;
+          log.warn(
+            `Request timeout on ${method} ${endpoint}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          return this.request<T>(endpoint, method, body, attempt + 1);
+        }
         return { success: false, error: `Request timeout after ${this.timeout}ms` };
       }
+
+      // Network errors (TypeError) or specific connection errors are also retryable
+      if (
+        attempt < this.maxRetries &&
+        (error instanceof TypeError ||
+          (error instanceof Error &&
+            (error.message.includes('network') ||
+              error.message.includes('fetch') ||
+              error.message.includes('connection'))))
+      ) {
+        const delay = this.retryDelay * 2 ** attempt;
+        log.warn(
+          `Network error on ${method} ${endpoint}: ${sanitizeError(error)}. Retrying in ${delay}ms... (Attempt ${attempt + 1}/${this.maxRetries})`
+        );
+        await new Promise((resolve) => setTimeout(resolve, delay));
+        return this.request<T>(endpoint, method, body, attempt + 1);
+      }
+
       return { success: false, error: sanitizeError(error) };
     } finally {
       clearTimeout(timeoutId);
