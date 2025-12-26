@@ -1,0 +1,126 @@
+name: 'Agentic PR Review'
+description: 'AI-powered code review and feedback for Pull Requests'
+author: 'Jon Bogaty'
+branding:
+  icon: 'search'
+  color: 'blue'
+
+inputs:
+  github_token:
+    description: 'GitHub token for API access'
+    required: true
+  model:
+    description: 'AI model to use for review'
+    required: false
+  base:
+    description: 'Base ref for diff'
+    required: false
+    default: 'main'
+  head:
+    description: 'Head ref for diff'
+    required: false
+    default: 'HEAD'
+  ollama_api_key:
+    description: 'Ollama API key (deprecated, use GH_TOKEN)'
+    required: false
+  ollama_host:
+    description: 'Ollama host (deprecated)'
+    required: false
+  ollama_model:
+    description: 'Ollama model (deprecated, use model)'
+    required: false
+  jules_api_key:
+    description: 'Google Jules API key'
+    required: false
+
+outputs:
+  suggestion_count:
+    description: 'Number of suggestions found'
+    value: ${{ steps.review.outputs.suggestion_count }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+
+    - name: Run PR Review
+      id: review
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github_token }}
+        GITHUB_TOKEN: ${{ inputs.github_token }}
+        INPUT_MODEL: ${{ inputs.model }}
+        INPUT_BASE: ${{ inputs.base }}
+        INPUT_HEAD: ${{ inputs.head }}
+        OLLAMA_API_KEY: ${{ inputs.ollama_api_key }}
+        OLLAMA_HOST: ${{ inputs.ollama_host }}
+        JULES_API_KEY: ${{ inputs.jules_api_key }}
+      run: |
+        declare -a ARGS
+        if [ -n "$INPUT_MODEL" ]; then
+          ARGS+=("--model" "$INPUT_MODEL")
+        fi
+        if [ -n "$INPUT_BASE" ]; then
+          ARGS+=("--base" "$INPUT_BASE")
+        fi
+        if [ -n "$INPUT_HEAD" ]; then
+          ARGS+=("--head" "$INPUT_HEAD")
+        fi
+        
+        # Install peer dependencies first
+        npm install -g agentic-control@1.1.0 @ai-sdk/anthropic @ai-sdk/google ai-sdk-ollama @ai-sdk/openai
+        
+        # Patch agentic-control to allow 'ollama' provider if it's missing from validation
+        AGENTIC_PATH=$(npm root -g)/agentic-control
+        VALIDATION_FILE="$AGENTIC_PATH/dist/core/validation.js"
+        if [ -f "$VALIDATION_FILE" ]; then
+          echo "Patching $VALIDATION_FILE to allow 'ollama' provider..."
+          sed -i "s/'anthropic', 'openai', 'google', 'mistral', 'azure'/'anthropic', 'openai', 'google', 'mistral', 'azure', 'ollama'/g" "$VALIDATION_FILE"
+        fi
+        
+        # Fetch base branch to ensure git diff works
+        git fetch origin "${INPUT_BASE:-main}"
+        git branch "${INPUT_BASE:-main}" FETCH_HEAD || true
+        
+        # Determine provider and configure
+        if [ -n "$OLLAMA_HOST" ]; then
+          echo '{"triage": {"provider": "ollama"}}' > agentic.config.json
+          export OLLAMA_API_KEY="${OLLAMA_API_KEY}"
+          # Strip trailing slash and /api because ai-sdk-ollama appends it
+          CLEAN_HOST="${OLLAMA_HOST%/}"
+          CLEAN_HOST="${CLEAN_HOST%/api}"
+          export OLLAMA_HOST="${CLEAN_HOST}"
+          echo "Using Ollama provider at ${OLLAMA_HOST}"
+        elif [ -n "$JULES_API_KEY" ]; then
+          echo '{"triage": {"provider": "google"}}' > agentic.config.json
+          export GOOGLE_API_KEY="$JULES_API_KEY"
+          if [[ "$INPUT_MODEL" == "glm-4.6:cloud" ]] || [ -z "$INPUT_MODEL" ]; then
+             ARGS=("--model" "gemini-1.5-pro")
+          fi
+        fi
+        
+        # Capture output to count suggestions
+        # Redirect stderr to stdout so we capture everything
+        EXIT_CODE=0
+        REVIEW_OUTPUT=$(agentic triage review "${ARGS[@]}" 2>&1) || EXIT_CODE=$?
+        echo "$REVIEW_OUTPUT"
+        
+        # Count suggestions (lines starting with emojis in agentic-control output)
+        # agentic-control uses 🟠, 🔴, 🟡, ⚪ for issues.
+        SUGGESTION_COUNT=$(echo "$REVIEW_OUTPUT" | grep -c -E '🟠|🔴|🟡|⚪') || SUGGESTION_COUNT=0
+        echo "suggestion_count=$SUGGESTION_COUNT" >> $GITHUB_OUTPUT
+
+        # If it failed but has suggestions, we consider it a "soft failure" for the action
+        # so that subsequent steps in the workflow can run (like Jules delegation).
+        # We only fail if it was a real error (no review output).
+        if [ $EXIT_CODE -ne 0 ]; then
+          if echo "$REVIEW_OUTPUT" | grep -q "=== Code Review ==="; then
+            echo "Review completed with suggestions (or rejected)."
+          else
+            echo "Review tool failed with exit code $EXIT_CODE"
+            exit $EXIT_CODE
+          fi
+        fi
