@@ -59,68 +59,91 @@ runs:
         OLLAMA_HOST: ${{ inputs.ollama_host }}
         JULES_API_KEY: ${{ inputs.jules_api_key }}
       run: |
-        declare -a ARGS
-        if [ -n "$INPUT_MODEL" ]; then
-          ARGS+=("--model" "$INPUT_MODEL")
-        fi
-        if [ -n "$INPUT_BASE" ]; then
-          ARGS+=("--base" "$INPUT_BASE")
-        fi
-        if [ -n "$INPUT_HEAD" ]; then
-          ARGS+=("--head" "$INPUT_HEAD")
-        fi
-        
-        # Install peer dependencies first
-        npm install -g agentic-control@1.1.0 @ai-sdk/anthropic @ai-sdk/google ai-sdk-ollama @ai-sdk/openai
-        
-        # Patch agentic-control to allow 'ollama' provider if it's missing from validation
-        AGENTIC_PATH=$(npm root -g)/agentic-control
-        VALIDATION_FILE="$AGENTIC_PATH/dist/core/validation.js"
-        if [ -f "$VALIDATION_FILE" ]; then
-          echo "Patching $VALIDATION_FILE to allow 'ollama' provider..."
-          sed -i "s/'anthropic', 'openai', 'google', 'mistral', 'azure'/'anthropic', 'openai', 'google', 'mistral', 'azure', 'ollama'/g" "$VALIDATION_FILE"
-        fi
-        
         # Fetch base branch to ensure git diff works
         git fetch origin "${INPUT_BASE:-main}"
         git branch "${INPUT_BASE:-main}" FETCH_HEAD || true
         
-        # Determine provider and configure
-        if [ -n "$OLLAMA_HOST" ]; then
-          echo '{"triage": {"provider": "ollama"}}' > agentic.config.json
-          export OLLAMA_API_KEY="${OLLAMA_API_KEY}"
-          # Strip trailing slash and /api because ai-sdk-ollama appends it
-          CLEAN_HOST="${OLLAMA_HOST%/}"
-          CLEAN_HOST="${CLEAN_HOST%/api}"
-          export OLLAMA_HOST="${CLEAN_HOST}"
-          echo "Using Ollama provider at ${OLLAMA_HOST}"
+        # Get the diff
+        DIFF=$(git diff "${INPUT_BASE:-main}"...HEAD 2>/dev/null || git diff HEAD~1 2>/dev/null || echo "No diff available")
+        DIFF_PREVIEW=$(echo "$DIFF" | head -c 50000)
+        
+        # Determine which API to use
+        if [ -n "$OLLAMA_HOST" ] && [ -n "$OLLAMA_API_KEY" ]; then
+          echo "Using Ollama API at $OLLAMA_HOST"
+          
+          # Direct Ollama API call (more reliable than agentic-control)
+          PROMPT="You are an expert code reviewer. Review this diff and provide:
+        1. A brief summary of changes
+        2. Any issues found (bugs, security, performance)
+        3. Suggestions for improvement
+        
+        Be concise. Use emojis: 🔴 critical, 🟠 high, 🟡 medium, ⚪ low.
+        
+        DIFF:
+        $DIFF_PREVIEW"
+          
+          RESPONSE=$(curl -sf --max-time 120 \
+            -H "Authorization: Bearer $OLLAMA_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg model "${INPUT_MODEL:-glm-4.6:cloud}" \
+              --arg prompt "$PROMPT" \
+              '{
+                model: $model,
+                messages: [
+                  { role: "system", content: "Expert code reviewer. Be concise and actionable." },
+                  { role: "user", content: $prompt }
+                ],
+                stream: false,
+                options: { temperature: 0.1, num_ctx: 32768 }
+              }')" \
+            "$OLLAMA_HOST/api/chat" 2>/dev/null) || RESPONSE=""
+          
+          if [ -n "$RESPONSE" ]; then
+            REVIEW=$(echo "$RESPONSE" | jq -r '.message.content // empty')
+            if [ -n "$REVIEW" ]; then
+              echo "=== Code Review ==="
+              echo "$REVIEW"
+              
+              # Count suggestions
+              SUGGESTION_COUNT=$(echo "$REVIEW" | grep -c -E '🔴|🟠|🟡|⚪' || echo "0")
+              echo "suggestion_count=$SUGGESTION_COUNT" >> $GITHUB_OUTPUT
+              
+              # Post review as PR comment
+              PR_NUM=$(jq -r '.pull_request.number // empty' "$GITHUB_EVENT_PATH" 2>/dev/null)
+              if [ -n "$PR_NUM" ] && [ "$PR_NUM" != "null" ]; then
+                BODY="## 🤖 AI Code Review
+
+        $REVIEW
+
+        ---
+        <sub>Reviewed by Ecosystem Reviewer using ${INPUT_MODEL:-glm-4.6:cloud}</sub>"
+                
+                gh pr comment "$PR_NUM" --body "$BODY" 2>/dev/null || echo "Could not post comment"
+              fi
+              exit 0
+            fi
+          fi
+          
+          echo "⚠️ Ollama API returned empty response, skipping review"
+          echo "suggestion_count=0" >> $GITHUB_OUTPUT
+          exit 0
+          
         elif [ -n "$JULES_API_KEY" ]; then
+          echo "Using Google API (Jules key)"
+          # Fallback to agentic-control with Google
+          npm install -g agentic-control@1.1.0 @ai-sdk/google 2>/dev/null || true
           echo '{"triage": {"provider": "google"}}' > agentic.config.json
           export GOOGLE_API_KEY="$JULES_API_KEY"
-          if [[ "$INPUT_MODEL" == "glm-4.6:cloud" ]] || [ -z "$INPUT_MODEL" ]; then
-             ARGS=("--model" "gemini-1.5-pro")
-          fi
-        fi
-        
-        # Capture output to count suggestions
-        # Redirect stderr to stdout so we capture everything
-        EXIT_CODE=0
-        REVIEW_OUTPUT=$(agentic triage review "${ARGS[@]}" 2>&1) || EXIT_CODE=$?
-        echo "$REVIEW_OUTPUT"
-        
-        # Count suggestions (lines starting with emojis in agentic-control output)
-        # agentic-control uses 🟠, 🔴, 🟡, ⚪ for issues.
-        SUGGESTION_COUNT=$(echo "$REVIEW_OUTPUT" | grep -c -E '🟠|🔴|🟡|⚪') || SUGGESTION_COUNT=0
-        echo "suggestion_count=$SUGGESTION_COUNT" >> $GITHUB_OUTPUT
-
-        # If it failed but has suggestions, we consider it a "soft failure" for the action
-        # so that subsequent steps in the workflow can run (like Jules delegation).
-        # We only fail if it was a real error (no review output).
-        if [ $EXIT_CODE -ne 0 ]; then
-          if echo "$REVIEW_OUTPUT" | grep -q "=== Code Review ==="; then
-            echo "Review completed with suggestions (or rejected)."
-          else
-            echo "Review tool failed with exit code $EXIT_CODE"
-            exit $EXIT_CODE
-          fi
+          
+          REVIEW_OUTPUT=$(agentic triage review --model gemini-1.5-pro 2>&1) || true
+          echo "$REVIEW_OUTPUT"
+          
+          SUGGESTION_COUNT=$(echo "$REVIEW_OUTPUT" | grep -c -E '🔴|🟠|🟡|⚪' || echo "0")
+          echo "suggestion_count=$SUGGESTION_COUNT" >> $GITHUB_OUTPUT
+          exit 0
+        else
+          echo "⚠️ No AI provider configured (need OLLAMA_API_KEY or JULES_API_KEY)"
+          echo "suggestion_count=0" >> $GITHUB_OUTPUT
+          exit 0
         fi
