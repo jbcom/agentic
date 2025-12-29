@@ -967,7 +967,9 @@ rolesCmd
         console.log(`${role.icon} ${role.name} (${role.id})`);
         console.log(`   ${role.description}`);
         console.log(`   Triggers: ${triggers || 'manual only'}`);
-        console.log(`   Capabilities: ${role.capabilities.slice(0, 3).join(', ')}${role.capabilities.length > 3 ? '...' : ''}`);
+        console.log(
+          `   Capabilities: ${role.capabilities.slice(0, 3).join(', ')}${role.capabilities.length > 3 ? '...' : ''}`
+        );
         console.log();
       }
     }
@@ -1044,12 +1046,16 @@ rolesCmd
       const apiKey = getTriageApiKey();
 
       if (!apiKey) {
-        console.error('❌ No API key found. Set ANTHROPIC_API_KEY or configure in agentic.config.json');
+        console.error(
+          '❌ No API key found. Set ANTHROPIC_API_KEY or configure in agentic.config.json'
+        );
         process.exit(1);
       }
 
       const providerFn = await getOrLoadProvider(cfg.triage?.provider || 'anthropic', apiKey);
-      const model = providerFn(role.defaultModel || cfg.triage?.model || 'claude-sonnet-4-20250514');
+      const model = providerFn(
+        role.defaultModel || cfg.triage?.model || 'claude-sonnet-4-20250514'
+      );
 
       console.log('🔮 Sage is thinking...\n');
 
