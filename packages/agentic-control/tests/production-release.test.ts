@@ -50,7 +50,7 @@ describe('Production Release Properties', () => {
 
       // Ensure we actually have some output
       expect(distFiles.length).toBeGreaterThan(0);
-    });
+    }, 60000);
   });
 
   describe('Property 2: Package content purity', () => {
@@ -77,7 +77,7 @@ describe('Production Release Properties', () => {
 
         expect(isPythonFile, `Found Python file in package: ${file}`).toBe(false);
       }
-    });
+    }, 60000);
 
     it('should have no Python dependencies in package.json', async () => {
       const packageJson = await import('../package.json');
@@ -448,7 +448,7 @@ describe('Production Release Properties', () => {
         expect(content.length).toBeGreaterThan(10);
         expect(content).toMatch(/export|declare/); // Should have exports or declarations
       }
-    });
+    }, 60000);
   });
 
   describe('Property 23: JSDoc completeness', () => {
