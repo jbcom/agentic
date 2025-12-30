@@ -319,18 +319,16 @@ jobs:
             
             # Create index if missing
             if [ ! -f "$TARGET/index.md" ] && [ ! -f "$TARGET/index.mdx" ]; then
-              cat > "$TARGET/index.mdx" << EOF
----
-title: $REPO
-description: API documentation for $REPO
----
-
-# $REPO
-
-Auto-generated API documentation.
-
-See the [source repository](https://github.com/${ORG}/${REPO}) for more details.
-EOF
+              echo "---" > "$TARGET/index.mdx"
+              echo "title: $REPO" >> "$TARGET/index.mdx"
+              echo "description: API documentation for $REPO" >> "$TARGET/index.mdx"
+              echo "---" >> "$TARGET/index.mdx"
+              echo "" >> "$TARGET/index.mdx"
+              echo "# $REPO" >> "$TARGET/index.mdx"
+              echo "" >> "$TARGET/index.mdx"
+              echo "Auto-generated API documentation." >> "$TARGET/index.mdx"
+              echo "" >> "$TARGET/index.mdx"
+              echo "See the [source repository](https://github.com/${ORG}/${REPO}) for more details." >> "$TARGET/index.mdx"
             fi
           fi
           
