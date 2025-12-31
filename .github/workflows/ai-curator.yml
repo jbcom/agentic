@@ -1,0 +1,41 @@
+# AI Curator - calls control-center reusable workflow
+# Synced from jbcom/control-center
+name: AI Curator
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC daily
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  build:
+    uses: jbcom/control-center/.github/workflows/control-center-build.yml@main
+
+  curate:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v4
+        with:
+          name: control-center-binary
+          path: /tmp
+          run-id: ${{ github.run_id }}
+          github-token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Run curator
+        env:
+          GITHUB_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+          GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+        run: |
+          chmod +x /tmp/control-center
+          /tmp/control-center curator \
+            --repo "${{ github.repository }}" \
+            --log-level info

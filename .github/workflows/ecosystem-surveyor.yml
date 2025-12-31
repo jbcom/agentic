@@ -35,13 +35,6 @@ on:
 permissions:
   contents: write
 
-env:
-  # Child org control center repos
-  CHILD_ORGS: |
-    agentic-dev-library/control-center
-    strata-game-library/control-center
-    extended-data-library/control-center
-
 jobs:
   # ════════════════════════════════════════════════════════════════
   # SURVEY: Discover and prepare context for each org

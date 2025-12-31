@@ -121,7 +121,7 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.CI_GITHUB_TOKEN }}
 
-      - uses: anthropics/claude-code-action@beta
+      - uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.CI_GITHUB_TOKEN }}
