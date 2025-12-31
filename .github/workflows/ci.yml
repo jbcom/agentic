@@ -36,7 +36,7 @@ jobs:
           STORE_PATH="${STORE_PATH:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm/store}"
           echo "store=$STORE_PATH" >> $GITHUB_OUTPUT
 
-      - uses: actions/cache@9255dc7a253b0ccc959486e2bca901246202afeb # v5.0.0
+      - uses: actions/cache@v4
         with:
           path: ${{ steps.pnpm-cache.outputs.store }}
           key: pnpm-store-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
@@ -55,10 +55,11 @@ jobs:
         run: pnpm run typecheck
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: build-output
-          path: dist
+          path: |
+            packages/*/dist
           retention-days: 1
 
   test:
@@ -77,10 +78,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: dist
 
       - name: Run tests with coverage
         run: pnpm run test:coverage
@@ -89,7 +89,7 @@ jobs:
         uses: coverallsapp/github-action@v2
 
       - name: Upload test results
-        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6.0.0
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: test-results
@@ -105,7 +105,7 @@ jobs:
       contents: write
       id-token: write
     steps:
-      - uses: actions/checkout@v4 # v6.0.1
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -122,10 +122,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      - uses: actions/download-artifact@v4
         with:
           name: build-output
-          path: dist
 
       - name: Git config
         run: |
