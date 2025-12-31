@@ -508,13 +508,14 @@ describe('Production Release Properties', () => {
       // This test verifies that the TypeScript compiler can infer types correctly
       // by checking that the build succeeds with strict type checking
 
-      const result = execSync('pnpm run typecheck', { stdio: 'pipe', encoding: 'utf-8' });
-
       // If typecheck passes, type inference is working correctly
       if (!process.env.CI) {
-        const result = execSync('pnpm run typecheck', { stdio: 'pipe', encoding: 'utf-8' });
-        expect(result).toBeDefined();
+        const _result = execSync('pnpm run typecheck', { stdio: 'pipe', encoding: 'utf-8' });
+        expect(_result).toBeDefined();
       }
+
+      // Check that main exports have proper typing
+      const { Fleet, AIAnalyzer, SandboxExecutor } = await import('../src/index.js');
 
       expect(Fleet).toBeDefined();
       expect(AIAnalyzer).toBeDefined();
