@@ -8,7 +8,7 @@
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "test": "pnpm -r test",
-    "test:coverage": "pnpm -r test:coverage",
+    "test:coverage": "vitest run --coverage",
     "format": "biome format --write .",
     "format:check": "biome format .",
     "lint": "biome lint .",

@@ -37,7 +37,6 @@ jobs:
       # IMPORTANT: Coverage must run in SAME JOB as SonarCloud
       - name: Run tests with coverage
         run: pnpm test:coverage
-        continue-on-error: true
 
       # Verify coverage file exists
       - name: Verify coverage file
@@ -49,6 +48,7 @@ jobs:
           else
             echo "❌ coverage/lcov.info NOT FOUND"
             ls -la coverage/ 2>/dev/null || echo "No coverage directory"
+            exit 1
           fi
 
       - name: SonarCloud Scan
@@ -56,3 +56,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectVersion=${{ github.event.pull_request.head.sha || github.sha }}

@@ -50,7 +50,7 @@ const result = await cascade('Fix the failing tests', {
 ## GitHub Actions
 
 ```yaml
-- uses: agentic-dev-library/control@v1
+- uses: agentic-dev-library/control@f16baf695939ffd7fd89d60da97473553485a552
   with:
     command: fleet
     args: status

@@ -93,10 +93,13 @@ jobs:
 
       - name: Verify builds
         run: |
+          ERROR=0
           for pkg in packages/*/; do
             if [ -d "$pkg/dist" ]; then
               echo "✅ $pkg built successfully"
             else
-              echo "⚠️ $pkg has no dist"
+              echo "❌ $pkg has no dist"
+              ERROR=1
             fi
           done
+          exit $ERROR
