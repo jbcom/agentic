@@ -11,6 +11,12 @@
 .DS_Store
 Thumbs.db
 
+# Node
+node_modules/
+dist/
+coverage/
+node-compile-cache/
+
 # Environments
 .env
 .env.local
@@ -51,3 +57,8 @@ memory-bank/
 ! .cursor/Dockerfile
 ! .cursor/environment.json
 ! .cursor/mcp.json
+
+# Repositories (for local development/testing)
+otterfall/
+game-generator/
+python/
