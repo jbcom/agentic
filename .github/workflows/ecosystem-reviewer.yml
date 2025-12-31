@@ -80,17 +80,17 @@ jobs:
       suggestion_count: ${{ steps.review.outputs.suggestion_count }}
       needs_escalation: ${{ steps.check.outputs.needs_escalation }}
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v6
         with:
           repository: ${{ env.TARGET_REPO }}
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Review PR
         id: review
         uses: jbcom/control-center/.github/actions/agentic-pr-review@main
         with:
-          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           model: ${{ env.OLLAMA_MODEL }}
           ollama_api_key: ${{ secrets.OLLAMA_API_KEY }}
           ollama_host: ${{ env.OLLAMA_HOST }}
@@ -99,7 +99,7 @@ jobs:
       - name: Check if escalation needed
         id: check
         env:
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           SUGGESTIONS="${{ steps.review.outputs.suggestion_count }}"
           ADDITIONS=$(gh pr view ${{ env.TARGET_PR }} --repo ${{ env.TARGET_REPO }} --json additions --jq '.additions')
@@ -136,12 +136,12 @@ jobs:
             echo "available=false" >> $GITHUB_OUTPUT
           fi
 
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v6
         if: steps.check-key.outputs.available == 'true'
         with:
           repository: ${{ env.TARGET_REPO }}
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Claude Code Review
         if: steps.check-key.outputs.available == 'true'
@@ -149,7 +149,7 @@ jobs:
         uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # main
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           allowed_bots: "google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
           allowed_tools: "Read,Glob,Grep,LS,Bash(git diff),Bash(gh pr view),Bash(gh pr list),Bash(gh issue view)"
           direct_prompt: |
@@ -192,7 +192,7 @@ jobs:
         id: jules
         env:
           GOOGLE_JULES_API_KEY: ${{ secrets.GOOGLE_JULES_API_KEY }}
-          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           set -eo pipefail
 
@@ -237,16 +237,16 @@ jobs:
       contains(github.event.comment.body, '@claude')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v6
         with:
           repository: ${{ env.TARGET_REPO }}
           fetch-depth: 0
-          token: ${{ secrets.CI_GITHUB_TOKEN }}
+          token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Run Claude
         uses: anthropics/claude-code-action@154d0de144ff82240e1c3deedff56280381fd122 # main
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.CI_GITHUB_TOKEN }}
+          github_token: ${{ secrets.CI_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           allowed_bots: "google-labs-jules[bot],copilot-swe-agent[bot],dependabot[bot],renovate[bot],github-actions[bot]"
           allowed_tools: "Edit,Write,Read,Glob,Grep,LS,Bash(git status),Bash(git diff),Bash(git add),Bash(git commit),Bash(git push),Bash(gh pr view),Bash(gh pr list),Bash(node:*),Bash(npm:*)"
