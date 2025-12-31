@@ -20,12 +20,14 @@ The project is a pnpm workspace monorepo:
 └── python/                      # Python CrewAI companion (PyPI)
 ```
 
-### Release & Maintenance (UPDATED 2025-12-24)
+### Release & Maintenance (UPDATED 2025-12-31)
 
+- **CI/CD Infrastructure**: Added SonarCloud and Coveralls integration (PR #50).
+- **CI/CD Fixes**: Resolved version mismatch in `pnpm/action-setup` and updated SonarCloud action SHA.
+- **Docker Support**: Restored multi-architecture Docker build support in `cd.yml`.
 - **Standardized Naming**: All package references updated to use `agentic-control` (unscoped) to match the published npm package.
 - **Automated Version Sync**: Added `scripts/sync-versions.ts` and `@semantic-release/exec` to ensure workspace packages stay in sync with the root version during release.
 - **NPM Monitoring**: New `pnpm run monitor:npm` command and `.github/workflows/monitor.yml` for daily health and download tracking.
-- **CI/CD Fixes**: Resolved TypeScript build error in `cli.ts` that was blocking releases.
 
 ### Test Status
 
