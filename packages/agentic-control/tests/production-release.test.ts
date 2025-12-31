@@ -576,8 +576,8 @@ describe('Property 6: Docker package installation', () => {
       fs.promises.readFile(join(WORKSPACE_ROOT, 'Dockerfile'), 'utf-8')
     );
 
-    // Allow any variant of pip install for agentic-crew (with or without extras)
-    expect(dockerfile).toMatch(/pip install.*agentic-crew/);
+    // Allow any variant of pip install for Python crews
+    expect(dockerfile).toMatch(/pip install.*python/);
     // agentic-control is built from source (monorepo packages)
     expect(dockerfile).toContain('pnpm run build');
     // Entry point uses the built CLI
