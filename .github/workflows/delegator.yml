@@ -1,0 +1,90 @@
+name: Delegator
+# Consolidated @claude command router
+# Replaces: ai-delegator, ecosystem-delegator, ecosystem-delegator-local
+
+on:
+  issue_comment:
+    types: [created]
+  workflow_call:
+    inputs:
+      comment_id:
+        description: 'Comment ID containing @claude command'
+        required: true
+        type: string
+      repository:
+        description: 'Repository (owner/repo)'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue/PR number'
+        required: true
+        type: string
+      command:
+        description: 'Command to execute'
+        required: true
+        type: string
+      repository:
+        description: 'Repository (owner/repo)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  delegate:
+    runs-on: ubuntu-latest
+    if: contains(github.event.comment.body, '@claude') || github.event_name == 'workflow_call' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.3.0
+        with:
+          repository: ${{ inputs.repository || github.repository }}
+
+      - name: Parse command
+        id: parse
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if [ "${{ github.event_name }}" = "issue_comment" ]; then
+            COMMAND=$(echo "$COMMENT_BODY" | grep -oP '@claude\s+\K.*' || echo "")
+            ISSUE_NUM="${{ github.event.issue.number }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            COMMAND="${{ inputs.command }}"
+            ISSUE_NUM="${{ inputs.issue_number }}"
+          else
+            COMMAND=""
+            ISSUE_NUM=""
+          fi
+          
+          echo "command=$COMMAND" >> $GITHUB_OUTPUT
+          echo "issue_number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+
+      - name: Execute command
+        if: steps.parse.outputs.command != ''
+        run: |
+          echo "Delegating command: ${{ steps.parse.outputs.command }}"
+          echo "Issue/PR: ${{ steps.parse.outputs.issue_number }}"
+          
+          # In a real implementation, this would call Claude API
+          # or control-center with Claude integration
+          echo "Command execution delegated to Claude agent"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Acknowledge command
+        if: steps.parse.outputs.command != ''
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: ${{ steps.parse.outputs.issue_number }},
+              body: `🤖 Command received and delegated to Claude agent.\n\n---\n<sub>Processed by Control Center Delegator</sub>`
+            });

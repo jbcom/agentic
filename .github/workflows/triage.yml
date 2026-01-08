@@ -1,0 +1,350 @@
+name: Triage
+# Consolidated issue & PR triage workflow
+# Replaces: ai-curator, ecosystem-curator, ecosystem-curator-local, ecosystem-triage
+#
+# INTELLIGENT ENTERPRISE HEALTH MANAGEMENT:
+# - On push to main: Rebase ALL open PRs, resolve conflicts with autoheal
+# - On PR events: Track and triage individual PRs
+# - On schedule: Deduplicate issues, check PR health across repository
+# - Prevents cascade of conflicts by keeping PRs up-to-date automatically
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  issues:
+    types: [opened, reopened, labeled]
+  pull_request:
+    types: [opened, reopened, labeled, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: '0 */6 * * *' # Every 6 hours for health checks
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: 'Operation to perform'
+        required: true
+        type: choice
+        options:
+          - triage_issue
+          - track_pr
+          - deduplicate
+          - rebase_all_prs
+          - health_check
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  # ============================================
+  # ENTERPRISE HEALTH: Keep all PRs up-to-date
+  # ============================================
+  rebase-prs-on-main-push:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    steps:
+      - name: Get all open PRs
+        id: get-prs
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator list-prs \
+            --repo ${{ github.repository }} \
+            --output json > open-prs.json
+          
+          echo "count=$(jq length open-prs.json)" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rebase and update each PR
+        if: steps.get-prs.outputs.count > 0
+        run: |
+          echo "🔄 Found ${{ steps.get-prs.outputs.count }} open PRs to rebase"
+          
+          jq -c '.[]' open-prs.json | while read -r pr; do
+            PR_NUM=$(echo "$pr" | jq -r '.number')
+            PR_BRANCH=$(echo "$pr" | jq -r '.head.ref')
+            PR_TITLE=$(echo "$pr" | jq -r '.title')
+            
+            echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+            echo "🔄 Rebasing PR #$PR_NUM: $PR_TITLE"
+            echo "   Branch: $PR_BRANCH"
+            
+            # Check if PR has conflicts
+            docker run --rm \
+              -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+              jbcom/control-center:latest curator check-conflicts \
+              --pr "$PR_NUM" \
+              --repo ${{ github.repository }} \
+              --output json > pr-$PR_NUM-status.json
+            
+            HAS_CONFLICTS=$(jq -r '.has_conflicts' pr-$PR_NUM-status.json)
+            IS_BEHIND=$(jq -r '.behind_base' pr-$PR_NUM-status.json)
+            
+            if [ "$IS_BEHIND" = "true" ] || [ "$HAS_CONFLICTS" = "true" ]; then
+              echo "⚠️  PR is behind base or has conflicts"
+              
+              # Attempt automatic rebase
+              docker run --rm \
+                -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                jbcom/control-center:latest curator rebase-pr \
+                --pr "$PR_NUM" \
+                --repo ${{ github.repository }} \
+                --auto-resolve \
+                --output json > pr-$PR_NUM-rebase.json
+              
+              REBASE_STATUS=$(jq -r '.status' pr-$PR_NUM-rebase.json)
+              
+              if [ "$REBASE_STATUS" = "success" ]; then
+                echo "✅ Successfully rebased and pushed"
+                
+                # Comment on PR
+                MESSAGE="🤖 **Automatic Rebase Complete**
+
+          This PR was automatically rebased against the latest \`${{ github.ref_name }}\` after recent changes were merged.
+
+          ✅ No conflicts detected
+          🔄 Branch is now up-to-date
+
+          ---
+          <sub>Performed by Control Center Triage</sub>"
+                docker run --rm \
+                  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                  jbcom/control-center:latest curator comment \
+                  --pr "$PR_NUM" \
+                  --repo ${{ github.repository }} \
+                  --message "$MESSAGE"
+              
+              elif [ "$REBASE_STATUS" = "conflicts" ]; then
+                echo "⚠️  Conflicts detected, triggering autoheal"
+                
+                # Trigger autoheal workflow to resolve conflicts
+                gh workflow run autoheal.yml \
+                  -f operation=resolve_conflicts \
+                  -f pr_number="$PR_NUM" \
+                  -f repository="${{ github.repository }}"
+                
+                # Comment on PR
+                MESSAGE="🤖 **Automatic Rebase - Conflicts Detected**
+
+          This PR has conflicts with the latest \`${{ github.ref_name }}\` branch.
+
+          ⚠️  Conflicts found during automatic rebase
+          🔧 Triggered autoheal workflow to resolve conflicts
+          ⏳ AI-powered conflict resolution in progress
+
+          The autoheal workflow will analyze the conflicts and attempt to resolve them automatically. Check back soon for updates.
+
+          ---
+          <sub>Performed by Control Center Triage</sub>"
+                docker run --rm \
+                  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                  jbcom/control-center:latest curator comment \
+                  --pr "$PR_NUM" \
+                  --repo ${{ github.repository }} \
+                  --message "$MESSAGE"
+              
+              else
+                echo "❌ Rebase failed: $REBASE_STATUS"
+                
+                # Comment on PR with failure details
+                FAILURE_REASON=$(jq -r '.error' pr-$PR_NUM-rebase.json)
+                MESSAGE="🤖 **Automatic Rebase Failed**
+
+          This PR could not be automatically rebased against \`${{ github.ref_name }}\`.
+
+          ❌ Error: $FAILURE_REASON
+
+          Please manually rebase your branch or resolve conflicts locally:
+          \`\`\`bash
+          git fetch origin
+          git rebase origin/${{ github.ref_name }}
+          git push --force-with-lease
+          \`\`\`
+
+          ---
+          <sub>Performed by Control Center Triage</sub>"
+                docker run --rm \
+                  -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                  jbcom/control-center:latest curator comment \
+                  --pr "$PR_NUM" \
+                  --repo ${{ github.repository }} \
+                  --message "$MESSAGE"
+              fi
+            else
+              echo "✅ PR is up-to-date, no action needed"
+            fi
+            
+            echo ""
+          done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate health report
+        if: always()
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator health-report \
+            --repo ${{ github.repository }} \
+            --output markdown > health-report.md
+          
+          cat health-report.md >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # INDIVIDUAL PR TRIAGE
+  # ============================================
+  triage-pr:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Triage PR
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator triage-pr \
+            --pr ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check if PR is behind base
+        if: github.event.action == 'opened' || github.event.action == 'reopened'
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator check-conflicts \
+            --pr ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }} \
+            --output json > pr-status.json
+          
+          # Check if PR is behind and notify
+          IS_BEHIND=$(jq -r '.behind_base // false' pr-status.json)
+          if [ "$IS_BEHIND" = "true" ]; then
+            MESSAGE="ℹ️ This PR is behind the base branch. Consider rebasing to include the latest changes."
+            docker run --rm \
+              -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+              jbcom/control-center:latest curator comment \
+              --pr ${{ github.event.pull_request.number }} \
+              --repo ${{ github.repository }} \
+              --message "$MESSAGE"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # ISSUE TRIAGE
+  # ============================================
+  triage-issue:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    steps:
+      - name: Triage new issue
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator triage \
+            --issue ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # SCHEDULED HEALTH CHECKS
+  # ============================================
+  scheduled-health-check:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.operation == 'health_check')
+    steps:
+      - name: Deduplicate issues
+        run: |
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator deduplicate \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check PR health
+        run: |
+          echo "🏥 Performing repository health check..."
+          
+          # Check all open PRs for staleness, conflicts, outdated branches
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            jbcom/control-center:latest curator health-check \
+            --repo ${{ github.repository }} \
+            --check-prs \
+            --check-stale \
+            --check-conflicts \
+            --auto-notify \
+            --output json > health-check.json
+          
+          # Generate report
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            jbcom/control-center:latest curator health-report \
+            --input health-check.json \
+            --output markdown > health-report.md
+          
+          cat health-report.md >> $GITHUB_STEP_SUMMARY
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-rebase stale PRs
+        run: |
+          echo "🔄 Auto-rebasing PRs that are significantly behind..."
+          
+          # Get PRs that are >10 commits behind
+          jq -r '.prs[] | select(.behind_by > 10) | .number' health-check.json | while read -r PR_NUM; do
+            echo "Triggering rebase for PR #$PR_NUM"
+            
+            gh workflow run triage.yml \
+              -f operation=rebase_all_prs
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ============================================
+  # MANUAL OPERATIONS
+  # ============================================
+  manual-operation:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.operation != 'health_check'
+    steps:
+      - name: Execute operation
+        run: |
+          case "${{ inputs.operation }}" in
+            triage_issue)
+              echo "Manual issue triage not yet implemented"
+              ;;
+            track_pr)
+              echo "Manual PR tracking not yet implemented"
+              ;;
+            deduplicate)
+              docker run --rm \
+                -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+                jbcom/control-center:latest curator deduplicate --repo ${{ github.repository }}
+              ;;
+            rebase_all_prs)
+              echo "🔄 Manually triggered: Rebase all open PRs"
+              gh workflow run triage.yml # Trigger push event handler
+              ;;
+            *)
+              echo "Unknown operation: ${{ inputs.operation }}"
+              exit 1
+              ;;
+          esac
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

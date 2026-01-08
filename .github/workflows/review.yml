@@ -1,0 +1,95 @@
+name: Review
+# Consolidated PR review automation workflow
+# Replaces: ai-reviewer, ecosystem-reviewer, ecosystem-reviewer-local
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  workflow_call:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: string
+      repository:
+        description: 'Repository (owner/repo)'
+        required: true
+        type: string
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: string
+      repository:
+        description: 'Repository (owner/repo)'
+        required: false
+        type: string
+
+env:
+  OLLAMA_HOST: ${{ vars.OLLAMA_HOST || 'https://ollama.com' }}
+  OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL || 'glm-4.6:cloud' }}
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  quick-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Review with control-center
+        id: review
+        run: |
+          PR_NUM="${{ inputs.pr_number || github.event.pull_request.number }}"
+          REPO="${{ inputs.repository || github.repository }}"
+          
+          docker run --rm \
+            -e GITHUB_TOKEN="${GITHUB_TOKEN}" \
+            -e OLLAMA_API_KEY="${OLLAMA_API_KEY}" \
+            -e OLLAMA_HOST="${OLLAMA_HOST}" \
+            -e OLLAMA_MODEL="${OLLAMA_MODEL}" \
+            jbcom/control-center:latest reviewer review \
+            --pr "$PR_NUM" \
+            --repo "$REPO" \
+            --output json > review-result.json
+          
+          echo "result<<EOF" >> $GITHUB_OUTPUT
+          cat review-result.json >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OLLAMA_API_KEY: ${{ secrets.OLLAMA_API_KEY }}
+
+      - name: Post review comment
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const fs = require('fs');
+            const review = JSON.parse(fs.readFileSync('review-result.json', 'utf8'));
+            
+            let body = `## 🤖 AI Code Review\n\n`;
+            body += `### Summary\n${review.summary}\n\n`;
+            
+            if (review.issues && review.issues.length > 0) {
+              body += `### Issues Found\n`;
+              review.issues.forEach(issue => {
+                const emoji = issue.severity === 'critical' ? '🔴' : 
+                             issue.severity === 'high' ? '🟠' : 
+                             issue.severity === 'medium' ? '🟡' : '🟢';
+                body += `${emoji} **${issue.severity}**: ${issue.description}\n`;
+                if (issue.suggestion) {
+                  body += `  - 💡 ${issue.suggestion}\n`;
+                }
+              });
+            }
+            
+            body += `\n---\n<sub>Reviewed by Control Center using ${process.env.OLLAMA_MODEL}</sub>`;
+            
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request?.number || Number(context.payload.inputs.pr_number),
+              body: body
+            });
