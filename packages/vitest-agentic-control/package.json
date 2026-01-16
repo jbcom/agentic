@@ -53,9 +53,9 @@
     "vitest": ">=1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
+    "@types/node": "^25.0.9",
     "typescript": "^5.7.0",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.17"
   },
   "engines": {
     "node": ">=22.0.0"
