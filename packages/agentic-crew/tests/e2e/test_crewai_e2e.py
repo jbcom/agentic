@@ -162,9 +162,8 @@ class TestCrewAITools:
             check_api_key: Fixture to check for required API keys.
             simple_agent_config: Simple agent configuration fixture.
         """
-        from crewai_tools import tool
-
         from agentic_crew.runners.crewai_runner import CrewAIRunner
+        from crewai_tools import tool
 
         # Create a simple tool
         @tool("get_test_data")

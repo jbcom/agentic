@@ -7,7 +7,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from agentic_crew.runners.local_cli_runner import LocalCLIConfig, LocalCLIRunner
 from agentic_crew.runners.single_agent_runner import SingleAgentRunner
 

@@ -1,29 +1,30 @@
-# CD Workflow - Release & Documentation Sync
+# CD Workflow - Monorepo Publish & Documentation Deploy
 #
-# ARCHITECTURE:
-# 1. Code repos build docs as part of CD (not separately)
-# 2. Built docs sync to org portal subdirectory
-# 3. Portal auto-rebuilds with org branding
+# This workflow handles publishing for ALL packages in the polyglot monorepo:
+#   - 5 TypeScript packages to npm
+#   - 2 Python packages to PyPI
+#   - 1 Rust crate to crates.io
+#   - Docker multi-platform image to GHCR
+#   - Astro documentation site to GitHub Pages
 #
-# DOCUMENTATION TOOLS (auto-detected):
-# - Python: Sphinx + autodoc2 → Markdown
-# - TypeScript/Node.js: TypeDoc → Markdown  
-# - Rust: rustdoc → HTML (converted to MD)
-# - Go: pkgsite/godoc → Markdown
-#
-# Managed by: [ORG]/control-center
+# Publish jobs run ONLY on GitHub Release events.
+# Documentation deploys on push to main (docs/packages paths), release, or manual dispatch.
 
 name: CD
 
 on:
-  push:
-    branches: [main]
   release:
     types: [published]
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'packages/*/src/**'
   workflow_dispatch:
 
 permissions:
   contents: write
+  pages: write
   id-token: write
   packages: write
 
@@ -31,317 +32,194 @@ concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: false
 
-env:
-  ORG_NAME: ${{ github.repository_owner }}
-  REPO_NAME: ${{ github.event.repository.name }}
-
+# =============================================================================
+# npm publish - TypeScript packages
+# =============================================================================
 jobs:
-  # ==========================================================================
-  # Detect & Setup
-  # ==========================================================================
-  detect:
-    name: Detect Stack
+  npm-publish:
+    name: 'npm: ${{ matrix.name }}'
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
-    # Skip for portal and control-center repos
-    if: |
-      !endsWith(github.repository, '.github.io') && 
-      !endsWith(github.repository, 'control-center')
-    outputs:
-      is_python: ${{ steps.detect.outputs.is_python }}
-      is_node: ${{ steps.detect.outputs.is_node }}
-      is_rust: ${{ steps.detect.outputs.is_rust }}
-      is_go: ${{ steps.detect.outputs.is_go }}
-      has_release: ${{ steps.detect.outputs.has_release }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: packages/agentic-control
+            name: '@jbcom/agentic'
+          - dir: packages/triage
+            name: '@jbcom/agentic-triage'
+          - dir: packages/meshy-content-generator
+            name: '@jbcom/agentic-meshy'
+          - dir: packages/providers
+            name: '@jbcom/agentic-providers'
+          - dir: packages/vitest-agentic-control
+            name: '@jbcom/vitest-agentic'
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
         with:
-          sparse-checkout: |
-            pyproject.toml
-            package.json
-            Cargo.toml
-            go.mod
-          sparse-checkout-cone-mode: false
+          version: 9
 
-      - id: detect
-        run: |
-          echo "is_python=$([[ -f pyproject.toml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "is_node=$([[ -f package.json ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "is_rust=$([[ -f Cargo.toml ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "is_go=$([[ -f go.mod ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-          echo "has_release=$([[ '${{ github.event_name }}' == 'release' ]] && echo true || echo false)" >> $GITHUB_OUTPUT
-
-  # ==========================================================================
-  # Python: Build, Test, Release, Docs
-  # ==========================================================================
-  python:
-    name: Python CD
-    needs: detect
-    if: needs.detect.outputs.is_python == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-        with:
-          fetch-depth: 0
-
-      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
-        with:
-          enable-cache: true
-
-      - name: Install dependencies
-        run: uv sync --all-extras
-
-      # Release to PyPI (only on release event)
-      - name: Build & Publish
-        if: needs.detect.outputs.has_release == 'true'
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          uv build
-          uv publish --token "$UV_PUBLISH_TOKEN" || echo "Already published or no token"
-
-      # Build Sphinx documentation
-      - name: Build Documentation
-        run: |
-          mkdir -p docs-output
-          
-          # Try Sphinx with autodoc2
-          if [ -f docs/conf.py ]; then
-            uv run sphinx-build -b html docs docs/_build/html
-            # Also build markdown for Starlight
-            uv pip install sphinx-markdown-builder 2>/dev/null || true
-            uv run sphinx-build -b markdown docs docs/_build/md 2>/dev/null || true
-            
-            if [ -d docs/_build/md ]; then
-              cp -r docs/_build/md/* docs-output/
-            else
-              # Fallback: copy HTML (portal can still serve it)
-              cp -r docs/_build/html/* docs-output/
-            fi
-          else
-            # No Sphinx config - generate basic API docs
-            uv pip install pdoc 2>/dev/null || true
-            uv run pdoc --output-dir docs-output --format md $(find src -name "*.py" -type f | head -1 | xargs dirname) 2>/dev/null || \
-            echo "# API Documentation\n\nSee source code for details." > docs-output/index.md
-          fi
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: docs-python
-          path: docs-output/
-
-  # ==========================================================================
-  # Node.js/TypeScript: Build, Test, Release, Docs
-  # ==========================================================================
-  nodejs:
-    name: Node.js CD
-    needs: detect
-    if: needs.detect.outputs.is_node == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
-
-      - uses: pnpm/action-setup@41ff72655975bd51cab0327fa583b6e92b6d3061 # v4.2.0
-        with:
-          version: 10
-
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6.1.0
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
 
-      - name: Install & Build
-        run: |
-          pnpm install --frozen-lockfile || pnpm install
-          pnpm build || true
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
-      # Release to npm (only on release event)
+      - name: Build package
+        run: pnpm nx build
+        working-directory: ${{ matrix.dir }}
+
       - name: Publish to npm
-        if: needs.detect.outputs.has_release == 'true'
+        run: npm publish --access public --no-git-checks || echo "Already published"
+        working-directory: ${{ matrix.dir }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: pnpm publish --access public --no-git-checks || echo "Already published or no token"
 
-      # Build TypeDoc documentation
-      - name: Build Documentation
-        run: |
-          mkdir -p docs-output
-          
-          # Install typedoc with markdown plugin
-          pnpm add -D typedoc typedoc-plugin-markdown 2>/dev/null || true
-          
-          # Try package.json docs script first
-          if pnpm run docs 2>/dev/null; then
-            cp -r docs/* docs-output/ 2>/dev/null || true
-          else
-            # Generate with typedoc directly
-            npx typedoc --plugin typedoc-plugin-markdown --out docs-output src/ 2>/dev/null || \
-            echo "# API Documentation\n\nSee source code for details." > docs-output/index.md
-          fi
+  # ===========================================================================
+  # PyPI publish - Python packages
+  # ===========================================================================
+  pypi-publish:
+    name: 'pypi: ${{ matrix.name }}'
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: packages/agentic-crew
+            name: agentic-crew
+          - dir: packages/pytest-agentic-crew
+            name: pytest-agentic-crew
+    steps:
+      - uses: actions/checkout@v4
 
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: docs-nodejs
-          path: docs-output/
+      - uses: astral-sh/setup-uv@v6
 
-  # ==========================================================================
-  # Rust: Build, Test, Release, Docs
-  # ==========================================================================
-  rust:
-    name: Rust CD
-    needs: detect
-    if: needs.detect.outputs.is_rust == 'true'
+      - name: Build package
+        run: uv build
+        working-directory: ${{ matrix.dir }}
+
+      - name: Publish to PyPI
+        run: uv publish || echo "Already published"
+        working-directory: ${{ matrix.dir }}
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_TOKEN }}
+
+  # ===========================================================================
+  # crates.io publish - Rust crate
+  # ===========================================================================
+  crates-publish:
+    name: 'crates: game-generator'
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v4
 
-      - uses: dtolnay/rust-toolchain@4be9e76fd7c4901c61fb841f559994984270fce7
-        with:
-          toolchain: stable
+      - uses: dtolnay/rust-toolchain@stable
 
-      - uses: swatinem/rust-cache@779680da715d629ac1d338a641029a2f4372abb5 # v2.7.8
-
-      - name: Build
-        run: cargo build --release
-
-      # Release to crates.io (only on release event)
       - name: Publish to crates.io
-        if: needs.detect.outputs.has_release == 'true'
+        run: cargo publish || echo "Already published"
+        working-directory: packages/game-generator
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-        run: cargo publish || echo "Already published or no token"
 
-      # Build rustdoc
-      - name: Build Documentation
-        run: |
-          cargo doc --no-deps
-          mkdir -p docs-output
-          cp -r target/doc/* docs-output/
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: docs-rust
-          path: docs-output/
-
-  # ==========================================================================
-  # Go: Build, Test, Release, Docs
-  # ==========================================================================
-  golang:
-    name: Go CD
-    needs: detect
-    if: needs.detect.outputs.is_go == 'true'
+  # ===========================================================================
+  # Docker multi-platform build & push
+  # ===========================================================================
+  docker-publish:
+    name: Docker image
+    if: github.event_name == 'release'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+      - uses: actions/checkout@v4
 
-      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
         with:
-          go-version: '1.22'
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build
-        run: go build -v ./...
-
-      # Build Go documentation
-      - name: Build Documentation
-        run: |
-          mkdir -p docs-output
-          
-          # Generate markdown from go doc
-          echo "# API Documentation" > docs-output/index.md
-          echo "" >> docs-output/index.md
-          go doc -all ./... >> docs-output/index.md 2>/dev/null || true
-          
-          # Try pkgsite for HTML (optional)
-          go install golang.org/x/pkgsite/cmd/pkgsite@latest 2>/dev/null || true
-
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+      - uses: docker/metadata-action@v5
+        id: meta
         with:
-          name: docs-go
-          path: docs-output/
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
 
-  # ==========================================================================
-  # Sync Documentation to Org Portal
-  # ==========================================================================
-  sync-docs:
-    name: Sync to Portal
-    needs: [detect, python, nodejs, rust, golang]
-    if: |
-      always() && 
-      !cancelled() &&
-      (needs.python.result == 'success' || needs.nodejs.result == 'success' || 
-       needs.rust.result == 'success' || needs.golang.result == 'success')
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===========================================================================
+  # Documentation - Astro site to GitHub Pages
+  # ===========================================================================
+  docs-deploy:
+    name: Deploy docs
+    if: >-
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - name: Download all docs artifacts
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+      - uses: actions/checkout@v4
         with:
-          path: all-docs
-          pattern: docs-*
-          merge-multiple: true
+          fetch-depth: 0
 
-      - name: Sync to org documentation portal
-        env:
-          DOCS_TOKEN: ${{ secrets.CI_GITHUB_TOKEN }}
-          ORG: ${{ env.ORG_NAME }}
-          REPO: ${{ env.REPO_NAME }}
-        run: |
-          PORTAL="${ORG}.github.io"
-          
-          # Derive package ID (strip common prefixes)
-          PACKAGE_ID=$(echo "$REPO" | sed 's/^strata-//' | sed 's/^agentic-//' | sed 's/^extended-//')
-          
-          echo "📚 Syncing docs for $REPO → $PORTAL/src/content/docs/$PACKAGE_ID/"
-          
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          
-          # Clone portal
-          if ! git clone "https://x-access-token:${DOCS_TOKEN}@github.com/${ORG}/${PORTAL}.git" portal 2>/dev/null; then
-            echo "⚠️ Portal repo ${ORG}/${PORTAL} not found - skipping sync"
-            exit 0
-          fi
-          
-          # Target directory
-          TARGET="portal/src/content/docs/packages/${PACKAGE_ID}"
-          mkdir -p "$TARGET"
-          
-          # Copy docs
-          if [ -d "all-docs" ] && [ "$(ls -A all-docs 2>/dev/null)" ]; then
-            cp -r all-docs/* "$TARGET/"
-            
-            # Ensure frontmatter for Starlight
-            for f in "$TARGET"/*.md; do
-              if [ -f "$f" ] && ! grep -q "^---" "$f"; then
-                TITLE=$(basename "$f" .md | sed 's/-/ /g' | sed 's/\b\(.\)/\u\1/g')
-                sed -i "1i---\ntitle: $TITLE\n---\n" "$f"
-              fi
-            done
-            
-            # Create index if missing
-            if [ ! -f "$TARGET/index.md" ] && [ ! -f "$TARGET/index.mdx" ]; then
-              echo "---" > "$TARGET/index.mdx"
-              echo "title: $REPO" >> "$TARGET/index.mdx"
-              echo "description: API documentation for $REPO" >> "$TARGET/index.mdx"
-              echo "---" >> "$TARGET/index.mdx"
-              echo "" >> "$TARGET/index.mdx"
-              echo "# $REPO" >> "$TARGET/index.mdx"
-              echo "" >> "$TARGET/index.mdx"
-              echo "Auto-generated API documentation." >> "$TARGET/index.mdx"
-              echo "" >> "$TARGET/index.mdx"
-              echo "See the [source repository](https://github.com/${ORG}/${REPO}) for more details." >> "$TARGET/index.mdx"
-            fi
-          fi
-          
-          cd portal
-          if [ -n "$(git status --porcelain)" ]; then
-            git add .
-            git commit -m "docs($PACKAGE_ID): sync from $REPO
-            
-            Auto-synced from: https://github.com/${ORG}/${REPO}
-            Triggered by: ${{ github.event_name }}"
-            
-            git push origin main
-            echo "✅ Documentation synced successfully"
-          else
-            echo "ℹ️ No documentation changes"
-          fi
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Install Node dependencies
+        run: pnpm install --filter agentic-docs...
+
+      - name: Install Python dependencies
+        run: uv sync --group docs
+
+      # Generate Python API docs via Sphinx (markdown output for Starlight)
+      - name: Generate Python API docs
+        run: uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated 2>/dev/null || true
+
+      # Build Astro site (starlight-typedoc generates TS docs at build time)
+      - name: Build Astro docs
+        run: pnpm run build
+        working-directory: docs
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/dist
+
+      - name: Deploy to GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

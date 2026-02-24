@@ -102,9 +102,8 @@ class TestLangGraphFlow:
             check_api_key: Fixture to check for required API keys.
             simple_agent_config: Simple agent configuration fixture.
         """
-        from langgraph.prebuilt import create_react_agent
-
         from agentic_crew.runners.langgraph_runner import LangGraphRunner
+        from langgraph.prebuilt import create_react_agent
 
         runner = LangGraphRunner()
 
@@ -188,10 +187,9 @@ class TestLangGraphTools:
         Args:
             check_api_key: Fixture to check for required API keys.
         """
+        from agentic_crew.runners.langgraph_runner import LangGraphRunner
         from langchain_core.tools import tool
         from langgraph.prebuilt import create_react_agent
-
-        from agentic_crew.runners.langgraph_runner import LangGraphRunner
 
         # Create a test tool
         @tool
