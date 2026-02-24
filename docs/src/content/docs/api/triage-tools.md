@@ -1,6 +1,6 @@
 ---
 title: "Triage Tools API"
-description: "Complete API reference for the AI-powered triage tools from @jbcom/triage, compatible with the Vercel AI SDK."
+description: "Complete API reference for the AI-powered triage tools from @jbcom/agentic-triage, compatible with the Vercel AI SDK."
 ---
 
 # Triage Tools API Reference
@@ -10,7 +10,7 @@ The triage tools package provides AI-compatible tool definitions for issue manag
 ## Installation
 
 ```bash
-npm install @jbcom/triage
+npm install @jbcom/agentic-triage
 ```
 
 ## Import
@@ -43,7 +43,7 @@ import {
 
   // Visual review
   visualReviewTool,
-} from '@jbcom/triage';
+} from '@jbcom/agentic-triage';
 ```
 
 ## Tool Collections
@@ -53,7 +53,7 @@ import {
 Returns the complete set of all available triage tools as a single object.
 
 ```typescript
-import { getTriageTools } from '@jbcom/triage';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 const tools = getTriageTools();
 // Returns object with all 13 tools
@@ -64,7 +64,7 @@ const tools = getTriageTools();
 The same collection exported as a named constant:
 
 ```typescript
-import { triageTools } from '@jbcom/triage';
+import { triageTools } from '@jbcom/agentic-triage';
 
 // triageTools.listIssues
 // triageTools.getIssue
@@ -90,7 +90,7 @@ All tools work directly with `generateText` and `streamText`:
 ```typescript
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { getTriageTools } from '@jbcom/triage';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
@@ -107,7 +107,7 @@ For streaming:
 ```typescript
 import { streamText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { triageTools } from '@jbcom/triage';
+import { triageTools } from '@jbcom/agentic-triage';
 
 const result = streamText({
   model: anthropic('claude-sonnet-4-20250514'),
@@ -145,7 +145,7 @@ List issues from the configured issue tracker with optional filters.
 ```typescript
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { listIssuesTool } from '@jbcom/triage';
+import { listIssuesTool } from '@jbcom/agentic-triage';
 
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
@@ -188,7 +188,7 @@ Create a new issue in the configured issue tracker.
 **Returns:** The created issue object.
 
 ```typescript
-import { createIssueTool } from '@jbcom/triage';
+import { createIssueTool } from '@jbcom/agentic-triage';
 
 // Used by AI:
 // "Create a bug report for the login page timeout issue"
@@ -341,7 +341,7 @@ interface CodeReviewComment {
 ```typescript
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { submitReviewTool } from '@jbcom/triage';
+import { submitReviewTool } from '@jbcom/agentic-triage';
 
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
@@ -411,7 +411,7 @@ Sage automatically resolves the AI model using the triage configuration. It uses
 ```typescript
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
-import { sageTool } from '@jbcom/triage';
+import { sageTool } from '@jbcom/agentic-triage';
 
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
@@ -455,7 +455,7 @@ This tool launches a Chromium browser via Playwright, navigates to the URL, wait
 **Requirements:** `@playwright/test` must be installed and browsers must be available (`npx playwright install chromium`).
 
 ```typescript
-import { visualReviewTool } from '@jbcom/triage';
+import { visualReviewTool } from '@jbcom/agentic-triage';
 
 // Example usage in AI pipeline:
 // "Take a screenshot of our staging site and check for visual regressions"
@@ -468,7 +468,7 @@ import { visualReviewTool } from '@jbcom/triage';
 The triage tools use `TriageConnectors` internally, which supports multiple issue tracking providers:
 
 ```typescript
-import { TriageConnectors } from '@jbcom/triage';
+import { TriageConnectors } from '@jbcom/agentic-triage';
 
 // GitHub (default -- auto-detected from .git)
 const github = new TriageConnectors();

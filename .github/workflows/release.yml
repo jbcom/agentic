@@ -1,0 +1,163 @@
+# Release Workflow - Publish all packages on GitHub Release
+#
+# Publishes:
+#   - 5 TypeScript packages to npm (OIDC provenance)
+#   - 2 Python packages to PyPI (OIDC trusted publishing)
+#   - 1 Rust crate to crates.io
+#   - Docker multi-platform image to GHCR
+#
+# Triggered ONLY on GitHub Release events.
+# OIDC trusted publishers are configured on PyPI and npm — no token secrets needed.
+
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+# =============================================================================
+# npm publish - TypeScript packages (OIDC provenance)
+# =============================================================================
+jobs:
+  npm-publish:
+    name: 'npm: ${{ matrix.name }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: packages/agentic-control
+            name: '@jbcom/agentic'
+          - dir: packages/triage
+            name: '@jbcom/agentic-triage'
+          - dir: packages/meshy-content-generator
+            name: '@jbcom/agentic-meshy'
+          - dir: packages/providers
+            name: '@jbcom/agentic-providers'
+          - dir: packages/vitest-agentic-control
+            name: '@jbcom/vitest-agentic'
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm nx build
+        working-directory: ${{ matrix.dir }}
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance --no-git-checks || echo "Already published"
+        working-directory: ${{ matrix.dir }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ===========================================================================
+  # PyPI publish - Python packages (OIDC trusted publishing)
+  # ===========================================================================
+  pypi-publish:
+    name: 'pypi: ${{ matrix.name }}'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - dir: packages/agentic-crew
+            name: agentic-crew
+          - dir: packages/pytest-agentic-crew
+            name: pytest-agentic-crew
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+
+      - name: Build package
+        run: uv build
+        working-directory: ${{ matrix.dir }}
+
+      - name: Publish to PyPI
+        run: uv publish
+        working-directory: ${{ matrix.dir }}
+
+  # ===========================================================================
+  # crates.io publish - Rust crate
+  # ===========================================================================
+  crates-publish:
+    name: 'crates: game-generator'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        run: cargo publish || echo "Already published"
+        working-directory: packages/game-generator
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+
+  # ===========================================================================
+  # Docker multi-platform build & push
+  # ===========================================================================
+  docker-publish:
+    name: Docker image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v5
+        id: meta
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

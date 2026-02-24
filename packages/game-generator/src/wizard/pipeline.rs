@@ -166,7 +166,7 @@ pub fn process_generation_queue(
 fn start_phase_generation(
     pipeline: &mut GenerationPipeline,
     app_state: &mut AppState,
-    _directories: &AppDirectories,
+    directories: &AppDirectories,
 ) {
     let current_phase = app_state.current_phase;
     app_state.add_log(
@@ -177,13 +177,104 @@ fn start_phase_generation(
     // Mark that we're making a request
     pipeline.mark_request_made();
 
-    // TODO: Actually trigger the generation using the GameGenerator
-    // This would involve:
-    // 1. Getting the appropriate template for the phase
-    // 2. Rendering it with current context
-    // 3. Calling the AI API
-    // 4. Saving the generated prompt to the generated/ directory
-    // 5. Adding it to the validation queue
+    // Map current phase to the template directory name
+    let phase_dir = match current_phase {
+        GenerationPhase::Design => "01_design",
+        GenerationPhase::StyleGuide => "02_style",
+        GenerationPhase::WorldGeneration => "03_world",
+        GenerationPhase::AiSystems => "04_ai_systems",
+        GenerationPhase::AssetGeneration => "05_assets",
+        GenerationPhase::CodeGeneration => "06_code",
+        GenerationPhase::DialogWriting => "07_dialog",
+        GenerationPhase::MusicComposition => "08_music",
+        GenerationPhase::Integration => "09_integration",
+        _ => {
+            app_state.add_log(
+                LogLevel::Warning,
+                format!("No template directory for phase: {current_phase:?}"),
+            );
+            return;
+        }
+    };
+
+    // Load prompts from the phase directory and queue them for validation
+    match directories.get_phase_prompts(phase_dir) {
+        Ok(prompts) if !prompts.is_empty() => {
+            for prompt_path in prompts {
+                match std::fs::read_to_string(&prompt_path) {
+                    Ok(content) => {
+                        let name = prompt_path
+                            .file_stem()
+                            .map(|s| s.to_string_lossy().to_string())
+                            .unwrap_or_else(|| "unknown".to_string());
+                        app_state.add_prompt_to_validate(
+                            phase_dir.to_string(),
+                            name,
+                            content,
+                            prompt_path,
+                        );
+                    }
+                    Err(e) => {
+                        app_state.add_log(
+                            LogLevel::Error,
+                            format!("Failed to read prompt {}: {e}", prompt_path.display()),
+                        );
+                    }
+                }
+            }
+            app_state.add_log(
+                LogLevel::Info,
+                format!(
+                    "Queued {} prompts for validation in phase {phase_dir}",
+                    app_state
+                        .prompt_validation_queue
+                        .iter()
+                        .filter(|p| p.phase == phase_dir)
+                        .count()
+                ),
+            );
+        }
+        Ok(_) => {
+            // No prompts found for this phase; generate a placeholder via the AI pipeline
+            let generated_path = directories.get_generated_prompt_path(phase_dir, "main");
+            let placeholder = format!(
+                "{{% comment %}}Auto-generated placeholder for phase: {phase_dir}{{% endcomment %}}\n\
+                 {{{{ game_name }}}}\n\
+                 {{{{ genre }}}}\n"
+            );
+
+            if let Some(parent) = generated_path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+
+            match std::fs::write(&generated_path, &placeholder) {
+                Ok(()) => {
+                    app_state.add_prompt_to_validate(
+                        phase_dir.to_string(),
+                        "main".to_string(),
+                        placeholder,
+                        generated_path,
+                    );
+                    app_state.add_log(
+                        LogLevel::Info,
+                        format!("Generated placeholder prompt for phase {phase_dir}"),
+                    );
+                }
+                Err(e) => {
+                    app_state.add_log(
+                        LogLevel::Error,
+                        format!("Failed to write generated prompt: {e}"),
+                    );
+                }
+            }
+        }
+        Err(e) => {
+            app_state.add_log(
+                LogLevel::Error,
+                format!("Failed to list prompts for phase {phase_dir}: {e}"),
+            );
+        }
+    }
 }
 
 fn validate_prompt(content: &str) -> Vec<String> {
@@ -209,13 +300,59 @@ fn validate_prompt(content: &str) -> Vec<String> {
         Err(e) => errors.push(format!("MinJinja parse error: {e}")),
     }
 
-    // Check for code blocks if it's a code generation prompt
-    if content.contains("```rust") || content.contains("```toml") {
-        // TODO: Add more specific code block validation
-        // For now, just check that code blocks are properly closed
-        let open_blocks = content.matches("```").count();
-        if !open_blocks.is_multiple_of(2) {
-            errors.push("Unclosed code block detected".to_string());
+    // Validate code blocks: ensure they are properly closed and check for known issues
+    let fence_count = content.matches("```").count();
+    if !fence_count.is_multiple_of(2) {
+        errors.push("Unclosed code block detected".to_string());
+    }
+
+    // Check Rust code blocks for basic syntactic validity
+    if content.contains("```rust") || content.contains("```rs") {
+        let mut in_rust_block = false;
+        let mut rust_content = String::new();
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed == "```rust" || trimmed == "```rs" {
+                in_rust_block = true;
+                rust_content.clear();
+            } else if trimmed == "```" && in_rust_block {
+                in_rust_block = false;
+                // Check for balanced braces/parens/brackets
+                let open_braces = rust_content.chars().filter(|&c| c == '{').count();
+                let close_braces = rust_content.chars().filter(|&c| c == '}').count();
+                if open_braces != close_braces {
+                    errors.push(format!(
+                        "Unbalanced braces in Rust code block: {} open, {} close",
+                        open_braces, close_braces
+                    ));
+                }
+            } else if in_rust_block {
+                rust_content.push_str(line);
+                rust_content.push('\n');
+            }
+        }
+    }
+
+    // Check TOML code blocks for basic validity
+    if content.contains("```toml") {
+        let mut in_toml_block = false;
+        let mut toml_content = String::new();
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed == "```toml" {
+                in_toml_block = true;
+                toml_content.clear();
+            } else if trimmed == "```" && in_toml_block {
+                in_toml_block = false;
+                if toml_content.parse::<toml::Value>().is_err() {
+                    errors.push("Invalid TOML in code block".to_string());
+                }
+            } else if in_toml_block {
+                toml_content.push_str(line);
+                toml_content.push('\n');
+            }
         }
     }
 

@@ -9,6 +9,7 @@ use crate::wizard::state::AppState;
 use bevy::prelude::*;
 use bevy_egui::{EguiContexts, egui};
 use futures::StreamExt;
+use serde_json;
 
 /// Render the AI conversation interface
 pub fn render_conversation(
@@ -96,8 +97,48 @@ pub fn render_conversation(
                 }
 
                 if ui.button("Export").clicked() {
-                    // TODO: Export conversation and config
-                    info!("Exporting freeform configuration...");
+                    // Serialize the game config and conversation history to disk
+                    let timestamp = std::time::SystemTime::now();
+                    let export_dir = std::env::temp_dir().join("game_generator_export");
+                    let _ = std::fs::create_dir_all(&export_dir);
+
+                    // Export game config as JSON
+                    let config_path = export_dir.join("freeform_config.json");
+                    if let Ok(json) = serde_json::to_string_pretty(&freeform_state.game_config) {
+                        let _ = std::fs::write(&config_path, json);
+                    }
+
+                    // Export conversation history as JSON
+                    let conv_path = export_dir.join("conversation.json");
+                    let history_json: Vec<serde_json::Value> = freeform_state
+                        .conversation
+                        .history
+                        .iter()
+                        .map(|entry| {
+                            serde_json::json!({
+                                "role": match entry.role {
+                                    ConversationRole::User => "user",
+                                    ConversationRole::Assistant => "assistant",
+                                    ConversationRole::System => "system",
+                                },
+                                "content": entry.content,
+                            })
+                        })
+                        .collect();
+                    if let Ok(json) = serde_json::to_string_pretty(&history_json) {
+                        let _ = std::fs::write(&conv_path, json);
+                    }
+
+                    freeform_state.export = Some(super::FreeformExport {
+                        config_path: config_path.to_string_lossy().to_string(),
+                        conversation_path: conv_path.to_string_lossy().to_string(),
+                        timestamp,
+                    });
+
+                    info!(
+                        "Exported freeform configuration to {}",
+                        export_dir.display()
+                    );
                 }
             });
         });
@@ -111,7 +152,13 @@ pub fn render_conversation(
 
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if ui.button("Generate Game →").clicked() {
-                    // TODO: Start generation
+                    // Activate the generation pipeline and transition to completion
+                    app_state.start_generation("Generating game from freeform design...".to_string());
+                    app_state.generation_active = true;
+                    app_state.add_log(
+                        crate::wizard::state::LogLevel::Info,
+                        "Starting game generation from freeform conversation...".to_string(),
+                    );
                     app_state.set_wizard_step(crate::wizard::state::WizardStep::Complete);
                 }
             });

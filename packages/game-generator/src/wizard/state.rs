@@ -281,8 +281,12 @@ impl AppState {
         });
     }
 
-    pub fn set_game_specification<T>(&mut self, _config: T) {
-        // TODO: Implement when we have proper game specification type
+    pub fn set_game_specification<T: std::fmt::Debug>(&mut self, config: T) {
+        // Store a debug representation of the game specification in form_data
+        // for use by the generation pipeline. A dedicated typed field can be
+        // added later when the game specification type is finalized.
+        self.form_data
+            .insert("game_specification".to_string(), format!("{config:?}"));
         self.add_log(LogLevel::Info, "Game specification updated".to_string());
     }
 }

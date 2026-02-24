@@ -1,18 +1,18 @@
-/* 
-  jbcom Sphinx Theme - Base
-  Derived from jbcom Design System
+/*
+  Agentic Sphinx Theme - Signal Amber
+  Derived from Signal Amber Design System
 */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-    --bg-default: #0a0f1a;
-    --bg-paper: #111827;
-    --primary: #06b6d4;
-    --secondary: #3b82f6;
-    --text-primary: #f1f5f9;
-    --text-secondary: #94a3b8;
-    --font-heading: 'Space Grotesk', sans-serif;
+    --bg-default: #0C0A09;
+    --bg-paper: #1C1917;
+    --primary: #F59E0B;
+    --secondary: #FCD34D;
+    --text-primary: #FAFAF9;
+    --text-secondary: #A8A29E;
+    --font-heading: 'Instrument Sans', sans-serif;
     --font-body: 'Inter', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
 }
@@ -52,7 +52,7 @@ code, pre {
 
 .highlight {
     background: var(--bg-paper) !important;
-    border: 1px solid #1e293b;
+    border: 1px solid #292524;
     border-radius: 8px;
 }
 
@@ -61,15 +61,5 @@ a {
 }
 
 a:hover {
-    color: #22d3ee !important;
+    color: var(--secondary) !important;
 }
-
-/* Agentic Purple Override */
-:root {
-    --primary: #8b5cf6;
-}
-
-.wy-side-nav-search {
-    background: #2e1065 !important;
-}
-

@@ -199,7 +199,15 @@ impl GameGenerationExt for ConversationManager {
             message: "Generating sprites and tilesets...".to_string(),
         });
 
-        // TODO: Implement asset generation
+        generate_phase_with_template(
+            self,
+            &conversation_id,
+            "05_assets",
+            config,
+            project_config.as_ref(),
+            &project_path.join("assets").join("asset_manifest.json"),
+        )
+        .await?;
 
         // Phase 4: Generate Code
         progress_callback(GenerationProgress {
@@ -209,7 +217,15 @@ impl GameGenerationExt for ConversationManager {
             message: "Implementing game mechanics...".to_string(),
         });
 
-        // TODO: Implement code generation
+        generate_phase_with_template(
+            self,
+            &conversation_id,
+            "06_code",
+            config,
+            project_config.as_ref(),
+            &project_path.join("src").join("game.rs"),
+        )
+        .await?;
 
         // Phase 5: Generate Dialog
         progress_callback(GenerationProgress {
@@ -219,7 +235,15 @@ impl GameGenerationExt for ConversationManager {
             message: "Creating character conversations...".to_string(),
         });
 
-        // TODO: Implement dialog generation
+        generate_phase_with_template(
+            self,
+            &conversation_id,
+            "07_dialog",
+            config,
+            project_config.as_ref(),
+            &project_path.join("data").join("dialog.json"),
+        )
+        .await?;
 
         // Phase 6: Generate Music
         progress_callback(GenerationProgress {
@@ -229,7 +253,15 @@ impl GameGenerationExt for ConversationManager {
             message: "Creating soundtrack...".to_string(),
         });
 
-        // TODO: Implement music generation
+        generate_phase_with_template(
+            self,
+            &conversation_id,
+            "08_music",
+            config,
+            project_config.as_ref(),
+            &project_path.join("audio").join("music_spec.json"),
+        )
+        .await?;
 
         // Phase 7: Integration
         progress_callback(GenerationProgress {
@@ -239,7 +271,15 @@ impl GameGenerationExt for ConversationManager {
             message: "Putting it all together...".to_string(),
         });
 
-        // TODO: Implement integration
+        generate_phase_with_template(
+            self,
+            &conversation_id,
+            "09_integration",
+            config,
+            project_config.as_ref(),
+            &project_path.join("Cargo.toml"),
+        )
+        .await?;
 
         // Phase 8: Packaging
         progress_callback(GenerationProgress {
@@ -390,6 +430,68 @@ async fn generate_world(
     }
 
     Err(anyhow::anyhow!("World generation template not found"))
+}
+
+/// Generate a phase using the corresponding template, falling back to a direct prompt
+/// if the template is not found. Writes the result to `output_path`.
+async fn generate_phase_with_template(
+    manager: &ConversationManager,
+    conversation_id: &str,
+    template_name: &str,
+    config: &GameConfig,
+    project_config: Option<&serde_json::Value>,
+    output_path: &Path,
+) -> Result<()> {
+    // Ensure the parent directory exists
+    if let Some(parent) = output_path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+
+    let response = if let Some(env) = manager.template_env.lock().await.as_ref()
+        && let Ok(template) = env.get_template(template_name)
+    {
+        let prompt = if let Some(proj) = project_config {
+            template.render(context!(config => config, project => proj))?
+        } else {
+            template.render(context!(config => config))?
+        };
+        manager
+            .send_message_with_config(
+                conversation_id,
+                prompt,
+                Some(MessageConfig {
+                    model: "gpt-4-turbo".to_string(),
+                    temperature: 0.5,
+                    max_tokens: 4000,
+                }),
+            )
+            .await?
+    } else {
+        // Fallback: generate using a direct prompt when no template is available
+        let phase_description = match template_name {
+            "05_assets" => "Generate a JSON manifest of all game assets (sprites, tilesets, UI elements) needed for",
+            "06_code" => "Generate the core game source code (Rust/Bevy) implementing the main gameplay loop for",
+            "07_dialog" => "Generate the dialog trees and NPC conversations as JSON for",
+            "08_music" => "Generate a JSON specification for the soundtrack and sound effects of",
+            "09_integration" => "Generate the project build configuration (Cargo.toml) that integrates all components of",
+            _ => "Generate content for",
+        };
+        let fallback_prompt = format!("{phase_description}: {}", config.name);
+        manager
+            .send_message_with_config(
+                conversation_id,
+                fallback_prompt,
+                Some(MessageConfig {
+                    model: "gpt-4-turbo".to_string(),
+                    temperature: 0.5,
+                    max_tokens: 4000,
+                }),
+            )
+            .await?
+    };
+
+    std::fs::write(output_path, response)?;
+    Ok(())
 }
 
 fn save_world_data(project_path: &Path, world_data: &WorldData) -> Result<()> {

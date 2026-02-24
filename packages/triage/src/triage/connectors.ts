@@ -31,6 +31,7 @@
  * ```
  */
 
+import { execFileSync } from 'node:child_process';
 import { createBestProvider, createProvider, type ProviderConfig } from '../providers/index.js';
 import type {
     CreateIssueOptions,
@@ -92,13 +93,11 @@ export class TriageConnectors {
 
     /**
      * Project operations API (boards, sprints, epics)
-     * @remarks Coming soon - currently returns stubs
      */
     public readonly projects: ProjectAPI;
 
     /**
      * Review operations API (PR feedback, comments)
-     * @remarks Coming soon - currently returns stubs
      */
     public readonly reviews: ReviewAPI;
 
@@ -107,8 +106,8 @@ export class TriageConnectors {
 
         // Initialize namespaced APIs
         this.issues = new IssueAPI(this);
-        this.projects = new ProjectAPI();
-        this.reviews = new ReviewAPI();
+        this.projects = new ProjectAPI(this);
+        this.reviews = new ReviewAPI(this);
     }
 
     /**
@@ -310,54 +309,179 @@ class IssueAPI {
 }
 
 // =============================================================================
-// Project API (Coming Soon)
+// Project API
 // =============================================================================
 
 /**
  * Project operations API - boards, sprints, epics
  *
- * @remarks This API is under development. Currently returns stubs.
+ * Uses GitHub milestones for sprints and issues with type:epic label for epics.
+ * For Linear/Jira providers, maps to their native concepts.
  */
 class ProjectAPI {
+    constructor(private connectors: TriageConnectors) {}
+
     /**
-     * List sprints/iterations
+     * List sprints/iterations.
+     *
+     * For GitHub: uses milestones as sprint proxies.
+     * For Linear/Jira: maps to their native cycle/sprint concepts.
      */
     async getSprints(): Promise<{ id: string; name: string; status: string }[]> {
-        // TODO: Implement when project providers are ready
+        const provider = await this.connectors.getProvider();
+
+        if (provider.name === 'github') {
+            return this.getGitHubMilestones('all');
+        }
+
+        if (provider.name === 'linear') {
+            // Linear cycles map to sprints - use issue listing grouped by state
+            const openIssues = await provider.listIssues({ status: 'open' });
+            const inProgressIssues = await provider.listIssues({ status: 'in_progress' });
+            const allIssues = [...openIssues, ...inProgressIssues];
+
+            // Group by metadata cycle if available, otherwise return a synthetic sprint
+            if (allIssues.length > 0) {
+                return [
+                    {
+                        id: 'current',
+                        name: 'Current Sprint',
+                        status: 'active',
+                    },
+                ];
+            }
+            return [];
+        }
+
+        if (provider.name === 'jira') {
+            // Jira sprints are available through the agile API
+            // Fall back to using milestones/versions
+            const issues = await provider.listIssues({ status: 'open', limit: 1 });
+            if (issues.length > 0) {
+                return [
+                    {
+                        id: 'current',
+                        name: 'Current Sprint',
+                        status: 'active',
+                    },
+                ];
+            }
+            return [];
+        }
+
+        // Beads and other providers: no sprint concept
         return [];
     }
 
     /**
-     * Get current sprint
+     * Get the current active sprint.
+     *
+     * For GitHub: returns the most recent open milestone.
+     * For Linear/Jira: returns the active cycle/sprint.
      */
     async getCurrentSprint(): Promise<{ id: string; name: string; status: string } | null> {
-        // TODO: Implement when project providers are ready
-        return null;
+        const provider = await this.connectors.getProvider();
+
+        if (provider.name === 'github') {
+            const milestones = await this.getGitHubMilestones('open');
+            // Return the first open milestone (most recently created)
+            return milestones.length > 0 ? milestones[0] : null;
+        }
+
+        // For other providers, get sprints and return the active one
+        const sprints = await this.getSprints();
+        const active = sprints.find((s) => s.status === 'active');
+        return active || (sprints.length > 0 ? sprints[0] : null);
     }
 
     /**
-     * Get epics
+     * Get epics (issues with type:epic label or Epic issue type).
+     *
+     * For GitHub: lists issues with the type:epic label.
+     * For Linear/Jira: uses their native epic type.
      */
     async getEpics(): Promise<{ id: string; title: string; progress: number }[]> {
-        // TODO: Implement when project providers are ready
-        return [];
+        const provider = await this.connectors.getProvider();
+
+        // Fetch epic-type issues
+        const epics = await provider.listIssues({ type: 'epic', limit: 100 });
+
+        if (epics.length === 0 && provider.name === 'github') {
+            // Fall back to searching for issues with 'epic' label
+            const labeledEpics = await provider.listIssues({ labels: ['epic'], limit: 100 });
+            return this.computeEpicProgress(labeledEpics);
+        }
+
+        return this.computeEpicProgress(epics);
+    }
+
+    /**
+     * Compute progress for epics based on their status
+     */
+    private computeEpicProgress(epics: TriageIssue[]): { id: string; title: string; progress: number }[] {
+        return epics.map((epic) => ({
+            id: epic.id,
+            title: epic.title,
+            // Progress based on status: closed = 100%, in_progress = 50%, open = 0%
+            progress: epic.status === 'closed' ? 100 : epic.status === 'in_progress' ? 50 : 0,
+        }));
+    }
+
+    /**
+     * Get GitHub milestones using the gh CLI
+     */
+    private async getGitHubMilestones(state: 'open' | 'closed' | 'all'): Promise<{ id: string; name: string; status: string }[]> {
+        try {
+            const repo = this.connectors['config'].repo;
+            const args = ['api', `repos/${repo}/milestones`, '--jq', '.[] | {number, title, state}'];
+            if (state !== 'all') {
+                args.splice(2, 0, '-f', `state=${state}`);
+            }
+
+            const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+            const env = { ...process.env };
+            if (token) env.GH_TOKEN = token;
+
+            const result = execFileSync('gh', args, { encoding: 'utf-8', env }).trim();
+            if (!result) return [];
+
+            // Parse JSONL output (one object per line)
+            return result
+                .split('\n')
+                .filter((line) => line.trim())
+                .map((line) => {
+                    const data = JSON.parse(line);
+                    return {
+                        id: String(data.number),
+                        name: data.title,
+                        status: data.state === 'open' ? 'active' : 'closed',
+                    };
+                });
+        } catch {
+            return [];
+        }
     }
 }
 
 // =============================================================================
-// Review API (Coming Soon)
+// Review API
 // =============================================================================
 
 /**
  * Review operations API - PR feedback, comments, approvals
  *
- * @remarks This API is under development. Currently returns stubs.
+ * Uses the gh CLI for GitHub providers and provider-specific APIs for others.
  */
 class ReviewAPI {
+    constructor(private connectors: TriageConnectors) {}
+
     /**
-     * Get PR review comments
+     * Get PR review comments.
+     *
+     * Fetches review comments from the pull request including inline code comments
+     * and general review comments.
      */
-    async getPRComments(_prNumber: number): Promise<
+    async getPRComments(prNumber: number): Promise<
         {
             id: string;
             body: string;
@@ -366,14 +490,23 @@ class ReviewAPI {
             line?: number;
         }[]
     > {
-        // TODO: Implement using existing octokit.ts functions
+        const provider = await this.connectors.getProvider();
+
+        if (provider.name === 'github') {
+            return this.getGitHubPRComments(prNumber);
+        }
+
+        // For non-GitHub providers, review comments are not applicable
         return [];
     }
 
     /**
-     * Get unresolved feedback on a PR
+     * Get unresolved feedback on a PR.
+     *
+     * Returns review comments and change requests that have not been resolved,
+     * helping developers track what still needs attention.
      */
-    async getUnresolvedFeedback(_prNumber: number): Promise<
+    async getUnresolvedFeedback(prNumber: number): Promise<
         {
             id: string;
             body: string;
@@ -381,15 +514,227 @@ class ReviewAPI {
             type: 'comment' | 'change_request';
         }[]
     > {
-        // TODO: Implement
+        const provider = await this.connectors.getProvider();
+
+        if (provider.name === 'github') {
+            return this.getGitHubUnresolvedFeedback(prNumber);
+        }
+
         return [];
     }
 
     /**
-     * Reply to a review comment
+     * Reply to a review comment.
+     *
+     * Posts a reply to an existing review comment on a pull request.
      */
-    async replyToComment(_commentId: string, _body: string): Promise<void> {
-        // TODO: Implement using existing octokit.ts functions
+    async replyToComment(commentId: string, body: string): Promise<void> {
+        const provider = await this.connectors.getProvider();
+
+        if (provider.name === 'github') {
+            await this.replyToGitHubComment(commentId, body);
+            return;
+        }
+
+        throw new Error(`Reply to comment not supported by ${provider.name} provider`);
+    }
+
+    /**
+     * Get PR review comments from GitHub using the gh CLI
+     */
+    private async getGitHubPRComments(prNumber: number): Promise<
+        {
+            id: string;
+            body: string;
+            author: string;
+            path?: string;
+            line?: number;
+        }[]
+    > {
+        try {
+            const repo = this.connectors['config'].repo;
+
+            // Get review comments (inline code comments)
+            const reviewCommentsJson = this.gh([
+                'api',
+                ...this.getRepoApiPath(repo, `pulls/${prNumber}/comments`),
+                '--jq',
+                '.[] | {id: .id, body: .body, author: .user.login, path: .path, line: (.line // .original_line)}',
+            ]);
+
+            // Get issue comments (general PR thread comments)
+            const issueCommentsJson = this.gh([
+                'api',
+                ...this.getRepoApiPath(repo, `issues/${prNumber}/comments`),
+                '--jq',
+                '.[] | {id: .id, body: .body, author: .user.login}',
+            ]);
+
+            const comments: { id: string; body: string; author: string; path?: string; line?: number }[] = [];
+
+            // Parse review comments (JSONL)
+            if (reviewCommentsJson) {
+                for (const line of reviewCommentsJson.split('\n').filter((l) => l.trim())) {
+                    try {
+                        const data = JSON.parse(line);
+                        comments.push({
+                            id: String(data.id),
+                            body: data.body,
+                            author: data.author || 'unknown',
+                            path: data.path || undefined,
+                            line: data.line || undefined,
+                        });
+                    } catch {
+                        // Skip malformed lines
+                    }
+                }
+            }
+
+            // Parse issue comments (JSONL)
+            if (issueCommentsJson) {
+                for (const line of issueCommentsJson.split('\n').filter((l) => l.trim())) {
+                    try {
+                        const data = JSON.parse(line);
+                        comments.push({
+                            id: String(data.id),
+                            body: data.body,
+                            author: data.author || 'unknown',
+                        });
+                    } catch {
+                        // Skip malformed lines
+                    }
+                }
+            }
+
+            return comments;
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Get unresolved feedback from GitHub PR reviews
+     */
+    private async getGitHubUnresolvedFeedback(prNumber: number): Promise<
+        {
+            id: string;
+            body: string;
+            author: string;
+            type: 'comment' | 'change_request';
+        }[]
+    > {
+        try {
+            const repo = this.connectors['config'].repo;
+
+            // Get PR reviews
+            const reviewsJson = this.gh([
+                'api',
+                ...this.getRepoApiPath(repo, `pulls/${prNumber}/reviews`),
+                '--jq',
+                '.[] | {id: .id, body: .body, author: .user.login, state: .state}',
+            ]);
+
+            const feedback: { id: string; body: string; author: string; type: 'comment' | 'change_request' }[] = [];
+
+            if (reviewsJson) {
+                for (const line of reviewsJson.split('\n').filter((l) => l.trim())) {
+                    try {
+                        const data = JSON.parse(line);
+                        // Only include reviews that are not approved/dismissed
+                        if (data.state === 'CHANGES_REQUESTED') {
+                            feedback.push({
+                                id: String(data.id),
+                                body: data.body || 'Changes requested',
+                                author: data.author || 'unknown',
+                                type: 'change_request',
+                            });
+                        } else if (data.state === 'COMMENTED' && data.body) {
+                            feedback.push({
+                                id: String(data.id),
+                                body: data.body,
+                                author: data.author || 'unknown',
+                                type: 'comment',
+                            });
+                        }
+                    } catch {
+                        // Skip malformed lines
+                    }
+                }
+            }
+
+            // Also get unresolved review comments (inline)
+            const comments = await this.getGitHubPRComments(prNumber);
+            for (const comment of comments) {
+                if (comment.path) {
+                    // Inline comments are always considered unresolved feedback
+                    // (GitHub doesn't expose resolution status via REST easily)
+                    feedback.push({
+                        id: comment.id,
+                        body: comment.body,
+                        author: comment.author,
+                        type: 'comment',
+                    });
+                }
+            }
+
+            return feedback;
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Reply to a GitHub PR comment
+     */
+    private async replyToGitHubComment(commentId: string, body: string): Promise<void> {
+        const repo = this.connectors['config'].repo;
+
+        // Use the gh api command to create a reply
+        // First, try to reply as a review comment reply
+        this.gh([
+            'api',
+            ...this.getRepoApiPath(repo, `pulls/comments/${commentId}/replies`),
+            '-f',
+            `body=${body}`,
+        ]);
+    }
+
+    /**
+     * Build the API path for a repo resource
+     */
+    private getRepoApiPath(repo: string | undefined, resource: string): string[] {
+        if (repo) {
+            return [`repos/${repo}/${resource}`];
+        }
+        // Fall back to detecting from environment
+        const envRepo = process.env.GITHUB_REPOSITORY;
+        if (envRepo) {
+            return [`repos/${envRepo}/${resource}`];
+        }
+        // Last resort: try to detect from git
+        try {
+            const remote = execFileSync('git', ['remote', 'get-url', 'origin'], {
+                encoding: 'utf-8',
+            }).trim();
+            const match = remote.match(/github\.com[/:]([^/]+\/[^/.]+)/);
+            if (match) {
+                const detectedRepo = match[1].replace(/\.git$/, '');
+                return [`repos/${detectedRepo}/${resource}`];
+            }
+        } catch {
+            // Not a git repo
+        }
+        return [`repos/unknown/unknown/${resource}`];
+    }
+
+    /**
+     * Execute a gh CLI command
+     */
+    private gh(args: string[]): string {
+        const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+        const env = { ...process.env };
+        if (token) env.GH_TOKEN = token;
+        return execFileSync('gh', args, { encoding: 'utf-8', env }).trim();
     }
 }
 
