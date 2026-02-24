@@ -7,6 +7,9 @@ readme = "README.md"
 license = "MIT"
 authors = [{ name = "Jon Bogaty" }]
 
+[tool.uv]
+package = false
+
 [tool.uv.workspace]
 members = ["packages/agentic-crew", "packages/pytest-agentic-crew"]
 
