@@ -1,0 +1,15 @@
+{
+  "name": "providers",
+  "tags": ["lang:ts", "scope:providers"],
+  "targets": {
+    "build": {
+      "command": "tsc"
+    },
+    "lint": {
+      "command": "biome lint src/"
+    },
+    "typecheck": {
+      "command": "tsc --noEmit"
+    }
+  }
+}

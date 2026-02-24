@@ -1,0 +1,18 @@
+{
+  "name": "meshy-content-generator",
+  "tags": ["lang:ts", "scope:meshy"],
+  "targets": {
+    "build": {
+      "command": "tsup"
+    },
+    "test": {
+      "command": "vitest run"
+    },
+    "lint": {
+      "command": "biome check ."
+    },
+    "typecheck": {
+      "command": "tsc --noEmit"
+    }
+  }
+}

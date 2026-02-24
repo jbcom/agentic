@@ -1,0 +1,13 @@
+{
+  "name": "agentic-docs",
+  "tags": ["scope:docs"],
+  "targets": {
+    "build": {
+      "command": "astro build",
+      "inputs": ["{projectRoot}/src/**/*", "{projectRoot}/astro.config.mjs"]
+    },
+    "dev": {
+      "command": "astro dev"
+    }
+  }
+}

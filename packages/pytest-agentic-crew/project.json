@@ -1,0 +1,14 @@
+{
+  "name": "pytest-agentic-crew",
+  "tags": ["lang:py", "scope:crew", "scope:testing"],
+  "targets": {
+    "lint": {
+      "command": "uvx ruff check {projectRoot}",
+      "inputs": ["{projectRoot}/src/**/*.py"]
+    },
+    "typecheck": {
+      "command": "uvx mypy {projectRoot}/src/",
+      "inputs": ["{projectRoot}/src/**/*.py"]
+    }
+  }
+}
