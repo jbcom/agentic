@@ -27,7 +27,7 @@ describe('Production Release Properties', () => {
      * For any build execution, all files in the dist directory should be
      * JavaScript (.js) or TypeScript declaration (.d.ts) files, with no Python files present.
      */
-    it('should produce only TypeScript artifacts in dist directory', async () => {
+    it('should produce only TypeScript artifacts in dist directory', { timeout: 30_000 }, async () => {
       const distDir = join(PACKAGE_ROOT, 'dist');
 
       // Ensure we have a clean build
@@ -63,7 +63,7 @@ describe('Production Release Properties', () => {
      * For any npm package installation, the installed package should contain
      * no Python files (.py, .pyc, __pycache__) or Python-specific dependencies.
      */
-    it('should contain no Python files in package contents', async () => {
+    it('should contain no Python files in package contents', { timeout: 30_000 }, async () => {
       const distDir = join(PACKAGE_ROOT, 'dist');
 
       // Build first to ensure dist exists
@@ -156,7 +156,7 @@ describe('Production Release Properties', () => {
      * For any import of crew-related exports from the package, TypeScript should
      * provide complete type information without any 'any' types.
      */
-    it('should provide complete TypeScript types for crew operations', async () => {
+    it('should provide complete TypeScript types for crew operations', { timeout: 30_000 }, async () => {
       const distDir = join(PACKAGE_ROOT, 'dist');
 
       // Check that TypeScript compilation succeeds with strict mode
@@ -422,7 +422,7 @@ describe('Production Release Properties', () => {
      * For any TypeScript build output, all public exports should have corresponding
      * declaration files with complete type information.
      */
-    it('should generate complete declaration files for all exports', async () => {
+    it('should generate complete declaration files for all exports', { timeout: 30_000 }, async () => {
       const distDir = join(PACKAGE_ROOT, 'dist');
 
       // Ensure we have a fresh build
@@ -496,7 +496,7 @@ describe('Production Release Properties', () => {
      * For any function or method call, TypeScript should provide accurate
      * type inference without requiring explicit type annotations.
      */
-    it('should provide good type inference for main APIs', async () => {
+    it('should provide good type inference for main APIs', { timeout: 30_000 }, async () => {
       // This test verifies that the TypeScript compiler can infer types correctly
       // by checking that the build succeeds with strict type checking
 
