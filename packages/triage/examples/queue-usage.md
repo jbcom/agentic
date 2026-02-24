@@ -5,7 +5,7 @@ This guide demonstrates how to use the queue management primitives with differen
 ## Basic Usage with Memory Storage
 
 ```typescript
-import { QueueManager, MemoryStorage, PriorityScorer } from '@agentic/triage';
+import { QueueManager, MemoryStorage, PriorityScorer } from '@jbcom/agentic-triage';
 
 // Create a queue with memory storage
 const storage = new MemoryStorage();
@@ -32,7 +32,7 @@ await queue.processNext(async (item) => {
 ## File Storage for Local Testing
 
 ```typescript
-import { QueueManager, FileStorage } from '@agentic/triage';
+import { QueueManager, FileStorage } from '@jbcom/agentic-triage';
 
 // Create a queue with file storage
 const storage = new FileStorage('/tmp/queue-state.json');
@@ -56,7 +56,7 @@ console.log(`Pending items: ${pending.length}`);
 ## GitHub Issue Storage (Production)
 
 ```typescript
-import { QueueManager, GitHubIssueStorage } from '@agentic/triage';
+import { QueueManager, GitHubIssueStorage } from '@jbcom/agentic-triage';
 
 // Create storage backed by a GitHub Issue
 const storage = new GitHubIssueStorage({
@@ -75,7 +75,7 @@ const queue = new QueueManager(storage);
 ## Priority Scoring
 
 ```typescript
-import { PriorityScorer } from '@agentic/triage';
+import { PriorityScorer } from '@jbcom/agentic-triage';
 
 const scorer = new PriorityScorer();
 
@@ -107,7 +107,7 @@ const priority4 = scorer.score({
 ## Distributed Locking
 
 ```typescript
-import { LockManager, MemoryStorage } from '@agentic/triage';
+import { LockManager, MemoryStorage } from '@jbcom/agentic-triage';
 
 const storage = new MemoryStorage();
 const lockManager = new LockManager(storage);
@@ -142,7 +142,7 @@ import {
     GitHubIssueStorage,
     PriorityScorer,
     LockManager,
-} from '@agentic/triage';
+} from '@jbcom/agentic-triage';
 
 // Setup
 const storage = new GitHubIssueStorage({

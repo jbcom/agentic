@@ -1,7 +1,7 @@
 /**
- * @agentic-dev-library/control
+ * @jbcom/agentic
  *
- * Orchestration layer for AI agent fleet management consuming @agentic/triage primitives.
+ * Orchestration layer for AI agent fleet management consuming @jbcom/agentic-triage primitives.
  *
  * Features:
  * - Multi-agent orchestration (Ollama/Jules/Cursor routing)

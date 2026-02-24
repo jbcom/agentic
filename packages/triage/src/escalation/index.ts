@@ -1,5 +1,5 @@
 /**
- * @agentic/triage - Escalation Module
+ * @jbcom/agentic-triage - Escalation Module
  *
  * 7-level escalation ladder that exhausts all free options
  * before resorting to expensive cloud agents.
@@ -14,7 +14,7 @@
  * - 6: Cloud Agent (Cursor) - Expensive, requires approval
  *
  * @packageDocumentation
- * @module @agentic/triage/escalation
+ * @module @jbcom/agentic-triage/escalation
  */
 
 // Configuration

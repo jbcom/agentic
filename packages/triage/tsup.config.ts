@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 /**
- * tsup configuration for @agentic-dev-library/triage
+ * tsup configuration for @jbcom/agentic-triage
  *
  * This configuration ensures the package works correctly in:
  * - Node.js ESM (with proper .js extensions)
@@ -65,7 +65,7 @@ export default defineConfig({
 
     // Add banner for module compatibility
     banner: {
-        js: '/* @agentic-dev-library/triage - ESM Build */',
+        js: '/* @jbcom/agentic-triage - ESM Build */',
     },
 
     // Minification disabled for library (consumers can minify)

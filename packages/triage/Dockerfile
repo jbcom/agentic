@@ -1,4 +1,4 @@
-# @agentic-dev-library/triage Docker Image
+# @jbcom/agentic-triage Docker Image
 # AI-powered GitHub issue triage, PR review, and sprint planning CLI
 # Includes triage primitives for issue/PR management
 

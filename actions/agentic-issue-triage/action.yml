@@ -1,6 +1,6 @@
 name: 'Agentic Issue Triage'
 description: 'Triage a GitHub issue using an AI agent.'
-author: 'agentic-dev-library'
+author: 'jbcom'
 branding:
   icon: 'alert-circle'
   color: 'orange'
@@ -45,6 +45,6 @@ runs:
         INPUT_MODEL: ${{ inputs.model }}
         INPUT_API_KEY: ${{ inputs.api_key }}
       run: |
-        # Use exact pinned version of @agentic-dev-library/control to prevent supply chain attacks (CWE-829)
-        npx @agentic-dev-library/control@1.2.0 triage assess "$INPUT_ISSUE_NUMBER" \
+        # Use exact pinned version of @jbcom/agentic to prevent supply chain attacks (CWE-829)
+        npx @jbcom/agentic@1.2.0 triage assess "$INPUT_ISSUE_NUMBER" \
           --model "$INPUT_MODEL"

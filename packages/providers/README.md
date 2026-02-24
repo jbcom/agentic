@@ -1,11 +1,11 @@
-# @agentic/providers
+# @jbcom/agentic-providers
 
-LLM and agent provider implementations for [@agentic/triage](https://github.com/agentic-dev-library/triage).
+LLM and agent provider implementations for [@jbcom/agentic-triage](https://github.com/jbcom/agentic/tree/main/packages/triage).
 
 ## Installation
 
 ```bash
-npm install @agentic/providers @agentic/triage
+npm install @jbcom/agentic-providers @jbcom/agentic-triage
 ```
 
 ## Providers
@@ -19,13 +19,13 @@ npm install @agentic/providers @agentic/triage
 ## Usage
 
 ```typescript
-import { AgentRegistry, evaluateComplexity, TaskRouter } from '@agentic/triage';
-import { 
-  createOllamaAgent, 
-  createOllamaEvaluator, 
+import { AgentRegistry, evaluateComplexity, TaskRouter } from '@jbcom/agentic-triage';
+import {
+  createOllamaAgent,
+  createOllamaEvaluator,
   createJulesAgent,
-  createCursorAgent 
-} from '@agentic/providers';
+  createCursorAgent
+} from '@jbcom/agentic-providers';
 
 // Create evaluator for complexity scoring
 const evaluate = createOllamaEvaluator({ 

@@ -1,5 +1,5 @@
 {
-  "name": "@jbcom/agentic",
+  "name": "@jbcom/agentic-meshy",
   "version": "0.1.1",
   "description": "Declarative Meshy content generation pipelines with a CLI and API.",
   "license": "MIT",

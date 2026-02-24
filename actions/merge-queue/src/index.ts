@@ -2,13 +2,13 @@
  * Agentic Merge Queue - GitHub Action
  *
  * Cross-organization merge queue using a GitHub Issue as state store.
- * Works with @agentic/triage primitives for queue management.
+ * Works with @jbcom/agentic-triage primitives for queue management.
  */
 
 import * as core from '@actions/core';
 import * as github from '@actions/github';
 
-// Note: In production, these would be proper imports from @agentic/triage
+// Note: In production, these would be proper imports from @jbcom/agentic-triage
 // For now, we inline the key types and logic
 
 interface QueueItem {
@@ -158,7 +158,7 @@ function formatIssueBody(state: QueueState): string {
 
   return `# 🔄 Ecosystem Merge Queue
 
-Cross-organization merge queue managed by [@agentic/control](https://github.com/agentic-dev-library/control).
+Cross-organization merge queue managed by [@jbcom/agentic](https://github.com/jbcom/agentic).
 
 **Updated**: ${state.updatedAt}
 
@@ -179,7 +179,7 @@ ${STATE_END}
 ${tableRows || '| - | *Queue empty* | - | - | - |'}
 
 ---
-*Managed by [Agentic Merge Queue](https://github.com/agentic-dev-library/control/actions/merge-queue)*
+*Managed by [Agentic Merge Queue](https://github.com/jbcom/agentic/actions/merge-queue)*
 `;
 }
 

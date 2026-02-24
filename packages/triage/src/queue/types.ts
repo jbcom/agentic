@@ -3,7 +3,7 @@
  *
  * Provider-agnostic types for managing task/merge queues.
  * Storage implementations (GitHub Issue, Redis, File, etc.)
- * are provided by @agentic/control or users.
+ * are provided by @jbcom/agentic or users.
  */
 
 /**

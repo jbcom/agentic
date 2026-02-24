@@ -3,7 +3,7 @@
 /**
  * Ecosystem Curator
  *
- * Nightly autonomous orchestration using @agentic/control for:
+ * Nightly autonomous orchestration using @jbcom/agentic for:
  * - Cursor Cloud Agent management (via CursorAPI)
  * - Issue triage
  * - PR processing
@@ -39,25 +39,25 @@ const stats = {
 };
 
 // ============================================
-// Dynamic imports for @agentic/control
+// Dynamic imports for @jbcom/agentic
 // ============================================
 let CursorAPI = null;
 
 async function loadAgenticControl() {
     try {
-        const fleet = await import('@agentic/control/fleet');
+        const fleet = await import('@jbcom/agentic/fleet');
         CursorAPI = fleet.CursorAPI;
-        console.log('✅ Loaded @agentic/control/fleet');
+        console.log('✅ Loaded @jbcom/agentic/fleet');
         return true;
     } catch (e) {
-        console.warn(`⚠️  @agentic/control not available: ${e.message}`);
+        console.warn(`⚠️  @jbcom/agentic not available: ${e.message}`);
         console.warn('   Falling back to direct API calls');
         return false;
     }
 }
 
 // ============================================
-// Cursor API (fallback if @agentic/control not available)
+// Cursor API (fallback if @jbcom/agentic not available)
 // ============================================
 const CURSOR_BASE_URL = 'https://api.cursor.com/v0';
 
@@ -179,7 +179,7 @@ async function initCursor() {
     if (CursorAPI) {
         try {
             cursorApi = new CursorAPI({ apiKey: CURSOR_API_KEY });
-            console.log('✅ Initialized CursorAPI from @agentic/control');
+            console.log('✅ Initialized CursorAPI from @jbcom/agentic');
             return true;
         } catch (e) {
             console.warn(`⚠️  CursorAPI init failed: ${e.message}`);
@@ -361,7 +361,7 @@ async function processPR(repo, pr) {
 async function main() {
     console.log('╔══════════════════════════════════════════════════════════════════╗');
     console.log('║                    ECOSYSTEM CURATOR                              ║');
-    console.log('║              Powered by @agentic/control                          ║');
+    console.log('║              Powered by @jbcom/agentic                          ║');
     console.log('╚══════════════════════════════════════════════════════════════════╝\n');
 
     console.log(`Time: ${new Date().toISOString()}`);
@@ -373,7 +373,7 @@ async function main() {
         process.exit(1);
     }
 
-    // Load @agentic/control if available
+    // Load @jbcom/agentic if available
     await loadAgenticControl();
     await initCursor();
 

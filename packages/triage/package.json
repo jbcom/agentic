@@ -1,5 +1,5 @@
 {
-    "name": "@jbcom/agentic",
+    "name": "@jbcom/agentic-triage",
     "version": "1.1.0",
     "description": "AI-powered GitHub issue triage, PR review, and sprint planning - Vercel AI SDK primitives",
     "type": "module",

@@ -1,7 +1,8 @@
-# @agentic-dev-library/triage
+# @jbcom/agentic-triage
 
-[![npm version](https://img.shields.io/npm/v/@agentic-dev-library/triage.svg)](https://www.npmjs.com/package/@agentic-dev-library/triage)
-[![Coverage Status](https://coveralls.io/repos/github/agentic-dev-library/triage/badge.svg?branch=main)](https://coveralls.io/github/agentic-dev-library/triage?branch=main)
+[![npm version](https://img.shields.io/npm/v/@jbcom/agentic-triage.svg)](https://www.npmjs.com/package/@jbcom/agentic-triage)
+[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jbcom_agentic_triage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jbcom_agentic_triage)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jbcom_agentic_triage&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jbcom_agentic_triage)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## 🏢 Enterprise Context
@@ -10,7 +11,7 @@
 
 > Portable triage primitives for AI agents - Vercel AI SDK tools, MCP server, and direct API
 
-**@agentic-dev-library/triage** provides reusable triage primitives for AI agent systems. It offers three integration patterns:
+**@jbcom/agentic-triage** provides reusable triage primitives for AI agent systems. It offers three integration patterns:
 
 1. **Vercel AI SDK Tools** - Portable tools for any Vercel AI SDK application
 2. **MCP Server** - Model Context Protocol server for Claude Desktop, Cursor, etc.
@@ -18,26 +19,26 @@
 
 ## 🚨 Migration from agentic-triage
 
-This package was previously published as `agentic-triage` and `@agentic/triage`. Starting with v0.3.0, it has been consolidated as `@agentic-dev-library/triage` under the [agentic-dev-library](https://www.npmjs.com/org/agentic-dev-library) NPM organization.
+This package was previously published as `agentic-triage` and `@agentic/triage`. Starting with v0.3.0, it has been consolidated as `@jbcom/agentic-triage` under the [jbcom](https://www.npmjs.com/org/jbcom) NPM organization.
 
 To migrate from older versions:
-1. Update your `package.json` to use `@agentic-dev-library/triage`.
+1. Update your `package.json` to use `@jbcom/agentic-triage`.
 2. Update your imports:
    ```typescript
    // Old (if using previous package names)
    import { getTriageTools } from 'agentic-triage';
    // New
-   import { getTriageTools } from '@agentic-dev-library/triage';
+   import { getTriageTools } from '@jbcom/agentic-triage';
    ```
 
 ## Installation
 
 ```bash
 # npm
-npm install @agentic-dev-library/triage
+npm install @jbcom/agentic-triage
 
 # pnpm
-pnpm add @agentic-dev-library/triage
+pnpm add @jbcom/agentic-triage
 ```
 
 ## Quick Start
@@ -45,7 +46,7 @@ pnpm add @agentic-dev-library/triage
 ### 1. Vercel AI SDK Tools (Recommended for AI Agents)
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -59,7 +60,7 @@ const result = await generateText({
 #### Selective Tool Import
 
 ```typescript
-import { getIssueTools, getReviewTools, getProjectTools } from '@agentic-dev-library/triage';
+import { getIssueTools, getReviewTools, getProjectTools } from '@jbcom/agentic-triage';
 
 // Only import what your agent needs
 const myAgentTools = {
@@ -80,7 +81,7 @@ import {
   searchIssuesTool,
   addLabelsTool,
   removeLabelsTool,
-} from '@agentic-dev-library/triage';
+} from '@jbcom/agentic-triage';
 
 // Use individual tools
 const tools = { listIssues: listIssuesTool, createIssue: createIssueTool };
@@ -93,7 +94,7 @@ const tools = { listIssues: listIssuesTool, createIssue: createIssueTool };
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server"]
+      "args": ["@jbcom/agentic-triage", "mcp-server"]
     }
   }
 }
@@ -102,7 +103,7 @@ const tools = { listIssues: listIssuesTool, createIssue: createIssueTool };
 ### 3. Direct TypeScript API
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
+import { TriageConnectors } from '@jbcom/agentic-triage';
 
 const triage = new TriageConnectors({ provider: 'github' });
 
@@ -143,7 +144,7 @@ The provider is auto-detected based on environment:
 ### Explicit Configuration
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
+import { TriageConnectors } from '@jbcom/agentic-triage';
 
 // GitHub
 const github = new TriageConnectors({

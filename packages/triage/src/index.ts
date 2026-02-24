@@ -1,5 +1,5 @@
 /**
- * @agentic-dev-library/triage - AI-Powered Development Automation
+ * @jbcom/agentic-triage - AI-Powered Development Automation
  *
  * The triage package provides a comprehensive SDK for automating
  * the entire development lifecycle:
@@ -10,14 +10,14 @@
  *
  * @example SDK Usage
  * ```typescript
- * import { aiGenerate, getTriageTools } from '@agentic-dev-library/triage';
+ * import { aiGenerate, getTriageTools } from '@jbcom/agentic-triage';
  *
  * // Generate with AI
  * const result = await aiGenerate(prompt, { systemPrompt });
  * ```
  *
  * @packageDocumentation
- * @module @agentic-dev-library/triage
+ * @module @jbcom/agentic-triage
  */
 
 // ============================================================================

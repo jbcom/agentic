@@ -11,7 +11,7 @@ import type {
   AgentResult,
   AgentTask,
   LLMEvaluator,
-} from '@agentic/triage';
+} from '@jbcom/agentic-triage';
 
 export interface OllamaConfig {
   /** Ollama API URL (default: http://localhost:11434) */
@@ -28,7 +28,7 @@ const DEFAULT_TIMEOUT = 60000;
 
 /**
  * Create an LLM evaluator function for Ollama
- * Use this with @agentic/triage's evaluateComplexity()
+ * Use this with @jbcom/agentic-triage's evaluateComplexity()
  */
 export function createOllamaEvaluator(config: OllamaConfig = {}): LLMEvaluator {
   const url = config.url ?? DEFAULT_URL;

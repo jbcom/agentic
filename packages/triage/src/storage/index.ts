@@ -1,5 +1,5 @@
 /**
- * @agentic/triage - Storage Module
+ * @jbcom/agentic-triage - Storage Module
  *
  * Pluggable storage backends for queue state persistence.
  *

@@ -5,7 +5,7 @@
  * WARNING: Cursor Cloud Agents are expensive - use sparingly!
  */
 
-import type { AgentCapabilities, AgentDefinition, AgentResult, AgentTask } from '@agentic/triage';
+import type { AgentCapabilities, AgentDefinition, AgentResult, AgentTask } from '@jbcom/agentic-triage';
 
 export interface CursorConfig {
   /** Cursor API key */

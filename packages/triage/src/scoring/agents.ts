@@ -3,7 +3,7 @@
  *
  * This module defines ONLY the interfaces and registry.
  * Actual provider implementations (Ollama, Jules, Cursor, etc.)
- * belong in @agentic/control where users configure their stack.
+ * belong in @jbcom/agentic where users configure their stack.
  *
  * The key insight: developers can use ANY LLM/agent provider
  * by implementing the AgentExecutor interface and registering
@@ -120,7 +120,7 @@ export interface AgentDefinition<T = unknown> {
  * ```typescript
  * const registry = new AgentRegistry();
  *
- * // Register your agents (implementations from @agentic/control or custom)
+ * // Register your agents (implementations from @jbcom/agentic or custom)
  * registry.register(myOllamaAgent);
  * registry.register(myJulesAgent);
  * registry.register(myCustomAgent);
@@ -265,7 +265,7 @@ export class AgentRegistry {
 
 /**
  * Configuration for creating an agent (without the executor)
- * Used by @agentic/control to create provider-specific agents
+ * Used by @jbcom/agentic to create provider-specific agents
  */
 export type AgentConfig = Omit<AgentDefinition, 'execute'>;
 

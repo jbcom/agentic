@@ -76,7 +76,7 @@
     "@inquirer/prompts": "8.1.0",
     "@modelcontextprotocol/sdk": "^1.25.0",
     "@octokit/rest": "^22.0.1",
-    "@jbcom/agentic": "^1.1.0",
+    "@jbcom/agentic-triage": "workspace:*",
     "ai": "^6.0.3",
     "commander": "^14.0.2",
     "cosmiconfig": "9.0.0",
@@ -118,7 +118,7 @@
     "tsx": "4.21.0",
     "typescript": "^5.7.0",
     "vitest": "^4.0.14",
-    "@agentic-dev-library/vitest-control": "workspace:*"
+    "@jbcom/vitest-agentic": "workspace:*"
   },
   "engines": {
     "node": ">=22.0.0"

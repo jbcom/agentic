@@ -5,7 +5,7 @@
  * Jules can create PRs, run commands, and handle multi-file changes.
  */
 
-import type { AgentCapabilities, AgentDefinition, AgentResult, AgentTask } from '@agentic/triage';
+import type { AgentCapabilities, AgentDefinition, AgentResult, AgentTask } from '@jbcom/agentic-triage';
 
 export interface JulesConfig {
   /** Jules API key */

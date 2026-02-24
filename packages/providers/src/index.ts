@@ -1,15 +1,15 @@
 /**
- * @agentic/providers
+ * @jbcom/agentic-providers
  *
- * LLM and agent provider implementations for use with @agentic/triage.
+ * LLM and agent provider implementations for use with @jbcom/agentic-triage.
  *
  * These implementations connect the provider-agnostic primitives from
- * @agentic/triage to real LLM services like Ollama, Jules, and Cursor.
+ * @jbcom/agentic-triage to real LLM services like Ollama, Jules, and Cursor.
  *
  * @example
  * ```typescript
- * import { AgentRegistry, evaluateComplexity, TaskRouter } from '@agentic/triage';
- * import { createOllamaAgent, createOllamaEvaluator, createJulesAgent } from '@agentic/providers';
+ * import { AgentRegistry, evaluateComplexity, TaskRouter } from '@jbcom/agentic-triage';
+ * import { createOllamaAgent, createOllamaEvaluator, createJulesAgent } from '@jbcom/agentic-providers';
  *
  * // Create evaluator for complexity scoring
  * const evaluate = createOllamaEvaluator({ url: 'http://ollama:11434' });

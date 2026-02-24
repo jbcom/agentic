@@ -23,25 +23,25 @@ if (!existsSync(pnpmDir)) {
   process.exit(0);
 }
 
-// Find @agentic/triage in .pnpm
+// Find @jbcom/agentic-triage in .pnpm
 const dirs = readdirSync(pnpmDir, { withFileTypes: true });
-const triageDirs = dirs.filter((d) => d.isDirectory() && d.name.includes('@agentic+triage'));
+const triageDirs = dirs.filter((d) => d.isDirectory() && d.name.includes('@jbcom+agentic-triage'));
 
 for (const dir of triageDirs) {
-  const triagePath = join(pnpmDir, dir.name, 'node_modules', '@agentic', 'triage');
+  const triagePath = join(pnpmDir, dir.name, 'node_modules', '@jbcom', 'agentic-triage');
   const distPath = join(triagePath, 'dist');
   const packagePath = join(triagePath, 'package.json');
 
   if (existsSync(packagePath) && !existsSync(distPath)) {
-    console.log(`Building @agentic/triage in ${triagePath}...`);
+    console.log(`Building @jbcom/agentic-triage in ${triagePath}...`);
     try {
       execSync('pnpm run build', { cwd: triagePath, stdio: 'inherit' });
-      console.log('Successfully built @agentic/triage');
+      console.log('Successfully built @jbcom/agentic-triage');
     } catch (error) {
-      console.error('Failed to build @agentic/triage:', error.message);
+      console.error('Failed to build @jbcom/agentic-triage:', error.message);
       process.exit(1);
     }
   } else if (existsSync(distPath)) {
-    console.log('@agentic/triage already built');
+    console.log('@jbcom/agentic-triage already built');
   }
 }

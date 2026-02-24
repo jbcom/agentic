@@ -19,7 +19,7 @@ inputs:
     description: 'GitHub token for API access'
     required: false
   version:
-    description: '@agentic-dev-library/control version to use'
+    description: '@jbcom/agentic version to use'
     required: false
     default: 'latest'
 
@@ -39,9 +39,9 @@ runs:
       with:
         node-version: '22'
 
-    - name: Install @agentic-dev-library/control
+    - name: Install @jbcom/agentic
       shell: bash
-      run: npm install -g @agentic-dev-library/control@${{ inputs.version }}
+      run: npm install -g @jbcom/agentic@${{ inputs.version }}
 
     - name: Run command
       id: run
@@ -70,7 +70,7 @@ runs:
 
         # Run and capture output
         set +e
-        OUTPUT=$(npx @agentic-dev-library/control "${CMD_ARGS[@]}" 2>&1)
+        OUTPUT=$(npx @jbcom/agentic "${CMD_ARGS[@]}" 2>&1)
         EXIT_CODE=$?
         set -e
 

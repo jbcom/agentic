@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-dev-library/vitest-control",
+  "name": "@jbcom/vitest-agentic",
   "version": "1.0.0",
   "description": "Vitest plugin with fixtures and utilities for @jbcom/agentic E2E testing",
   "type": "module",
@@ -64,7 +64,7 @@
     "vitest",
     "testing",
     "fixtures",
-    "agentic-dev-library",
+    "jbcom",
     "control",
     "e2e",
     "mcp",

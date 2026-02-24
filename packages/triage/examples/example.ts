@@ -5,14 +5,14 @@ import { generateText } from 'ai';
 import { getTriageTools, TriageConnectors } from '../src/index.js';
 
 /**
- * Complete example showcasing @agentic-dev-library/triage primitives:
+ * Complete example showcasing @jbcom/agentic-triage primitives:
  *
  * 1. Direct API usage (TriageConnectors)
  * 2. Vercel AI SDK Tools (getTriageTools)
  * 3. AI-powered triage agent
  */
 async function main() {
-    console.log('=== @agentic-dev-library/triage Complete Example ===\n');
+    console.log('=== @jbcom/agentic-triage Complete Example ===\n');
 
     // ===================================================================
     // 1. Direct API Usage
