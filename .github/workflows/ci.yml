@@ -48,11 +48,11 @@ jobs:
       - name: Lint
         run: pnpm nx run-many -t lint --projects=tag:lang:ts
 
-      - name: Type check
-        run: pnpm nx run-many -t typecheck --projects=tag:lang:ts
-
       - name: Build
         run: pnpm nx run-many -t build --projects=tag:lang:ts
+
+      - name: Type check
+        run: pnpm nx run-many -t typecheck --projects=tag:lang:ts
 
       - name: Test with coverage
         run: pnpm nx run-many -t test:coverage --projects=tag:lang:ts
