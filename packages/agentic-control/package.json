@@ -74,7 +74,7 @@
   "dependencies": {
     "@ai-sdk/mcp": "^1.0.1",
     "@inquirer/prompts": "8.1.0",
-    "@modelcontextprotocol/sdk": "^1.25.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@octokit/rest": "^22.0.1",
     "@jbcom/agentic-triage": "workspace:*",
     "ai": "^6.0.3",
