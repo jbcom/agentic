@@ -9,7 +9,7 @@ This guide covers using AI-powered triage for code review, conversation analysis
 
 ## Prerequisites
 
-- `@agentic-dev-library/control` installed
+- `@jbcom/agentic` installed
 - At least one AI provider SDK installed
 - API key for your chosen provider
 
@@ -71,7 +71,7 @@ agentic triage analyze bc-xxx-xxx --model claude-opus-4-20250514
 ### Basic Analysis
 
 ```typescript
-import { AIAnalyzer } from '@agentic-dev-library/control';
+import { AIAnalyzer } from '@jbcom/agentic';
 
 async function analyzeError() {
   const analyzer = new AIAnalyzer({
@@ -91,7 +91,7 @@ async function analyzeError() {
 ### With Specific Provider
 
 ```typescript
-import { AIAnalyzer } from '@agentic-dev-library/control';
+import { AIAnalyzer } from '@jbcom/agentic';
 
 async function analyzeWithOpenAI() {
   const analyzer = new AIAnalyzer({
@@ -109,7 +109,7 @@ async function analyzeWithOpenAI() {
 ### Analyze Agent Conversation
 
 ```typescript
-import { Fleet, AIAnalyzer } from '@agentic-dev-library/control';
+import { Fleet, AIAnalyzer } from '@jbcom/agentic';
 
 async function analyzeAgentWork(agentId: string) {
   const fleet = new Fleet();
@@ -139,7 +139,7 @@ async function analyzeAgentWork(agentId: string) {
 ### Code Review
 
 ```typescript
-import { AIAnalyzer } from '@agentic-dev-library/control';
+import { AIAnalyzer } from '@jbcom/agentic';
 
 async function reviewPR() {
   const analyzer = new AIAnalyzer({ repo: 'my-org/my-repo' });
@@ -167,7 +167,7 @@ For more control, use the triage package directly with the Vercel AI SDK:
 ### All Triage Tools
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -192,7 +192,7 @@ import {
   listIssuesTool, 
   createIssueTool, 
   searchIssuesTool 
-} from '@agentic-dev-library/triage';
+} from '@jbcom/agentic';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -219,7 +219,7 @@ import {
   getIssueTools,    // Issue CRUD, search, labels
   getReviewTools,   // PR review, comments, approval
   getProjectTools,  // Sprints, project management
-} from '@agentic-dev-library/triage';
+} from '@jbcom/agentic';
 
 // Combine what you need
 const myAgentTools = {
@@ -328,7 +328,7 @@ const result = await analyzer.quickTriage(prompt);
 ### 3. Cache Results for Development
 
 ```typescript
-import { AIAnalyzer } from '@agentic-dev-library/control';
+import { AIAnalyzer } from '@jbcom/agentic';
 
 const analyzer = new AIAnalyzer({
   repo: 'my-org/my-repo',

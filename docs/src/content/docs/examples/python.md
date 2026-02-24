@@ -9,7 +9,7 @@ These examples demonstrate using `agentic-crew` for framework-agnostic AI crew o
 
 ## Minimal Crew Run
 
-From [`crew/examples/python/minimal_run.py`](https://github.com/agentic-dev-library/crew/blob/main/examples/python/minimal_run.py):
+From [`crew/examples/python/minimal_run.py`](https://github.com/jbcom/agentic/blob/main/examples/python/minimal_run.py):
 
 ```python
 from __future__ import annotations

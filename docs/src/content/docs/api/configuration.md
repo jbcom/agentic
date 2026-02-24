@@ -1,11 +1,11 @@
 ---
 title: Configuration API
-description: API reference for @agentic-dev-library/control configuration
+description: API reference for @jbcom/agentic configuration
 ---
 
 # Configuration API Reference
 
-Complete reference for configuration functions and types from `@agentic-dev-library/control`.
+Complete reference for configuration functions and types from `@jbcom/agentic`.
 
 ## Overview
 
@@ -19,7 +19,7 @@ import {
   getConfig,
   setConfig,
   mergeConfig,
-} from '@agentic-dev-library/control';
+} from '@jbcom/agentic';
 ```
 
 ## Functions
@@ -400,7 +400,7 @@ The `init` command:
 Validate configuration at runtime:
 
 ```typescript
-import { loadConfig, validateConfig } from '@agentic-dev-library/control';
+import { loadConfig, validateConfig } from '@jbcom/agentic';
 
 const config = await loadConfig();
 const result = validateConfig(config);

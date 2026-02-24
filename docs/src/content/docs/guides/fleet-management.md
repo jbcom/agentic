@@ -9,7 +9,7 @@ This guide demonstrates fleet-level operations: listing agents, filtering by sta
 
 ## Prerequisites
 
-- `@agentic-dev-library/control` installed globally
+- `@jbcom/agentic` installed globally
 - `CURSOR_API_KEY` environment variable set
 
 ## CLI Commands
@@ -59,7 +59,7 @@ agentic fleet followup bc-xxx-xxx "Please provide a status update"
 ### Fleet Summary
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function getFleetStatus() {
   const fleet = new Fleet();
@@ -84,8 +84,8 @@ async function getFleetStatus() {
 ### Display Agents Table
 
 ```typescript
-import type { Agent } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { Agent } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 function displayAgents(agents: Agent[]): void {
   if (agents.length === 0) {
@@ -124,7 +124,7 @@ async function listAllAgents() {
 Send a message to all running agents simultaneously:
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function broadcastStatusCheck() {
   const fleet = new Fleet();
@@ -159,7 +159,7 @@ async function broadcastStatusCheck() {
 ### List Available Repositories
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function listRepositories() {
   const fleet = new Fleet();
@@ -179,11 +179,11 @@ async function listRepositories() {
 
 ### Full Fleet Management Example
 
-From the [control repository examples](https://github.com/agentic-dev-library/control/blob/main/examples/02-fleet-management.ts):
+From the [control repository examples](https://github.com/jbcom/agentic/blob/main/examples/02-fleet-management.ts):
 
 ```typescript
-import type { Agent, AgentStatus } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { Agent, AgentStatus } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 function displayAgents(agents: Agent[]): void {
   if (agents.length === 0) {

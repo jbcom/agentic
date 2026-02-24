@@ -5,12 +5,12 @@ description: Complete API reference for @agentic/triage tools
 
 # Triage Tools API Reference
 
-Complete reference for the triage tools from `@agentic-dev-library/triage`.
+Complete reference for the triage tools from `@jbcom/agentic`.
 
 ## Installation
 
 ```bash
-npm install @agentic-dev-library/triage
+npm install @jbcom/agentic
 ```
 
 ## Tool Collections
@@ -20,7 +20,7 @@ npm install @agentic-dev-library/triage
 Get all available triage tools.
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 
 const tools = getTriageTools();
 // Returns all issue, review, and project tools
@@ -33,7 +33,7 @@ const tools = getTriageTools();
 Get issue management tools.
 
 ```typescript
-import { getIssueTools } from '@agentic-dev-library/triage';
+import { getIssueTools } from '@jbcom/agentic';
 
 const tools = getIssueTools();
 // Returns: listIssues, getIssue, createIssue, updateIssue,
@@ -47,7 +47,7 @@ const tools = getIssueTools();
 Get code review tools.
 
 ```typescript
-import { getReviewTools } from '@agentic-dev-library/triage';
+import { getReviewTools } from '@jbcom/agentic';
 
 const tools = getReviewTools();
 // Returns: getPRComments, addPRComment, approvePR, requestChanges
@@ -60,7 +60,7 @@ const tools = getReviewTools();
 Get project management tools.
 
 ```typescript
-import { getProjectTools } from '@agentic-dev-library/triage';
+import { getProjectTools } from '@jbcom/agentic';
 
 const tools = getProjectTools();
 // Returns: getSprints, getCurrentSprint, getSprintIssues, moveToSprint
@@ -73,7 +73,7 @@ const tools = getProjectTools();
 List issues with optional filtering.
 
 ```typescript
-import { listIssuesTool } from '@agentic-dev-library/triage';
+import { listIssuesTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -94,7 +94,7 @@ import { listIssuesTool } from '@agentic-dev-library/triage';
 Get a specific issue by number.
 
 ```typescript
-import { getIssueTool } from '@agentic-dev-library/triage';
+import { getIssueTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -112,7 +112,7 @@ import { getIssueTool } from '@agentic-dev-library/triage';
 Create a new issue.
 
 ```typescript
-import { createIssueTool } from '@agentic-dev-library/triage';
+import { createIssueTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -134,7 +134,7 @@ import { createIssueTool } from '@agentic-dev-library/triage';
 Update an existing issue.
 
 ```typescript
-import { updateIssueTool } from '@agentic-dev-library/triage';
+import { updateIssueTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -155,7 +155,7 @@ import { updateIssueTool } from '@agentic-dev-library/triage';
 Close an issue.
 
 ```typescript
-import { closeIssueTool } from '@agentic-dev-library/triage';
+import { closeIssueTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -174,7 +174,7 @@ import { closeIssueTool } from '@agentic-dev-library/triage';
 Search issues by query.
 
 ```typescript
-import { searchIssuesTool } from '@agentic-dev-library/triage';
+import { searchIssuesTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -194,7 +194,7 @@ import { searchIssuesTool } from '@agentic-dev-library/triage';
 Add labels to an issue.
 
 ```typescript
-import { addLabelsTool } from '@agentic-dev-library/triage';
+import { addLabelsTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -213,7 +213,7 @@ import { addLabelsTool } from '@agentic-dev-library/triage';
 Remove labels from an issue.
 
 ```typescript
-import { removeLabelsTool } from '@agentic-dev-library/triage';
+import { removeLabelsTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -232,7 +232,7 @@ import { removeLabelsTool } from '@agentic-dev-library/triage';
 Get comments on a pull request.
 
 ```typescript
-import { getPRCommentsTool } from '@agentic-dev-library/triage';
+import { getPRCommentsTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -250,7 +250,7 @@ import { getPRCommentsTool } from '@agentic-dev-library/triage';
 Add a comment to a pull request.
 
 ```typescript
-import { addPRCommentTool } from '@agentic-dev-library/triage';
+import { addPRCommentTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -271,7 +271,7 @@ import { addPRCommentTool } from '@agentic-dev-library/triage';
 Approve a pull request.
 
 ```typescript
-import { approvePRTool } from '@agentic-dev-library/triage';
+import { approvePRTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -290,7 +290,7 @@ import { approvePRTool } from '@agentic-dev-library/triage';
 Request changes on a pull request.
 
 ```typescript
-import { requestChangesTool } from '@agentic-dev-library/triage';
+import { requestChangesTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -309,7 +309,7 @@ import { requestChangesTool } from '@agentic-dev-library/triage';
 Get all sprints/iterations.
 
 ```typescript
-import { getSprintsTool } from '@agentic-dev-library/triage';
+import { getSprintsTool } from '@jbcom/agentic';
 ```
 
 **Returns:** `Sprint[]`
@@ -321,7 +321,7 @@ import { getSprintsTool } from '@agentic-dev-library/triage';
 Get the current active sprint.
 
 ```typescript
-import { getCurrentSprintTool } from '@agentic-dev-library/triage';
+import { getCurrentSprintTool } from '@jbcom/agentic';
 ```
 
 **Returns:** `Sprint`
@@ -333,7 +333,7 @@ import { getCurrentSprintTool } from '@agentic-dev-library/triage';
 Get issues in a sprint.
 
 ```typescript
-import { getSprintIssuesTool } from '@agentic-dev-library/triage';
+import { getSprintIssuesTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -351,7 +351,7 @@ import { getSprintIssuesTool } from '@agentic-dev-library/triage';
 Move an issue to a sprint.
 
 ```typescript
-import { moveToSprintTool } from '@agentic-dev-library/triage';
+import { moveToSprintTool } from '@jbcom/agentic';
 ```
 
 **Parameters:**
@@ -450,7 +450,7 @@ interface User {
 For non-AI use cases, use the `TriageConnectors` class directly:
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
+import { TriageConnectors } from '@jbcom/agentic';
 
 const triage = new TriageConnectors({ provider: 'github' });
 
@@ -471,7 +471,7 @@ await triage.projects.moveToSprint(456, sprint.id);
 ## Provider Configuration
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
+import { TriageConnectors } from '@jbcom/agentic';
 
 // GitHub (auto-detected if .git present)
 const github = new TriageConnectors({

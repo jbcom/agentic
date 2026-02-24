@@ -1,32 +1,289 @@
-/* 
-  agentic-dev-library Documentation Portal
-  
-  BRANDING HIERARCHY:
-  1. Enterprise base (jbcom.github.io) - fonts, core colors, layout
-  2. Org theme - accent colors (below)
-  3. Org customizations - unique to this org
-  
+/*
+  Agentic Documentation — Custom Theme
+
+  BRANDING:
+  1. Enterprise base (jbcom.github.io) - fonts, core colors
+  2. Agentic theme - purple accent, polyglot badges
+  3. Custom layout enhancements
+
   Owner: Jon Bogaty (jbcom)
-  Part of the jbcom Enterprise ecosystem
 */
 
 /* ===== LAYER 1: Enterprise Base ===== */
 @import url('https://raw.githubusercontent.com/jbcom/jbcom.github.io/main/enterprise-branding/starlight-base.css');
 
-/* ===== LAYER 2: Org Theme (Purple) ===== */
-/* 
-  Agentic Division - Branding Override
-  Org: agentic-dev-library
-*/
+/* ===== LAYER 2: Color System ===== */
 
 :root {
-  /* Purple Theme */
-  --sl-color-accent-low: #2e1065;
+  /* Purple accent palette */
+  --sl-color-accent-low: #1e1040;
   --sl-color-accent: #8b5cf6;
   --sl-color-accent-high: #ddd6fe;
-  --sl-color-text-accent: #8b5cf6;
+  --sl-color-text-accent: #a78bfa;
+
+  /* Language colors */
+  --lang-ts: #3178c6;
+  --lang-py: #3776ab;
+  --lang-rs: #dea584;
+
+  /* Gradients */
+  --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+  --gradient-dark: linear-gradient(180deg, #0f0a1a 0%, #1a1025 100%);
+  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
 }
 
-/* ===== LAYER 3: Org-Specific Customizations ===== */
-/* Add styles unique to agentic-dev-library below */
+[data-theme='light'] {
+  --sl-color-accent-low: #ede9fe;
+  --sl-color-accent: #7c3aed;
+  --sl-color-accent-high: #2e1065;
+  --sl-color-text-accent: #6d28d9;
+}
 
+/* ===== LAYER 3: Hero Section ===== */
+
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Purple glow behind hero */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 100%;
+  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero .tagline {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  max-width: 42rem;
+  opacity: 0.9;
+}
+
+/* ===== LAYER 4: Language Badges ===== */
+
+.lang-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.lang-badge--ts {
+  background: rgba(49, 120, 198, 0.15);
+  color: #60a5fa;
+  border: 1px solid rgba(49, 120, 198, 0.3);
+}
+
+.lang-badge--py {
+  background: rgba(55, 118, 171, 0.15);
+  color: #93c5fd;
+  border: 1px solid rgba(55, 118, 171, 0.3);
+}
+
+.lang-badge--rs {
+  background: rgba(222, 165, 132, 0.15);
+  color: #fdba74;
+  border: 1px solid rgba(222, 165, 132, 0.3);
+}
+
+[data-theme='light'] .lang-badge--ts {
+  background: rgba(49, 120, 198, 0.1);
+  color: #1d4ed8;
+  border-color: rgba(49, 120, 198, 0.25);
+}
+
+[data-theme='light'] .lang-badge--py {
+  background: rgba(55, 118, 171, 0.1);
+  color: #1e40af;
+  border-color: rgba(55, 118, 171, 0.25);
+}
+
+[data-theme='light'] .lang-badge--rs {
+  background: rgba(222, 165, 132, 0.1);
+  color: #9a3412;
+  border-color: rgba(222, 165, 132, 0.25);
+}
+
+/* ===== LAYER 5: Card Enhancements ===== */
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.1);
+}
+
+/* Package showcase cards */
+.sl-link-card {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.sl-link-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--sl-color-accent);
+}
+
+/* ===== LAYER 6: Architecture Section ===== */
+
+.arch-diagram {
+  background: rgba(139, 92, 246, 0.03);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--sl-color-text);
+}
+
+[data-theme='light'] .arch-diagram {
+  background: rgba(139, 92, 246, 0.04);
+  border-color: rgba(139, 92, 246, 0.15);
+}
+
+/* ===== LAYER 7: Feature Grid ===== */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.feature-card {
+  padding: 1.25rem;
+  background: rgba(139, 92, 246, 0.03);
+  border: 1px solid rgba(139, 92, 246, 0.08);
+  border-radius: 0.75rem;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.feature-card:hover {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.feature-card h4 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+  line-height: 1.6;
+}
+
+[data-theme='light'] .feature-card {
+  background: rgba(139, 92, 246, 0.04);
+  border-color: rgba(139, 92, 246, 0.12);
+}
+
+[data-theme='light'] .feature-card:hover {
+  background: rgba(139, 92, 246, 0.07);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* ===== LAYER 8: Stats / Numbers ===== */
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+  margin: 2rem 0;
+  padding: 1.5rem 0;
+}
+
+.stat {
+  text-align: center;
+  min-width: 120px;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: var(--gradient-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.7;
+  margin-top: 0.25rem;
+}
+
+/* ===== LAYER 9: Polyglot Indicator ===== */
+
+.polyglot-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+/* ===== LAYER 10: Section Dividers ===== */
+
+.section-divider {
+  border: none;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.2), transparent);
+  margin: 3rem 0;
+}
+
+/* ===== LAYER 11: Code Block Polish ===== */
+
+.expressive-code {
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+}
+
+/* ===== LAYER 12: Responsive ===== */
+
+@media (max-width: 50rem) {
+  .stats-row {
+    gap: 1.25rem;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== LAYER 13: Subtle Animations ===== */
+
+@media (prefers-reduced-motion: no-preference) {
+  .card,
+  .sl-link-card,
+  .feature-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+}

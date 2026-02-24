@@ -1,72 +1,44 @@
 ---
 title: Quick Start
-description: Get up and running with Agentic in under 5 minutes
+description: Install Agentic and spawn your first AI agent in under 5 minutes
 ---
 
 # Quick Start
 
-This guide will get you up and running with Agentic in under 5 minutes. We'll install the core packages, configure authentication, and spawn your first AI agent.
+Get from zero to a running AI agent in five steps.
 
 ## Prerequisites
 
-- **Node.js 18+** (for @agentic-dev-library/control)
+- **Node.js 22+** (for @jbcom/agentic)
 - **Python 3.10+** (for agentic-crew, optional)
-- **Git** configured with at least one remote repository
+- **Git** with at least one configured remote
 - **GitHub Personal Access Token** with `repo` scope
 
-## Installation
-
-### Option 1: npm/pnpm (Recommended)
+## 1. Install
 
 ```bash
 # Install the control package globally
-pnpm add -g @agentic-dev-library/control
-# or
-npm install -g @agentic-dev-library/control
+npm install -g @jbcom/agentic
 
-# Verify installation
+# Verify
 agentic --version
 ```
 
-### Option 2: Docker
+For Python crew orchestration:
 
 ```bash
-# Pull the latest image (includes Python companion)
-docker pull jbcom/agentic-control:latest
-
-# Run with your environment
-docker run --rm \
-  -e GITHUB_TOKEN=$GITHUB_TOKEN \
-  -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  -v $(pwd):/workspace \
-  jbcom/agentic-control:latest fleet list
+pip install agentic-crew[crewai]
 ```
 
-### Option 3: From Source
+## 2. Initialize
 
-```bash
-git clone https://github.com/agentic-dev-library/control.git
-cd control
-pnpm install
-pnpm run build
-pnpm run agentic --help
-```
-
-## Initialize Configuration
-
-The `agentic init` command intelligently detects your environment:
+The `agentic init` command detects your environment — Git remotes, existing tokens, AI provider keys — and generates a config file:
 
 ```bash
 agentic init
 ```
 
-This will:
-- Detect your Git repository from `git remote`
-- Scan for existing tokens in your environment (`GITHUB_*_TOKEN`, etc.)
-- Interactively prompt for missing configuration
-- Generate a working `agentic.config.json`
-
-### Generated Configuration
+This creates `agentic.config.json`:
 
 ```json
 {
@@ -77,14 +49,9 @@ This will:
         "tokenEnvVar": "GITHUB_MY_ORG_TOKEN"
       }
     },
-    "defaultTokenEnvVar": "GITHUB_TOKEN",
-    "prReviewTokenEnvVar": "GITHUB_TOKEN"
+    "defaultTokenEnvVar": "GITHUB_TOKEN"
   },
   "defaultRepository": "my-org/my-repo",
-  "fleet": {
-    "autoCreatePr": false,
-    "openAsCursorGithubApp": false
-  },
   "triage": {
     "provider": "anthropic",
     "model": "claude-sonnet-4-20250514",
@@ -93,52 +60,36 @@ This will:
 }
 ```
 
-## Set Environment Variables
+## 3. Set Environment Variables
 
 ```bash
-# Required: Default GitHub token
+# Required: GitHub token
 export GITHUB_TOKEN="ghp_xxx"
 
-# Optional: Organization-specific tokens
+# Optional: org-specific tokens (auto-routed by config)
 export GITHUB_MY_ORG_TOKEN="ghp_xxx"
 
-# For AI triage features
-export ANTHROPIC_API_KEY="sk-xxx"
-# Or for other providers:
+# For AI triage features (pick one)
+export ANTHROPIC_API_KEY="sk-ant-xxx"
 # export OPENAI_API_KEY="sk-xxx"
 # export GOOGLE_API_KEY="xxx"
-
-# For fleet management
-export CURSOR_API_KEY="xxx"
 ```
 
-## Verify Setup
-
-Check that your tokens are configured correctly:
+Verify your tokens:
 
 ```bash
 agentic tokens status
 ```
 
-Expected output:
 ```
 Token Status
 ─────────────────────────────────────────────────
 ✅ GITHUB_TOKEN           (default)          valid
 ✅ GITHUB_MY_ORG_TOKEN    (my-org)           valid
 ✅ ANTHROPIC_API_KEY      (triage provider)  valid
-✅ CURSOR_API_KEY         (fleet management) valid
 ```
 
-## Your First Agent
-
-### List Available Repositories
-
-```bash
-agentic fleet list
-```
-
-### Spawn an Agent
+## 4. Spawn Your First Agent
 
 ```bash
 agentic fleet spawn "https://github.com/my-org/my-repo" \
@@ -146,12 +97,9 @@ agentic fleet spawn "https://github.com/my-org/my-repo" \
   --auto-pr
 ```
 
-The agent will:
-1. Clone the repository
-2. Work on the task you specified
-3. Create a pull request with the changes
+The agent will clone the repo, work on the task, and open a pull request.
 
-### Monitor Progress
+Monitor progress:
 
 ```bash
 # List running agents
@@ -161,51 +109,38 @@ agentic fleet list --running
 agentic fleet summary
 ```
 
-### View Conversation
+## 5. Try AI Triage
+
+For quick AI analysis without spawning a full agent:
 
 ```bash
-# Get the conversation from an agent
-agentic fleet conversation bc-xxx-xxx
-
-# Analyze with AI
-agentic triage analyze bc-xxx-xxx -o report.md
-```
-
-## Quick Triage Example
-
-For AI-powered code review without spawning a full agent:
-
-```bash
-# Quick triage of text
+# Quick triage
 agentic triage quick "Error: Cannot find module 'express'"
 
-# Review code changes
+# Code review
 agentic triage review --base main --head HEAD
 ```
 
-## Install AI Provider (for Triage)
+Or use the TypeScript API:
 
-To use triage features, install at least one AI provider:
+```typescript
+import { getTriageTools } from '@jbcom/agentic/tools';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
 
-```bash
-# Anthropic (recommended)
-pnpm add @ai-sdk/anthropic
-
-# Or OpenAI
-pnpm add @ai-sdk/openai
-
-# Or Google AI
-pnpm add @ai-sdk/google
-
-# Or Mistral
-pnpm add @ai-sdk/mistral
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: getTriageTools(),
+  prompt: 'List all open high-priority bugs',
+});
 ```
 
-## Next Steps
+## What's Next
 
-You're now ready to explore the full power of Agentic!
+You're up and running. Here's where to go from here:
 
-- **[Configuration Guide](/getting-started/configuration/)** - Deep dive into configuration options
-- **[Agent Spawning Guide](/guides/agent-spawning/)** - Master agent creation and monitoring
-- **[Fleet Management](/guides/fleet-management/)** - Coordinate multiple agents
-- **[Orchestration Patterns](/guides/orchestration-patterns/)** - Advanced multi-agent workflows
+- **[Configuration](/getting-started/configuration/)** — Multi-org tokens, fleet defaults, AI provider setup
+- **[Agent Spawning](/guides/agent-spawning/)** — Advanced agent creation and monitoring
+- **[Fleet Management](/guides/fleet-management/)** — Coordinate multiple agents
+- **[Orchestration Patterns](/guides/orchestration-patterns/)** — Diamond patterns, handoffs, coordination loops
+- **[Python Crews](/packages/crew/)** — Framework-agnostic crew orchestration

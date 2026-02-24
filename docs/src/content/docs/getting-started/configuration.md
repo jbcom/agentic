@@ -68,8 +68,8 @@ The most powerful feature of Agentic is automatic token routing based on reposit
         "name": "partner-org",
         "tokenEnvVar": "PARTNER_GH_PAT"
       },
-      "agentic-dev-library": {
-        "name": "agentic-dev-library",
+      "jbcom": {
+        "name": "jbcom",
         "tokenEnvVar": "GITHUB_AGENTIC_TOKEN"
       }
     },
@@ -217,7 +217,7 @@ Configure Agentic programmatically in your TypeScript/JavaScript code:
 import { 
   setTokenConfig,
   addOrganization,
-} from '@agentic-dev-library/control';
+} from '@jbcom/agentic';
 
 // Configure everything at once
 setTokenConfig({

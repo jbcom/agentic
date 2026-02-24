@@ -39,8 +39,8 @@ The diamond pattern enables coordinated work across multiple repositories with a
 When you need to update multiple repositories in coordination:
 
 ```typescript
-import type { DiamondConfig, SpawnOptions } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { DiamondConfig, SpawnOptions } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 async function diamondPattern() {
   const fleet = new Fleet();
@@ -134,8 +134,8 @@ async function diamondPattern() {
 Monitor multiple agents with progress callbacks:
 
 ```typescript
-import type { AgentStatus } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { AgentStatus } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 async function monitorWithCallbacks() {
   const fleet = new Fleet();
@@ -183,7 +183,7 @@ async function monitorWithCallbacks() {
 Set up bidirectional communication between a control center and agents via GitHub PR comments:
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function coordinationLoop() {
   const fleet = new Fleet();
@@ -219,7 +219,7 @@ agentic fleet coordinate \
 Transfer work between agents with full context preservation:
 
 ```typescript
-import { HandoffManager } from '@agentic-dev-library/control';
+import { HandoffManager } from '@jbcom/agentic';
 
 async function agentHandoff() {
   const handoff = new HandoffManager();
@@ -279,7 +279,7 @@ agentic handoff takeover bc-predecessor-xxx 123 feature/continued
 Spawn agents across multiple repos for coordinated updates:
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function maintenanceFleet() {
   const fleet = new Fleet();
@@ -324,7 +324,7 @@ async function maintenanceFleet() {
 ### Release Preparation Coordinator
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function releasePreparation(version: string) {
   const fleet = new Fleet();

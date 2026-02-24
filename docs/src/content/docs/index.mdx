@@ -1,9 +1,9 @@
 ---
 title: Agentic
-description: Unified AI agent fleet management, orchestration, and triage toolkit
+description: The polyglot AI agent toolkit — fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.
 template: splash
 hero:
-  tagline: Transform your development workflow with AI-powered agent orchestration. Spawn, coordinate, and manage fleets of AI agents across your repositories.
+  tagline: "The polyglot toolkit for AI agent orchestration. Spawn fleets, coordinate crews, triage issues, and generate games — across TypeScript, Python, and Rust."
   image:
     file: ../../assets/houston.webp
   actions:
@@ -11,160 +11,280 @@ hero:
       link: /getting-started/introduction/
       icon: right-arrow
     - text: View on GitHub
-      link: https://github.com/agentic-dev-library
+      link: https://github.com/jbcom/agentic
       icon: external
       variant: minimal
 ---
 
-import { Card, CardGrid, Tabs, TabItem, Code } from '@astrojs/starlight/components';
+import { Card, CardGrid, Tabs, TabItem, LinkCard } from '@astrojs/starlight/components';
 
-## 🚀 The AI & Agents Division of [jbcom Enterprise](https://jbcom.github.io)
+<div class="polyglot-bar" style="justify-content: center; margin-top: -0.5rem; margin-bottom: 2rem;">
+  <span class="lang-badge lang-badge--ts">TypeScript</span>
+  <span class="lang-badge lang-badge--py">Python</span>
+  <span class="lang-badge lang-badge--rs">Rust</span>
+</div>
 
-Agentic provides a unified toolkit for AI agent development, deployment, and orchestration. Part of the [Strata](https://strata.game) gaming platform and [Extended Data](https://extendeddata.dev) infrastructure ecosystem.
+<div class="stats-row">
+  <div class="stat">
+    <div class="stat-number">5</div>
+    <div class="stat-label">Packages</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">3</div>
+    <div class="stat-label">Languages</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">6+</div>
+    <div class="stat-label">AI Providers</div>
+  </div>
+  <div class="stat">
+    <div class="stat-number">4</div>
+    <div class="stat-label">Frameworks</div>
+  </div>
+</div>
 
-<CardGrid stagger>
-  <Card title="🎯 Smart Token Management" icon="setting">
-    Automatically routes operations to the right GitHub tokens based on organization. No more manual token switching across repos!
+---
+
+## What can you build with Agentic?
+
+<CardGrid>
+  <Card title="Spawn AI agent fleets" icon="rocket">
+    Dispatch multiple AI agents across repositories. They clone, work, and open PRs — all in parallel, with automatic token routing per GitHub org.
+
+    ```bash
+    agentic fleet spawn "my-org/api" \
+      "Fix the failing CI" --auto-pr
+    ```
   </Card>
-  <Card title="🚀 Fleet Orchestration" icon="rocket">
-    Spawn and coordinate multiple Cursor Background Agents simultaneously across your entire organization.
+
+  <Card title="Orchestrate AI crews" icon="puzzle">
+    Define crews in YAML, run them on CrewAI, LangGraph, or Strands. One format, any framework. Includes CLI runners for aider, claude-code, and ollama.
+
+    ```bash
+    agentic-crew run my-app analyzer \
+      --input "Review auth module"
+    ```
   </Card>
-  <Card title="🔍 AI-Powered Triage" icon="magnifier">
-    Analyze conversations, review code, and extract actionable insights with multi-provider AI support (Anthropic, OpenAI, Google, Mistral).
+
+  <Card title="Triage issues at scale" icon="magnifier">
+    Portable Vercel AI SDK tools for issue triage, code review, and sprint planning. Works with GitHub, Jira, Linear, and Beads.
+
+    ```typescript
+    const result = await generateText({
+      model: anthropic('claude-sonnet-4-20250514'),
+      tools: getTriageTools(),
+      prompt: 'Triage all open critical bugs',
+    });
+    ```
   </Card>
-  <Card title="🏗️ Sandbox Execution" icon="laptop">
-    Run AI agents in isolated Docker containers with resource limits for safe local development.
-  </Card>
-  <Card title="🤝 Framework Agnostic" icon="puzzle">
-    Define crews once, run on CrewAI, LangGraph, or Strands. Universal CLI runner for aider, claude-code, ollama, and more.
-  </Card>
-  <Card title="🔐 Security First" icon="approve-check">
-    Token sanitization, safe subprocess execution, OIDC publishing, and zero hardcoded credentials.
+
+  <Card title="Generate retro RPGs" icon="star">
+    AI-powered game generation with Bevy. Procedural worlds, characters, quests, and assets — from a TOML config file.
+
+    ```rust
+    let game = QuickGenerator::new()
+        .genre(Genre::Jrpg)
+        .theme(Theme::Fantasy)
+        .generate_and_run();
+    ```
   </Card>
 </CardGrid>
 
 ---
 
-## 📦 Core Packages
+## The Ecosystem
 
-<CardGrid>
-  <Card title="@agentic/control" icon="seti:typescript">
-    **Unified AI agent fleet management** - Token switching, fleet orchestration, sandbox execution, and handoff protocols.
+Five packages that work together — or independently. Each solves a specific problem. All share the same design principles: provider-agnostic, declarative config, and zero hardcoded credentials.
 
+<div class="arch-diagram">{`
+  ┌─────────────────────────────────────────────────────────────┐
+  │                        agentic CLI                          │
+  │              "agentic fleet | triage | sandbox"             │
+  └──────────────────────────┬──────────────────────────────────┘
+                             │
+          ┌──────────────────┼──────────────────┐
+          │                  │                  │
+          ▼                  ▼                  ▼
+  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
+  │   @jbcom/    │  │   @jbcom/    │  │   @agentic/  │
+  │   agentic    │──│   agentic    │  │   meshy      │
+  │  (control)   │  │  (triage)    │  │  (3D assets) │
+  │  TypeScript  │  │  TypeScript  │  │  TypeScript  │
+  └──────┬───────┘  └──────────────┘  └──────────────┘
+         │
+         ├───────────────────┐
+         ▼                   ▼
+  ┌──────────────┐  ┌──────────────┐
+  │ agentic-crew │  │    game-     │
+  │  (crews)     │  │  generator   │
+  │   Python     │  │    Rust      │
+  └──────────────┘  └──────────────┘
+`}</div>
+
+### Packages at a glance
+
+| Package | Language | What it does |
+|---------|----------|-------------|
+| **[@jbcom/agentic](/packages/control/)** | <span class="lang-badge lang-badge--ts">TS</span> | Fleet management, token routing, sandbox execution, handoff protocols |
+| **[@jbcom/agentic (triage)](/packages/triage/)** | <span class="lang-badge lang-badge--ts">TS</span> | Vercel AI SDK tools for issue triage, PR review, sprint planning |
+| **[agentic-crew](/packages/crew/)** | <span class="lang-badge lang-badge--py">PY</span> | Framework-agnostic crew orchestration — CrewAI, LangGraph, Strands |
+| **[@agentic/meshy](/packages/meshy-content-generator/)** | <span class="lang-badge lang-badge--ts">TS</span> | Declarative 3D asset pipelines powered by Meshy AI |
+| **[game-generator](/packages/game-generator/)** | <span class="lang-badge lang-badge--rs">RS</span> | AI-powered retro RPG generation with Bevy engine |
+
+---
+
+## Quick Start
+
+<Tabs>
+  <TabItem label="TypeScript (Fleet)">
     ```bash
-    npm install -g @agentic-dev-library/control
+    # Install the control package
+    npm install -g @jbcom/agentic
+
+    # Initialize configuration
+    agentic init
+
+    # Spawn your first AI agent
+    agentic fleet spawn "my-org/my-repo" \
+      "Fix the failing tests" --auto-pr
+
+    # Monitor progress
+    agentic fleet list --running
     ```
+  </TabItem>
+  <TabItem label="TypeScript (Triage)">
+    ```typescript
+    import { getTriageTools } from '@jbcom/agentic/tools';
+    import { generateText } from 'ai';
+    import { anthropic } from '@ai-sdk/anthropic';
 
-    [Learn more →](/packages/control/)
-  </Card>
+    const result = await generateText({
+      model: anthropic('claude-sonnet-4-20250514'),
+      tools: getTriageTools(),
+      maxSteps: 10,
+      prompt: 'List critical bugs and create a triage plan',
+    });
 
-  <Card title="@agentic/crew" icon="seti:python">
-    **Framework-agnostic crew orchestration** - Define once, run on CrewAI, LangGraph, or Strands.
-
+    console.log(result.text);
+    ```
+  </TabItem>
+  <TabItem label="Python (Crews)">
     ```bash
+    # Install with your preferred framework
     pip install agentic-crew[crewai]
+
+    # Define a crew in YAML, then run it
+    agentic-crew run my-package analyzer \
+      --input "Review this codebase for security issues"
     ```
 
-    [Learn more →](/packages/crew/)
-  </Card>
+    ```python
+    from agentic_crew import run_crew
 
-  <Card title="@agentic/triage" icon="seti:typescript">
-    **Portable triage primitives** - Vercel AI SDK tools, MCP server, and direct TypeScript API.
-
-    ```bash
-    npm install @agentic-dev-library/triage
+    # Auto-detects best available framework
+    result = run_crew("my-package", "analyzer",
+                      inputs={"code": "..."})
     ```
-
-    [Learn more →](/packages/triage/)
-  </Card>
-
-  <Card title="game-generator" icon="seti:rust">
-    **AI-powered retro RPG generator** - Multi-provider AI integration with Bevy game engine.
-
+  </TabItem>
+  <TabItem label="Rust (Games)">
     ```bash
+    # Build and run the game generator
     cargo run --bin vintage-game-generator
+
+    # Or use it as a library
     ```
 
-    [Learn more →](/packages/game-generator/)
+    ```rust
+    use vintage_game_generator::prelude::*;
+
+    fn main() {
+        let game = QuickGenerator::new()
+            .genre(Genre::Jrpg)
+            .theme(Theme::Fantasy)
+            .generate_and_run();
+    }
+    ```
+  </TabItem>
+</Tabs>
+
+---
+
+## Who uses Agentic?
+
+<div class="feature-grid">
+  <div class="feature-card">
+    <h4>Solo Developers</h4>
+    <p>Spawn AI agents to handle tedious tasks — dependency updates, code reviews, test generation — while you focus on architecture.</p>
+  </div>
+  <div class="feature-card">
+    <h4>Platform Teams</h4>
+    <p>Standardize AI workflows across your org. Define crews once, run them consistently. Multi-org token management handles the auth complexity.</p>
+  </div>
+  <div class="feature-card">
+    <h4>Game Studios</h4>
+    <p>Generate retro RPG content procedurally — worlds, characters, quests, assets. Blend classic game styles with AI-driven creativity.</p>
+  </div>
+  <div class="feature-card">
+    <h4>3D Content Pipelines</h4>
+    <p>Declarative Meshy-powered pipelines for text-to-3D, rigging, and animation. JSON manifests, not brittle scripts.</p>
+  </div>
+</div>
+
+---
+
+## Design Principles
+
+<CardGrid>
+  <Card title="Provider Agnostic" icon="setting">
+    Every package works with multiple AI providers — Anthropic, OpenAI, Google, Mistral, Ollama, Azure. Swap providers without changing code.
+  </Card>
+  <Card title="Declarative Config" icon="document">
+    Crews in YAML. Pipelines in JSON. Fleets from CLI flags. Configuration lives in version control, not in scripts.
+  </Card>
+  <Card title="Security First" icon="approve-check">
+    Token sanitization, SHA-pinned Actions, OIDC publishing, sandboxed execution. No hardcoded credentials anywhere.
+  </Card>
+  <Card title="Polyglot by Design" icon="puzzle">
+    TypeScript for orchestration. Python for AI frameworks. Rust for performance. Nx orchestrates the monorepo. Use what fits.
   </Card>
 </CardGrid>
 
 ---
 
-## ⚡ Quick Demo
-
-```bash
-# Initialize with smart detection
-agentic init
-
-# Spawn an AI agent to fix your CI
-agentic fleet spawn "https://github.com/my-org/my-repo" \
-  "Fix the failing GitHub Actions workflow" --auto-pr
-
-# Run AI analysis in a secure sandbox
-agentic sandbox run "Analyze this codebase for security vulnerabilities" \
-  --workspace . --output ./security-report
-
-# Get AI-powered code review
-agentic triage review --base main --head feature-branch
-
-# Coordinate multiple agents on complex tasks
-agentic fleet coordinate --repo my-org/app --pr 156 \
-  --agents agent-1,agent-2,agent-3
-```
-
----
-
-## 🌐 Enterprise Ecosystem
-
-Agentic is part of a coherent suite of specialized tools, sharing a unified design system:
+## Explore
 
 <CardGrid>
-  <Card title="jbcom Hub" icon="open-book">
-    Central documentation hub and portfolio for the jbcom enterprise.
-    
-    [Visit jbcom.github.io →](https://jbcom.github.io)
-  </Card>
+  <Card title="Getting Started" icon="rocket">
+    Install, configure, and spawn your first agent in under 5 minutes.
 
-  <Card title="Strata Games" icon="seti:rust">
-    AI-powered gaming platform with procedural content generation and vintage RPG experiences.
-    
-    [Visit strata.game →](https://strata.game)
-  </Card>
-
-  <Card title="Extended Data" icon="seti:db">
-    Enterprise infrastructure tools including secret synchronization, database management, and CI/CD orchestration.
-    
-    [Visit extendeddata.dev →](https://extendeddata.dev)
-  </Card>
-</CardGrid>
-
----
-
-## 🎓 Learn More
-
-<CardGrid>
-  <Card title="Getting Started Guide" icon="rocket">
-    Set up your first AI agent fleet in under 5 minutes.
-    
     [Start here →](/getting-started/introduction/)
   </Card>
 
-  <Card title="Live Examples" icon="document">
-    Real-world TypeScript and Python examples from our repositories.
-    
-    [View examples →](/examples/typescript/)
+  <Card title="Guides" icon="open-book">
+    Fleet management, orchestration patterns, sandbox execution, and AI triage workflows.
+
+    [Read guides →](/guides/agent-spawning/)
+  </Card>
+
+  <Card title="Integrations" icon="puzzle">
+    GitHub Actions, CrewAI, LangGraph, Vercel AI SDK, MCP Server — connect Agentic to your stack.
+
+    [See integrations →](/integrations/github-actions/)
   </Card>
 
   <Card title="API Reference" icon="document">
-    Complete API documentation for all packages.
-    
+    Complete API documentation for fleet management, triage tools, and configuration.
+
     [Browse API →](/api/fleet-management/)
   </Card>
-
-  <Card title="Integration Guides" icon="puzzle">
-    Connect Agentic with GitHub Actions, CrewAI, Vercel AI SDK, and more.
-    
-    [See integrations →](/integrations/github-actions/)
-  </Card>
 </CardGrid>
+
+---
+
+<div style="text-align: center; padding: 1.5rem 0;">
+  <p style="opacity: 0.6; font-size: 0.9rem;">
+    Part of the <a href="https://jbcom.github.io">jbcom</a> ecosystem &middot;
+    <a href="https://strata.game">Strata Games</a> &middot;
+    <a href="https://extendeddata.dev">Extended Data</a>
+  </p>
+</div>

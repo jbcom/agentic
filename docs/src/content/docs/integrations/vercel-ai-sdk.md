@@ -11,7 +11,7 @@ description: Use @agentic/triage tools with the Vercel AI SDK
 
 ```bash
 # Install triage package
-npm install @agentic-dev-library/triage
+npm install @jbcom/agentic
 
 # Install an AI provider
 npm install @ai-sdk/anthropic
@@ -22,7 +22,7 @@ npm install @ai-sdk/openai
 ## Quick Start
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -41,7 +41,7 @@ console.log(result.text);
 ### All Tools
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 
 // Get all available tools
 const allTools = getTriageTools();
@@ -50,7 +50,7 @@ const allTools = getTriageTools();
 ### Issue Tools
 
 ```typescript
-import { getIssueTools } from '@agentic-dev-library/triage';
+import { getIssueTools } from '@jbcom/agentic';
 
 const issueTools = getIssueTools();
 // Includes: listIssues, getIssue, createIssue, updateIssue, 
@@ -60,7 +60,7 @@ const issueTools = getIssueTools();
 ### Review Tools
 
 ```typescript
-import { getReviewTools } from '@agentic-dev-library/triage';
+import { getReviewTools } from '@jbcom/agentic';
 
 const reviewTools = getReviewTools();
 // Includes: getPRComments, addPRComment, approvePR, requestChanges
@@ -69,7 +69,7 @@ const reviewTools = getReviewTools();
 ### Project Tools
 
 ```typescript
-import { getProjectTools } from '@agentic-dev-library/triage';
+import { getProjectTools } from '@jbcom/agentic';
 
 const projectTools = getProjectTools();
 // Includes: getSprints, getCurrentSprint, getSprintIssues, moveToSprint
@@ -87,7 +87,7 @@ import {
   searchIssuesTool,
   addLabelsTool,
   removeLabelsTool,
-} from '@agentic-dev-library/triage';
+} from '@jbcom/agentic';
 
 // Use only what you need
 const minimalTools = {
@@ -101,7 +101,7 @@ const minimalTools = {
 ### Basic Text Generation
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -120,7 +120,7 @@ async function triageIssues() {
 ### Streaming
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { streamText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -141,7 +141,7 @@ async function streamTriage() {
 ### With Tool Results
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -171,7 +171,7 @@ async function triageWithResults() {
 ### Combining with Custom Tools
 
 ```typescript
-import { getIssueTools } from '@agentic-dev-library/triage';
+import { getIssueTools } from '@jbcom/agentic';
 import { generateText, tool } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { z } from 'zod';
@@ -210,7 +210,7 @@ async function triageAndNotify() {
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -224,7 +224,7 @@ const result = await generateText({
 
 ```typescript
 import { openai } from '@ai-sdk/openai';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -238,7 +238,7 @@ const result = await generateText({
 
 ```typescript
 import { google } from '@ai-sdk/google';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -271,7 +271,7 @@ const result = await generateText({
 
 ```typescript
 import { generateText } from 'ai';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 
 const messages = [
   { role: 'user', content: 'List all open bugs' },
@@ -299,7 +299,7 @@ result = await generateText({
 
 ```typescript
 import { generateText } from 'ai';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 
 try {
   const result = await generateText({

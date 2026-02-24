@@ -22,7 +22,7 @@ Add to your Claude Desktop configuration (`~/Library/Application Support/Claude/
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server"]
+      "args": ["@jbcom/agentic", "mcp-server"]
     }
   }
 }
@@ -37,7 +37,7 @@ Add to your Cursor MCP configuration:
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server"]
+      "args": ["@jbcom/agentic", "mcp-server"]
     }
   }
 }
@@ -50,7 +50,7 @@ Add to your Cursor MCP configuration:
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server"],
+      "args": ["@jbcom/agentic", "mcp-server"],
       "env": {
         "GH_TOKEN": "your-github-token",
         "GITHUB_REPOSITORY": "owner/repo"
@@ -128,7 +128,7 @@ Cursor will use the triage tools to analyze issues and suggest a sprint plan.
 If you prefer to install globally:
 
 ```bash
-npm install -g @agentic-dev-library/triage
+npm install -g @jbcom/agentic
 ```
 
 Then configure:
@@ -151,7 +151,7 @@ Then configure:
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server", "--provider", "github"],
+      "args": ["@jbcom/agentic", "mcp-server", "--provider", "github"],
       "env": {
         "GH_TOKEN": "your-token",
         "GITHUB_REPOSITORY": "owner/repo"
@@ -168,7 +168,7 @@ Then configure:
   "mcpServers": {
     "triage-jira": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server", "--provider", "jira"],
+      "args": ["@jbcom/agentic", "mcp-server", "--provider", "jira"],
       "env": {
         "JIRA_HOST": "your-company.atlassian.net",
         "JIRA_EMAIL": "your-email@company.com",
@@ -187,7 +187,7 @@ Then configure:
   "mcpServers": {
     "triage-linear": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server", "--provider", "linear"],
+      "args": ["@jbcom/agentic", "mcp-server", "--provider", "linear"],
       "env": {
         "LINEAR_API_KEY": "your-api-key",
         "LINEAR_TEAM_ID": "your-team-id"
@@ -203,13 +203,13 @@ For development or testing:
 
 ```bash
 # Run the MCP server
-npx @agentic-dev-library/triage mcp-server
+npx @jbcom/agentic mcp-server
 
 # With debug logging
-DEBUG=triage:* npx @agentic-dev-library/triage mcp-server
+DEBUG=triage:* npx @jbcom/agentic mcp-server
 
 # With specific provider
-npx @agentic-dev-library/triage mcp-server --provider github
+npx @jbcom/agentic mcp-server --provider github
 ```
 
 ## Debugging
@@ -218,10 +218,10 @@ npx @agentic-dev-library/triage mcp-server --provider github
 
 ```bash
 # Test the server starts correctly
-npx @agentic-dev-library/triage mcp-server --test
+npx @jbcom/agentic mcp-server --test
 
 # List available tools
-npx @agentic-dev-library/triage mcp-server --list-tools
+npx @jbcom/agentic mcp-server --list-tools
 ```
 
 ### View Logs
@@ -238,7 +238,7 @@ In Claude Desktop, check the logs at:
 node --version
 
 # Reinstall the package
-npm install -g @agentic-dev-library/triage
+npm install -g @jbcom/agentic
 ```
 
 **Authentication errors:**

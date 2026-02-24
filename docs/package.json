@@ -1,6 +1,6 @@
 {
   "name": "agentic-docs",
-  "description": "Agentic Dev Library documentation site - Astro Starlight with Sphinx API docs",
+  "description": "Agentic documentation — the polyglot AI agent toolkit (Astro Starlight)",
   "type": "module",
   "version": "1.0.0",
   "private": true,

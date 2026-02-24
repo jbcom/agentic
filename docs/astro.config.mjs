@@ -8,7 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Agentic',
-			description: 'Unified AI agent fleet management, orchestration, and triage toolkit - powering strata.game',
+			description: 'The polyglot AI agent toolkit — fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.',
 			logo: {
 				light: './src/assets/logo-light.svg',
 				dark: './src/assets/logo-dark.svg',
@@ -39,11 +39,11 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Core Packages',
+					label: 'Packages',
 					items: [
-						{ label: '@agentic/control', slug: 'packages/control' },
-						{ label: '@agentic/crew', slug: 'packages/crew' },
-						{ label: '@agentic/triage', slug: 'packages/triage' },
+						{ label: '@jbcom/agentic (Control)', slug: 'packages/control' },
+						{ label: '@jbcom/agentic (Triage)', slug: 'packages/triage' },
+						{ label: 'agentic-crew', slug: 'packages/crew' },
 						{ label: '@agentic/meshy', slug: 'packages/meshy-content-generator' },
 						{ label: 'game-generator', slug: 'packages/game-generator' },
 					],
@@ -59,7 +59,7 @@ export default defineConfig({
 					],
 				},
 				{
-					label: 'Live Examples',
+					label: 'Examples',
 					items: [
 						{ label: 'TypeScript Examples', slug: 'examples/typescript' },
 						{ label: 'Python Examples', slug: 'examples/python' },
@@ -88,14 +88,6 @@ export default defineConfig({
 				{
 					label: 'Python API (Generated)',
 					autogenerate: { directory: 'api/_generated' },
-				},
-				{
-					label: 'Enterprise',
-					items: [
-						{ label: 'jbcom Hub', link: 'https://jbcom.github.io' },
-						{ label: 'Strata (Games)', link: 'https://strata.game' },
-						{ label: 'Extended Data', link: 'https://extendeddata.dev' },
-					],
 				},
 			],
 		}),

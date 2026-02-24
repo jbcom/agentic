@@ -1,180 +1,112 @@
 ---
-title: "@agentic/triage"
-description: Portable triage primitives for AI agents - Vercel AI SDK tools, MCP server, and direct API
+title: "@jbcom/agentic (Triage)"
+description: Portable triage primitives — Vercel AI SDK tools, MCP server, and direct TypeScript API for issue management and PR review
 ---
 
-# @agentic/triage
+# @jbcom/agentic — Triage
 
-> Portable triage primitives for AI agents - Vercel AI SDK tools, MCP server, and direct TypeScript API
+<div class="polyglot-bar">
+  <span class="lang-badge lang-badge--ts">TypeScript</span>
+</div>
 
-[![npm version](https://img.shields.io/npm/v/@agentic-dev-library/triage.svg)](https://www.npmjs.com/package/@agentic-dev-library/triage)
-[![Coverage Status](https://coveralls.io/repos/github/agentic-dev-library/triage/badge.svg?branch=main)](https://coveralls.io/github/agentic-dev-library/triage?branch=main)
+> Composable triage tools built on the Vercel AI SDK. Issue management, PR review, sprint planning — for GitHub, Jira, Linear, and Beads.
+
+[![npm version](https://img.shields.io/npm/v/@jbcom/agentic.svg)](https://www.npmjs.com/package/@jbcom/agentic)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**@agentic/triage** provides reusable triage primitives for AI agent systems. It offers three integration patterns:
+## Three Ways to Use It
 
-1. **Vercel AI SDK Tools** - Portable tools for any Vercel AI SDK application
-2. **MCP Server** - Model Context Protocol server for Claude Desktop, Cursor, etc.
-3. **Direct TypeScript API** - Programmatic access for non-AI use cases
+1. **Vercel AI SDK Tools** — Drop triage tools into any `generateText()` or `streamText()` call
+2. **MCP Server** — Expose tools to Claude Desktop, Cursor, or any MCP client
+3. **Direct TypeScript API** — Programmatic access for scripts, CI, and custom integrations
 
 ## Installation
 
 ```bash
-# npm
-npm install @agentic-dev-library/triage
-
-# pnpm
-pnpm add @agentic-dev-library/triage
+npm install @jbcom/agentic
 ```
 
 ## Quick Start
 
-### 1. Vercel AI SDK Tools (Recommended for AI Agents)
+### Vercel AI SDK (Recommended)
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic/tools';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
   tools: getTriageTools(),
-  prompt: 'List all open high-priority bugs and create a triage plan',
+  maxSteps: 10,
+  prompt: 'List all open critical bugs and create a triage plan',
 });
-
-console.log(result.text);
 ```
 
-### 2. Selective Tool Import
+### Selective Import
 
-Import only the tools your agent needs to minimize the tool space:
+Import only what your agent needs — smaller tool space means more focused behavior:
 
 ```typescript
-import { 
-  getIssueTools, 
-  getReviewTools, 
-  getProjectTools 
-} from '@agentic-dev-library/triage';
+import { getIssueTools, getReviewTools } from '@jbcom/agentic/tools';
 
-// Only import what your agent needs
 const myAgentTools = {
   ...getIssueTools(),    // Issue CRUD, search, labels
   ...getReviewTools(),   // PR review, comments, approval
 };
 ```
 
-### 3. Individual Tools
+### MCP Server
 
-For maximum control, import individual tools:
-
-```typescript
-import {
-  listIssuesTool,
-  createIssueTool,
-  getIssueTool,
-  updateIssueTool,
-  closeIssueTool,
-  searchIssuesTool,
-  addLabelsTool,
-  removeLabelsTool,
-} from '@agentic-dev-library/triage';
-
-const tools = { 
-  listIssues: listIssuesTool, 
-  createIssue: createIssueTool 
-};
-```
-
-### 4. MCP Server (For Claude Desktop, Cursor, etc.)
-
-Add to your MCP configuration:
+Add to your Claude Desktop or Cursor MCP config:
 
 ```json
 {
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@agentic-dev-library/triage", "mcp-server"]
+      "args": ["@jbcom/agentic", "mcp-server"]
     }
   }
 }
 ```
 
-### 5. Direct TypeScript API
+### Direct TypeScript API
 
-For non-AI use cases or custom integrations:
+For scripts and CI pipelines:
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
+import { TriageConnectors } from '@jbcom/agentic';
 
 const triage = new TriageConnectors({ provider: 'github' });
 
-// Issue operations
-const issues = await triage.issues.list({ 
-  status: 'open', 
-  priority: 'high' 
-});
-
+const issues = await triage.issues.list({ status: 'open', priority: 'high' });
 const issue = await triage.issues.create({
   title: 'Fix login bug',
   body: 'Users cannot login with SSO',
   type: 'bug',
   priority: 'critical',
 });
-
 await triage.issues.addLabels(issue.id, ['needs-triage', 'auth']);
-await triage.issues.close(issue.id, 'Fixed in PR #123');
-
-// Project operations
-const sprints = await triage.projects.getSprints();
-const currentSprint = await triage.projects.getCurrentSprint();
-
-// Review operations
-const comments = await triage.reviews.getPRComments(144);
 ```
 
 ## Provider Support
 
 | Provider | Status | Use Case |
 |----------|--------|----------|
-| **GitHub Issues** | ✅ Complete | GitHub-native projects |
-| **Beads** | ✅ Complete | Local-first, AI-native issue tracking |
-| **Jira** | ✅ Complete | Enterprise projects |
-| **Linear** | ✅ Complete | Modern team workflows |
+| **GitHub Issues** | Complete | GitHub-native projects |
+| **Beads** | Complete | Local-first, AI-native tracking |
+| **Jira** | Complete | Enterprise projects |
+| **Linear** | Complete | Modern team workflows |
 
-### Auto-Detection
-
-The provider is auto-detected based on environment:
-- `.beads/` directory present → Beads provider
-- `GITHUB_REPOSITORY` set or `.git` remote → GitHub provider
-
-### Explicit Configuration
+Auto-detected from environment — `.beads/` directory uses Beads, `.git` remote uses GitHub. Or configure explicitly:
 
 ```typescript
-import { TriageConnectors } from '@agentic-dev-library/triage';
-
-// GitHub
-const github = new TriageConnectors({
-  provider: 'github',
-  github: { owner: 'myorg', repo: 'myrepo' }
-});
-
-// Beads
-const beads = new TriageConnectors({
-  provider: 'beads',
-  beads: { workingDir: '/path/to/project' }
-});
-
-// Jira
 const jira = new TriageConnectors({
   provider: 'jira',
-  jira: { 
-    host: 'mycompany.atlassian.net',
-    projectKey: 'PROJ'
-  }
+  jira: { host: 'mycompany.atlassian.net', projectKey: 'PROJ' }
 });
 
-// Linear
 const linear = new TriageConnectors({
   provider: 'linear',
   linear: { teamId: 'TEAM123' }
@@ -183,7 +115,7 @@ const linear = new TriageConnectors({
 
 ## Available Tools
 
-### Issue Tools (`getIssueTools()`)
+### Issue Tools — `getIssueTools()`
 
 | Tool | Description |
 |------|-------------|
@@ -196,7 +128,7 @@ const linear = new TriageConnectors({
 | `addLabels` | Add labels to an issue |
 | `removeLabels` | Remove labels from an issue |
 
-### Review Tools (`getReviewTools()`)
+### Review Tools — `getReviewTools()`
 
 | Tool | Description |
 |------|-------------|
@@ -205,7 +137,7 @@ const linear = new TriageConnectors({
 | `approvePR` | Approve a pull request |
 | `requestChanges` | Request changes on a PR |
 
-### Project Tools (`getProjectTools()`)
+### Project Tools — `getProjectTools()`
 
 | Tool | Description |
 |------|-------------|
@@ -214,12 +146,12 @@ const linear = new TriageConnectors({
 | `getSprintIssues` | Get issues in a sprint |
 | `moveToSprint` | Move issue to a sprint |
 
-## Example: AI-Powered Triage Agent
+## Example: Full Triage Agent
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic/tools';
 
 async function triageAgent() {
   const result = await generateText({
@@ -229,105 +161,43 @@ async function triageAgent() {
     prompt: `
       You are a triage agent. Please:
       1. List all open critical bugs
-      2. For each bug, assess severity and add appropriate labels
-      3. Create a summary report of your findings
+      2. Assess severity and add appropriate labels
+      3. Create a summary report
     `,
   });
 
   console.log('Triage Complete:', result.text);
-  return result;
 }
-```
-
-## Example: Selective Tools for Code Review
-
-```typescript
-import { anthropic } from '@ai-sdk/anthropic';
-import { generateText } from 'ai';
-import { 
-  listIssuesTool, 
-  createIssueTool, 
-  searchIssuesTool 
-} from '@agentic-dev-library/triage';
-
-async function codeReviewAgent() {
-  const minimalTools = {
-    listIssues: listIssuesTool,
-    createIssue: createIssueTool,
-    searchIssues: searchIssuesTool,
-  };
-
-  const result = await generateText({
-    model: anthropic('claude-sonnet-4-20250514'),
-    tools: minimalTools,
-    maxSteps: 5,
-    prompt: 'List the open issues and create a summary report.',
-  });
-
-  console.log(result.text);
-}
-```
-
-## CLI (Development & Testing)
-
-The CLI is primarily for development and testing the primitives:
-
-```bash
-# Test issue assessment
-triage assess 123
-
-# Test PR review
-triage review 144
 ```
 
 ## Environment Variables
 
-```bash
-# For GitHub provider
-GH_TOKEN=ghp_xxx              # GitHub PAT with repo scope
+| Variable | Description |
+|----------|-------------|
+| `GH_TOKEN` | GitHub PAT with repo scope |
+| `ANTHROPIC_API_KEY` | For AI-powered triage |
+| `OPENAI_API_KEY` | Alternative AI provider |
 
-# For AI operations (when using CLI)
-ANTHROPIC_API_KEY=xxx         # Anthropic API key
-OPENAI_API_KEY=xxx            # Or OpenAI API key
-OLLAMA_API_KEY=xxx            # Ollama Cloud API key
-```
+## Migration
 
-## Migration from agentic-triage
-
-This package was previously published as `agentic-triage` or `@agentic/triage`. Starting with v0.3.0, it has been consolidated as `@agentic-dev-library/triage`.
-
-To migrate:
+Previously published as `@agentic-dev-library/triage`. To migrate:
 
 ```typescript
 // Old
-import { getTriageTools } from '@agentic/triage';
+import { getTriageTools } from '@agentic-dev-library/triage';
 
 // New
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic/tools';
 ```
 
-## Integration with @agentic/control
+## Related
 
-@agentic/triage tools are consumed by [@agentic/control](/packages/control/) for AI-powered agent analysis:
-
-```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
-import { generateText } from 'ai';
-
-// Use in your agent configurations
-const result = await generateText({
-  model: yourModel,
-  tools: {
-    ...getTriageTools(),
-    ...yourOtherTools,
-  },
-  prompt: 'Triage open issues...',
-});
-```
+- **[@jbcom/agentic (Control)](/packages/control/)** — Consumes triage tools for fleet analysis
+- **[agentic-crew](/packages/crew/)** — Multi-agent workflows
+- **[Vercel AI SDK Integration](/integrations/vercel-ai-sdk/)** — Detailed usage patterns
+- **[MCP Server Guide](/integrations/mcp-server/)** — Claude Desktop setup
 
 ## Links
 
-- [GitHub Repository](https://github.com/agentic-dev-library/triage)
-- [npm Package](https://www.npmjs.com/package/@agentic-dev-library/triage)
-- [MCP Server Guide](/integrations/mcp-server/)
-- [Vercel AI SDK Integration](/integrations/vercel-ai-sdk/)
+- [GitHub](https://github.com/jbcom/agentic/tree/main/packages/triage)
+- [npm](https://www.npmjs.com/package/@jbcom/agentic)

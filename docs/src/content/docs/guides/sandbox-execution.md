@@ -10,7 +10,7 @@ Run AI agents in isolated Docker containers with resource limits, workspace moun
 ## Prerequisites
 
 - Docker installed and running
-- `@agentic-dev-library/control` installed
+- `@jbcom/agentic` installed
 - AI provider API key (for AI-powered sandboxes)
 
 ## CLI Usage
@@ -63,7 +63,7 @@ agentic sandbox run "Analyze large codebase" \
 ### Basic Execution
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 async function runSandbox() {
   const sandbox = new SandboxExecutor();
@@ -89,7 +89,7 @@ async function runSandbox() {
 ### Parallel Fleet Execution
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 async function runFleet() {
   const sandbox = new SandboxExecutor();
@@ -132,7 +132,7 @@ async function runFleet() {
 ### With Custom Configuration
 
 ```typescript
-import { SandboxExecutor, SandboxConfig } from '@agentic-dev-library/control';
+import { SandboxExecutor, SandboxConfig } from '@jbcom/agentic';
 
 async function customSandbox() {
   const sandbox = new SandboxExecutor();
@@ -231,7 +231,7 @@ interface SandboxConfig {
 ### Security Audit
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 async function securityAudit() {
   const sandbox = new SandboxExecutor();
@@ -263,7 +263,7 @@ async function securityAudit() {
 ### Dependency Update
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 async function updateDependencies() {
   const sandbox = new SandboxExecutor();
@@ -296,7 +296,7 @@ async function updateDependencies() {
 ### Code Migration
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 async function migrateToTypeScript() {
   const sandbox = new SandboxExecutor();

@@ -1,428 +1,203 @@
 ---
-title: "@agentic/control"
-description: Unified AI agent fleet management, triage, and orchestration toolkit
+title: "@jbcom/agentic (Control)"
+description: AI agent fleet management — token routing, fleet orchestration, sandbox execution, and handoff protocols
 ---
 
-# @agentic/control
+# @jbcom/agentic — Control
 
-> 🚀 **Unified AI agent fleet management, triage, and orchestration toolkit**
+<div class="polyglot-bar">
+  <span class="lang-badge lang-badge--ts">TypeScript</span>
+</div>
 
-[![npm version](https://badge.fury.io/js/@agentic-dev-library/control.svg)](https://www.npmjs.com/package/@agentic-dev-library/control)
-[![Docker Pulls](https://img.shields.io/docker/pulls/jbcom/agentic-control)](https://hub.docker.com/r/jbcom/agentic-control)
+> Spawn, coordinate, and manage fleets of AI agents with automatic token routing, sandboxed execution, and handoff protocols.
+
+[![npm version](https://badge.fury.io/js/@jbcom/agentic.svg)](https://www.npmjs.com/package/@jbcom/agentic)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 
-**Transform your development workflow with AI-powered agent orchestration.** Spawn, coordinate, and manage fleets of AI agents across your repositories with intelligent token switching, advanced triage capabilities, and secure sandbox execution.
+## What It Does
 
-## ✨ What Makes @agentic/control Special?
+@jbcom/agentic is the orchestration layer of the Agentic ecosystem. It handles the hard coordination problems that come up when you run multiple AI agents across multiple repositories and organizations:
 
-| Feature | Description |
-|---------|-------------|
-| 🎯 **Smart Token Management** | Automatically routes operations to the right GitHub tokens based on organization |
-| 🚀 **Fleet Orchestration** | Spawn and coordinate multiple Cursor Background Agents simultaneously |
-| 🔍 **AI-Powered Triage** | Analyze conversations, review code, and extract actionable insights |
-| 🏗️ **Sandbox Execution** | Run AI agents in isolated Docker containers for safe local development |
-| 🤝 **Seamless Handoffs** | Transfer work between agents with full context preservation |
-| 🔐 **Security First** | Token sanitization, safe subprocess execution, and zero hardcoded credentials |
-| 🔌 **Provider Agnostic** | Works with Anthropic, OpenAI, Google, Mistral, and Azure |
+| Capability | Description |
+|-----------|-------------|
+| **Token Routing** | Automatically selects the right GitHub token based on repository organization — no manual switching |
+| **Fleet Orchestration** | Spawn, monitor, and coordinate multiple Cursor Background Agents in parallel |
+| **Sandbox Execution** | Run AI agents in isolated Docker containers with resource limits |
+| **Handoff Protocol** | Transfer work between agents with full context preservation |
+| **AI Triage** | Analyze agent conversations and extract actionable insights |
+| **Provider Agnostic** | Works with Anthropic, OpenAI, Google, Mistral, Azure, and Ollama |
 
 ## Installation
 
-### npm/pnpm (Recommended)
-
 ```bash
-# Install globally
-pnpm add -g @agentic-dev-library/control
-# or
-npm install -g @agentic-dev-library/control
+# Global CLI
+npm install -g @jbcom/agentic
 
-# Verify installation
-agentic --version
+# As a library
+npm install @jbcom/agentic
 ```
 
-### Docker
+Install at least one AI provider for triage features:
 
 ```bash
-# Pull the latest image
-docker pull jbcom/agentic-control:latest
-
-# Run with your environment
-docker run --rm \
-  -e GITHUB_TOKEN=$GITHUB_TOKEN \
-  -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY \
-  -v $(pwd):/workspace \
-  jbcom/agentic-control:latest fleet list
+npm install @ai-sdk/anthropic  # Recommended
+# or: @ai-sdk/openai, @ai-sdk/google, @ai-sdk/mistral, @ai-sdk/azure
 ```
 
-### Installing AI Providers
-
-AI triage features require installing a provider SDK:
-
-```bash
-# Anthropic (recommended)
-pnpm add @ai-sdk/anthropic
-
-# OpenAI
-pnpm add @ai-sdk/openai
-
-# Google AI
-pnpm add @ai-sdk/google
-
-# Mistral
-pnpm add @ai-sdk/mistral
-
-# Azure OpenAI
-pnpm add @ai-sdk/azure
-```
-
-## CLI Commands
+## CLI Reference
 
 ### Configuration
 
 ```bash
-# Initialize configuration (interactive)
-agentic init
-
-# Non-interactive initialization
-agentic init --non-interactive
+agentic init                     # Interactive setup
+agentic init --non-interactive   # Auto-detect everything
 ```
 
 ### Token Management
 
 ```bash
-# Check all token status
-agentic tokens status
-
-# Validate required tokens
-agentic tokens validate
-
-# Show token for a specific repo
-agentic tokens for-repo my-org/my-repo
+agentic tokens status            # Show all token status
+agentic tokens validate          # Validate required tokens
+agentic tokens for-repo my-org/r # Show which token a repo uses
 ```
 
 ### Fleet Management
 
 ```bash
-# List all agents
-agentic fleet list
+agentic fleet list               # List all agents
+agentic fleet list --running     # Running agents only
+agentic fleet summary            # Fleet overview
+agentic fleet models             # Available Cursor models
 
-# List only running agents
-agentic fleet list --running
-
-# List available Cursor models
-agentic fleet models
-
-# Get fleet summary
-agentic fleet summary
-
-# Spawn a new agent
+# Spawn agents
 agentic fleet spawn <repo> <task>
+agentic fleet spawn <repo> <task> --auto-pr --branch fix/ci
 
-# Spawn with options
-agentic fleet spawn <repo> <task> \
-  --ref feature-branch \
-  --auto-pr \
-  --branch my-branch
-
-# Send followup message
+# Communication
 agentic fleet followup <agent-id> "Status update?"
-
-# Run coordination loop
-agentic fleet coordinate --pr 123 --repo my-org/my-repo
+agentic fleet coordinate --pr 123 --repo my-org/repo
 ```
 
-### AI Triage
+### Sandbox
 
 ```bash
-# Quick triage of text
-agentic triage quick "Error in deployment pipeline"
+# Single agent
+agentic sandbox run "Security audit" \
+  --runtime claude --workspace . --timeout 300
 
-# Review code changes
-agentic triage review --base main --head HEAD
-
-# Analyze agent conversation
-agentic triage analyze <agent-id> -o report.md
-
-# Create issues from analysis
-agentic triage analyze <agent-id> --create-issues
-
-# Use specific model (overrides config)
-agentic triage analyze <agent-id> --model claude-opus-4-20250514
-```
-
-### Sandbox Execution
-
-```bash
-# Run a single AI agent in sandbox
-agentic sandbox run "Analyze this codebase" \
-  --runtime claude \
-  --workspace . \
-  --output ./analysis-results \
-  --timeout 300
-
-# Run multiple agents in parallel
+# Parallel fleet
 agentic sandbox fleet \
-  "Review authentication system" \
-  "Analyze database queries" \
-  "Check for security vulnerabilities" \
-  --runtime claude \
-  --workspace . \
-  --output ./fleet-results
-
-# With custom environment and resource limits
-agentic sandbox run "Refactor the API layer" \
-  --workspace ./src/api \
-  --output ./refactor-results \
-  --memory 2048 \
-  --timeout 600 \
-  --env "NODE_ENV=development,LOG_LEVEL=debug"
+  "Review auth" "Analyze queries" "Check security" \
+  --runtime claude --workspace . --output ./results
 ```
 
-### Handoff Protocol
+### Handoff
 
 ```bash
-# Initiate handoff to successor
-agentic handoff initiate <predecessor-id> \
-  --pr 123 \
-  --branch my-branch \
-  --repo https://github.com/my-org/my-repo
-
-# Confirm health as successor
-agentic handoff confirm <predecessor-id>
-
-# Take over from predecessor
-agentic handoff takeover <predecessor-id> 123 my-new-branch
+agentic handoff initiate <id> --pr 123 --branch my-branch
+agentic handoff confirm <id>
+agentic handoff takeover <id> 123 new-branch
 ```
 
-## Programmatic Usage
+## Programmatic API
 
 ### Fleet Management
 
 ```typescript
-import { Fleet, GitHubClient, getTokenForRepo } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
-// Initialize Fleet manager
 const fleet = new Fleet();
 
 // Spawn an agent
 const result = await fleet.spawn({
   repository: 'https://github.com/my-org/my-repo',
   task: 'Fix the failing CI workflow',
-  ref: 'main',
-  target: {
-    autoCreatePr: true,
-    branchName: 'fix/ci-workflow',
+  target: { autoCreatePr: true, branchName: 'fix/ci' },
+});
+
+// Monitor multiple agents
+const results = await fleet.monitorAgents(agentIds, {
+  pollInterval: 30000,
+  onProgress: (statusMap) => {
+    for (const [id, status] of statusMap) {
+      console.log(`${id}: ${status}`);
+    }
   },
 });
 
-if (result.success && result.data) {
-  console.log(`Agent spawned: ${result.data.id}`);
-  
-  // Wait for completion
-  const finalResult = await fleet.waitFor(result.data.id, {
-    timeout: 600000, // 10 minutes
-    pollInterval: 15000, // 15 seconds
-  });
-  
-  console.log(`Final status: ${finalResult.data?.status}`);
-}
-
-// List all agents
-const agents = await fleet.list();
-
-// Get running agents only
-const running = await fleet.running();
-
-// Broadcast message to multiple agents
-const broadcastResults = await fleet.broadcast(
-  ['agent-1', 'agent-2'],
-  'Please provide a status update.'
-);
+// Broadcast to agents
+await fleet.broadcast(['agent-1', 'agent-2'], 'Status update?');
 ```
 
-### Token-Aware Operations
+### Token Routing
 
 ```typescript
-import { 
-  getTokenForRepo,
-  setTokenConfig,
-  addOrganization,
-} from '@agentic-dev-library/control';
+import { getTokenForRepo, addOrganization } from '@jbcom/agentic';
 
-// Configure organizations
 addOrganization({
   name: 'my-company',
   tokenEnvVar: 'GITHUB_COMPANY_TOKEN',
 });
 
-// Get token for a specific repo (auto-routed)
+// Automatically returns GITHUB_COMPANY_TOKEN
 const token = getTokenForRepo('my-company/my-repo');
-// Returns value of GITHUB_COMPANY_TOKEN
-
-// Configure everything at once
-setTokenConfig({
-  organizations: {
-    'my-company': { name: 'my-company', tokenEnvVar: 'GITHUB_COMPANY_TOKEN' },
-    'partner-org': { name: 'partner-org', tokenEnvVar: 'PARTNER_GH_PAT' },
-  },
-  defaultTokenEnvVar: 'GITHUB_TOKEN',
-  prReviewTokenEnvVar: 'GITHUB_BOT_TOKEN',
-});
-```
-
-### AI Analysis
-
-```typescript
-import { AIAnalyzer } from '@agentic-dev-library/control';
-
-// Use default provider (from config)
-const analyzer = new AIAnalyzer({ repo: 'my-company/my-repo' });
-const result = await analyzer.quickTriage('Error in deployment');
-
-// Use specific provider
-const openaiAnalyzer = new AIAnalyzer({ 
-  repo: 'my-company/my-repo',
-  provider: 'openai',
-  model: 'gpt-4o',
-  apiKey: process.env.OPENAI_API_KEY,
-});
 ```
 
 ### Sandbox Execution
 
 ```typescript
-import { SandboxExecutor } from '@agentic-dev-library/control';
+import { SandboxExecutor } from '@jbcom/agentic';
 
 const sandbox = new SandboxExecutor();
 
-// Single execution
 const result = await sandbox.execute({
   runtime: 'claude',
   workspace: './src',
   outputDir: './analysis',
-  prompt: 'Analyze this code for performance bottlenecks',
-  timeout: 300000, // 5 minutes
-  memory: 1024, // 1GB
+  prompt: 'Analyze for performance bottlenecks',
+  timeout: 300000,
+  memory: 1024,
 });
-
-// Parallel fleet execution
-const results = await sandbox.executeFleet([
-  {
-    runtime: 'claude',
-    workspace: './frontend',
-    outputDir: './frontend-analysis',
-    prompt: 'Review React components for accessibility issues',
-  },
-  {
-    runtime: 'cursor', 
-    workspace: './backend',
-    outputDir: './backend-analysis',
-    prompt: 'Analyze API endpoints for security vulnerabilities',
-  }
-]);
-```
-
-## Real-World Use Cases
-
-### Automated Code Maintenance
-
-```bash
-# Update dependencies across multiple repos
-agentic fleet spawn "my-org/frontend" \
-  "Update React to v18 and fix breaking changes" --auto-pr
-
-agentic fleet spawn "my-org/backend" \
-  "Update Node.js dependencies and fix vulnerabilities" --auto-pr
-
-agentic fleet spawn "my-org/mobile" \
-  "Update React Native and test on latest iOS" --auto-pr
-```
-
-### Security Auditing
-
-```bash
-# Run security analysis in isolated sandbox
-agentic sandbox run \
-  "Perform comprehensive security audit focusing on authentication, authorization, and data validation" \
-  --workspace . --output ./security-audit --timeout 900
-```
-
-### Code Review Automation
-
-```bash
-# AI-powered code review for PRs
-agentic triage review --base main --head feature/user-auth
-
-# Auto-create follow-up issues
-agentic triage analyze <agent-id> --create-issues
-```
-
-### Release Coordination
-
-```bash
-# Coordinate multiple agents for release preparation
-agentic fleet coordinate --repo my-org/app --pr 200 \
-  --agents docs-agent,test-agent,deploy-agent
 ```
 
 ## Architecture
 
 ```
-agentic-control/
-├── src/
-│   ├── core/           # Types, tokens, config
-│   │   ├── types.ts    # Shared type definitions
-│   │   ├── tokens.ts   # Intelligent token switching
-│   │   └── config.ts   # Configuration management
-│   ├── fleet/          # Cursor agent fleet management
-│   │   ├── fleet.ts    # High-level Fleet API
-│   │   └── cursor-api.ts   # Direct Cursor API client
-│   ├── triage/         # AI-powered analysis
-│   │   └── analyzer.ts # Multi-provider AI analysis
-│   ├── github/         # Token-aware GitHub ops
-│   │   └── client.ts   # Multi-org GitHub client
-│   ├── handoff/        # Agent continuity
-│   │   └── manager.ts  # Handoff protocols
-│   ├── cli.ts          # Command-line interface
-│   └── index.ts        # Main exports
-└── tests/
+src/
+├── core/           # Types, tokens, config
+│   ├── types.ts    # Shared type definitions
+│   ├── tokens.ts   # Token routing logic
+│   └── config.ts   # cosmiconfig-based config
+├── fleet/          # Agent fleet management
+│   ├── fleet.ts    # High-level Fleet API
+│   └── cursor-api.ts
+├── triage/         # AI analysis
+│   └── analyzer.ts # Multi-provider analyzer
+├── github/         # Token-aware GitHub client
+├── handoff/        # Agent continuity protocols
+├── sandbox/        # Docker execution
+├── cli.ts          # Commander-based CLI
+└── index.ts        # Public API exports
 ```
 
 ## Security
 
-This package is designed with security in mind:
-
-- **No hardcoded values** - All tokens and organizations are user-configured
-- **Safe subprocess execution** - Uses `spawnSync` instead of shell interpolation
-- **Token sanitization** - Tokens are never logged or exposed in error messages
-- **ReDoS protection** - Regex patterns are designed to prevent denial of service
-- **No credential patterns in docs** - We don't document third-party API key formats
-
-### GitHub Actions SHA Pinning
-
-All GitHub Actions are pinned to their full commit SHA instead of semantic version tags:
-
-```yaml
-# Secure
-- uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-
-# Vulnerable to tag manipulation
-- uses: actions/checkout@v4  # ⚠️ Avoid
-```
-
-### npm Trusted Publishing (OIDC)
-
-Package publishing uses OpenID Connect authentication instead of long-lived tokens, eliminating token leakage risk and providing cryptographic proof of provenance.
+- **No hardcoded values** — All tokens configured via environment variables
+- **Safe subprocess execution** — `spawnSync` instead of shell interpolation
+- **Token sanitization** — Tokens never logged or exposed in error messages
+- **SHA-pinned Actions** — All GitHub Actions pinned to full commit SHA
+- **OIDC publishing** — npm publishing via OpenID Connect, no long-lived tokens
+- **ReDoS protection** — Regex patterns designed to prevent denial of service
 
 ## Related Packages
 
-- **[@agentic/triage](/packages/triage/)** - Triage primitives consumed by control
-- **[@agentic/crew](/packages/crew/)** - Framework-agnostic crew orchestration
-- **[game-generator](/packages/game-generator/)** - AI-powered game generation
+- **[@jbcom/agentic (Triage)](/packages/triage/)** — Triage primitives consumed by control
+- **[agentic-crew](/packages/crew/)** — Framework-agnostic crew orchestration
+- **[@agentic/meshy](/packages/meshy-content-generator/)** — 3D asset pipelines
+- **[game-generator](/packages/game-generator/)** — AI-powered game generation
 
 ## Links
 
-- [GitHub Repository](https://github.com/agentic-dev-library/control)
-- [npm Package](https://www.npmjs.com/package/@agentic-dev-library/control)
-- [Docker Hub](https://hub.docker.com/r/jbcom/agentic-control)
+- [GitHub](https://github.com/jbcom/agentic/tree/main/packages/agentic-control)
+- [npm](https://www.npmjs.com/package/@jbcom/agentic)
 - [API Reference](/api/fleet-management/)

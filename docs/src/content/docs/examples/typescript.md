@@ -9,10 +9,10 @@ These examples are taken directly from the Agentic repositories. They demonstrat
 
 ## Agent Spawning
 
-This example from [`control/examples/01-agent-spawn.ts`](https://github.com/agentic-dev-library/control/blob/main/examples/01-agent-spawn.ts) shows how to spawn a Cursor Background Agent and monitor it until completion.
+This example from [`control/examples/01-agent-spawn.ts`](https://github.com/jbcom/agentic/blob/main/examples/01-agent-spawn.ts) shows how to spawn a Cursor Background Agent and monitor it until completion.
 
 ```typescript
-import { Fleet } from '@agentic-dev-library/control';
+import { Fleet } from '@jbcom/agentic';
 
 async function main(): Promise<void> {
   console.log('🚀 Agent Spawning Example\n');
@@ -101,11 +101,11 @@ main().catch(console.error);
 
 ## Fleet Management
 
-From [`control/examples/02-fleet-management.ts`](https://github.com/agentic-dev-library/control/blob/main/examples/02-fleet-management.ts), this shows fleet-level operations.
+From [`control/examples/02-fleet-management.ts`](https://github.com/jbcom/agentic/blob/main/examples/02-fleet-management.ts), this shows fleet-level operations.
 
 ```typescript
-import type { Agent, AgentStatus } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { Agent, AgentStatus } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 function displayAgents(agents: Agent[]): void {
   if (agents.length === 0) {
@@ -199,12 +199,12 @@ main().catch(console.error);
 
 ## Triage with Vercel AI SDK
 
-From [`triage/examples/basic-agent.ts`](https://github.com/agentic-dev-library/triage/blob/main/examples/basic-agent.ts):
+From [`triage/examples/basic-agent.ts`](https://github.com/jbcom/agentic/blob/main/examples/basic-agent.ts):
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
-import { getTriageTools } from '@agentic-dev-library/triage';
+import { getTriageTools } from '@jbcom/agentic';
 
 async function main() {
   try {
@@ -227,7 +227,7 @@ main().catch(console.error);
 
 ## Selective Triage Tools
 
-From [`triage/examples/selective-tools.ts`](https://github.com/agentic-dev-library/triage/blob/main/examples/selective-tools.ts), using only a subset of tools:
+From [`triage/examples/selective-tools.ts`](https://github.com/jbcom/agentic/blob/main/examples/selective-tools.ts), using only a subset of tools:
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
@@ -236,7 +236,7 @@ import {
   createIssueTool, 
   listIssuesTool, 
   searchIssuesTool 
-} from '@agentic-dev-library/triage';
+} from '@jbcom/agentic';
 
 async function main() {
   try {
@@ -268,11 +268,11 @@ main().catch(console.error);
 
 ## Orchestration Patterns
 
-From [`control/examples/03-orchestration-patterns.ts`](https://github.com/agentic-dev-library/control/blob/main/examples/03-orchestration-patterns.ts), advanced multi-agent coordination:
+From [`control/examples/03-orchestration-patterns.ts`](https://github.com/jbcom/agentic/blob/main/examples/03-orchestration-patterns.ts), advanced multi-agent coordination:
 
 ```typescript
-import type { DiamondConfig, SpawnOptions } from '@agentic-dev-library/control';
-import { Fleet } from '@agentic-dev-library/control';
+import type { DiamondConfig, SpawnOptions } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 async function diamondPatternExample(fleet: Fleet): Promise<void> {
   console.log('💎 Diamond Pattern Orchestration');
@@ -363,7 +363,7 @@ import {
   getTokenForRepo,
   setTokenConfig,
   addOrganization,
-} from '@agentic-dev-library/control';
+} from '@jbcom/agentic';
 
 // Configure organizations
 addOrganization({
@@ -396,7 +396,7 @@ const token = getTokenForRepo('my-company/my-repo');
 Clone the repository and run the examples:
 
 ```bash
-git clone https://github.com/agentic-dev-library/control.git
+git clone https://github.com/jbcom/agentic.git
 cd control
 pnpm install
 

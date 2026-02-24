@@ -1,109 +1,109 @@
 ---
 title: Introduction to Agentic
-description: Learn about the Agentic ecosystem and how it transforms AI agent development
+description: The polyglot AI agent toolkit — what it is, what it solves, and how to start
 ---
 
 # Introduction to Agentic
 
-**Agentic** is the AI & Agents division of the [jbcom enterprise](https://jbcom.github.io), providing a unified toolkit for AI agent development, deployment, and orchestration. Whether you're building AI-powered development workflows, coordinating multi-agent systems, or triaging issues at scale, Agentic has you covered.
+**Agentic** is a polyglot toolkit for AI agent orchestration. It gives you the primitives to spawn, coordinate, and manage AI agents across TypeScript, Python, and Rust — without locking you into a single framework or provider.
 
-## What is Agentic?
+## The Problem
 
-Agentic is a comprehensive ecosystem of tools designed to make working with AI agents as seamless as possible:
+AI agent tooling is fragmented:
 
-### 🎯 **Intelligent Multi-Org Token Management**
-Automatically routes GitHub operations to the correct tokens based on repository organization. No more manual token switching!
+- **Framework lock-in** — CrewAI, LangGraph, and Strands each have different APIs for the same concepts. Switching frameworks means rewriting everything.
+- **Token complexity** — Managing GitHub tokens across multiple organizations is manual and error-prone. One wrong token breaks CI, PRs, or agent spawns.
+- **No fleet coordination** — Spawning one agent is easy. Coordinating ten across different repos, monitoring their progress, and handling failures? That requires infrastructure.
+- **Scattered tools** — Your triage system is separate from your fleet manager which is separate from your 3D pipeline which is separate from your game generator. No shared patterns.
 
-```typescript
-import { getTokenForRepo } from '@agentic-dev-library/control';
+## The Solution
 
-// Automatically uses GITHUB_MYCOMPANY_TOKEN for my-company repos
-const token = getTokenForRepo('my-company/my-repo');
-```
+Agentic is five packages that solve these problems independently or together:
 
-### 🚀 **AI Agent Fleet Management**
-Spawn, monitor, and coordinate multiple Cursor Background Agents working simultaneously across your repositories.
+### @jbcom/agentic (Control)
 
-```bash
-# Spawn agents across multiple repos
-agentic fleet spawn "my-org/frontend" "Update React to v18" --auto-pr
-agentic fleet spawn "my-org/backend" "Update Node.js dependencies" --auto-pr
-agentic fleet spawn "my-org/mobile" "Update React Native" --auto-pr
-```
+<span class="lang-badge lang-badge--ts">TypeScript</span>
 
-### 🏗️ **Secure Sandbox Execution**
-Run AI agents in isolated Docker containers with resource limits, workspace mounting, and parallel execution support.
+The orchestration layer. Spawn AI agent fleets, route tokens per organization, execute tasks in sandboxed Docker containers, and hand off work between agents with full context preservation.
 
 ```bash
-agentic sandbox run "Perform security audit" \
-  --workspace . --output ./security-audit --timeout 900
+agentic fleet spawn "my-org/api" "Fix failing CI" --auto-pr
+agentic sandbox run "Security audit" --workspace . --timeout 900
 ```
 
-### 🔍 **Advanced AI Triage & Analysis**
-Leverage multiple AI providers (Anthropic, OpenAI, Google, Mistral) for code review, conversation analysis, and task extraction.
+### @jbcom/agentic (Triage)
+
+<span class="lang-badge lang-badge--ts">TypeScript</span>
+
+Portable triage primitives built on the Vercel AI SDK. Issue management, PR review, sprint planning — as composable tools that work with any AI provider and any project tracker (GitHub, Jira, Linear, Beads).
 
 ```typescript
-import { getTriageTools } from '@agentic-dev-library/triage';
-import { generateText } from 'ai';
-
 const result = await generateText({
   model: anthropic('claude-sonnet-4-20250514'),
   tools: getTriageTools(),
-  prompt: 'List all open critical bugs and create a triage plan',
+  prompt: 'Triage all open critical bugs',
 });
 ```
 
-### 🤝 **Framework-Agnostic Crew Orchestration**
-Define AI crews once, run on CrewAI, LangGraph, or Strands. Universal CLI runner for all major coding tools.
+### agentic-crew
+
+<span class="lang-badge lang-badge--py">Python</span>
+
+Framework-agnostic crew orchestration. Define agents and tasks in YAML, run them on CrewAI, LangGraph, or Strands — whichever is installed. Includes a universal CLI runner for aider, claude-code, ollama, and other single-agent tools.
 
 ```python
 from agentic_crew import run_crew
 
-# Auto-detects best framework (CrewAI > LangGraph > Strands)
-result = run_crew("my-package", "analyzer", inputs={"code": "..."})
+# Auto-detects best framework at runtime
+result = run_crew("my-app", "reviewer", inputs={"pr": 42})
 ```
 
-## The Agentic Ecosystem
+### @agentic/meshy
 
-| Package | Language | Purpose |
-|---------|----------|---------|
-| **[@agentic/control](/packages/control/)** | TypeScript | Fleet management, token switching, sandbox execution |
-| **[@agentic/crew](/packages/crew/)** | Python | Framework-agnostic crew orchestration |
-| **[@agentic/triage](/packages/triage/)** | TypeScript | Portable triage primitives for AI agents |
-| **[game-generator](/packages/game-generator/)** | Rust | AI-powered retro RPG generation |
+<span class="lang-badge lang-badge--ts">TypeScript</span>
 
-## Enterprise Context
+Declarative 3D asset pipelines for Meshy AI. Define text-to-3D, rigging, and animation pipelines in JSON. Built-in 3D preview, VCR recording for CI, and manifest-based state that survives failures.
 
-Agentic is part of a coherent suite of specialized tools within the jbcom enterprise:
+```bash
+content-gen run character ./assets/characters/hero
+```
 
-- **[jbcom Hub](https://jbcom.github.io)** - Central documentation and portfolio
-- **[Strata](https://strata.game)** - AI-powered gaming platform
-- **[Extended Data](https://extendeddata.dev)** - Enterprise infrastructure tools
+### game-generator
 
-All tools share a unified design system and are interconnected for seamless workflows.
+<span class="lang-badge lang-badge--rs">Rust</span>
 
-## Key Benefits
+AI-powered retro RPG generation with Bevy. Procedural worlds, characters, quests, and assets. Multi-provider AI with intelligent caching. Part of the [Strata](https://strata.game) gaming platform.
 
-### For Individual Developers
-- **Reduced Context Switching**: Smart token management handles multi-org authentication automatically
-- **Parallel Development**: Spawn multiple AI agents to work on different tasks simultaneously
-- **AI-Assisted Code Review**: Get intelligent feedback on your PRs before human review
+```rust
+let game = QuickGenerator::new()
+    .genre(Genre::Jrpg)
+    .theme(Theme::Fantasy)
+    .generate_and_run();
+```
 
-### For Teams
-- **Standardized Workflows**: Define crews once, run consistently across all team members
-- **Secure Execution**: Sandbox mode ensures AI operations don't affect production systems
-- **Full Audit Trail**: Every agent action is logged and can be analyzed
+## Key Principles
 
-### For Enterprises
-- **Multi-Org Support**: Manage multiple GitHub organizations with different access tokens
-- **OIDC Publishing**: Secure npm publishing without long-lived tokens
-- **Compliance Ready**: Token sanitization and audit logs for security requirements
+**Provider agnostic** — Every package works with multiple AI providers. Anthropic, OpenAI, Google, Mistral, Ollama, Azure. Swap providers by changing a config value.
+
+**Declarative over imperative** — Crews in YAML. Pipelines in JSON. Fleet config in JSON. Token routing from environment variables. Configuration lives in version control.
+
+**Security first** — Token sanitization everywhere. SHA-pinned GitHub Actions. OIDC publishing. Sandboxed execution with Docker resource limits. Zero hardcoded credentials.
+
+**Polyglot** — TypeScript for orchestration and web tooling. Python for AI framework integration. Rust for performance-critical game generation. Each language where it's strongest.
+
+## Who Is This For?
+
+| You are... | Agentic gives you... |
+|------------|---------------------|
+| A developer managing multiple GitHub orgs | Automatic token routing — one config, all orgs |
+| A team standardizing AI workflows | Framework-agnostic crews — define once, run anywhere |
+| A platform engineer coordinating agents | Fleet management — spawn, monitor, coordinate, hand off |
+| A game developer using AI generation | Procedural RPG content with Bevy integration |
+| A 3D artist building asset pipelines | Declarative Meshy pipelines with manifest state |
 
 ## Next Steps
 
-Ready to get started? Here's your path:
-
-1. **[Quick Start](/getting-started/quick-start/)** - Get up and running in 5 minutes
-2. **[Configuration](/getting-started/configuration/)** - Customize Agentic for your workflow
-3. **[TypeScript Examples](/examples/typescript/)** - Learn from real-world code
-4. **[API Reference](/api/fleet-management/)** - Deep dive into the API
+1. **[Quick Start](/getting-started/quick-start/)** — Install and spawn your first agent in 5 minutes
+2. **[Configuration](/getting-started/configuration/)** — Set up tokens, providers, and fleet defaults
+3. **[Packages](/packages/control/)** — Deep dive into each package
+4. **[Guides](/guides/agent-spawning/)** — Learn orchestration patterns and best practices

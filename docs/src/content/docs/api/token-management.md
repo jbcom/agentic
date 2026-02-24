@@ -1,11 +1,11 @@
 ---
 title: Token Management API
-description: API reference for @agentic-dev-library/control token management
+description: API reference for @jbcom/agentic token management
 ---
 
 # Token Management API Reference
 
-Complete reference for token management functions from `@agentic-dev-library/control`.
+Complete reference for token management functions from `@jbcom/agentic`.
 
 ## Overview
 
@@ -20,7 +20,7 @@ import {
   addOrganization,
   getTokenConfig,
   validateTokens,
-} from '@agentic-dev-library/control';
+} from '@jbcom/agentic';
 ```
 
 ## Functions
@@ -276,7 +276,7 @@ Repository: my-company/my-repo
 The Fleet class automatically uses token management:
 
 ```typescript
-import { Fleet, addOrganization } from '@agentic-dev-library/control';
+import { Fleet, addOrganization } from '@jbcom/agentic';
 
 // Configure organizations
 addOrganization({
@@ -297,7 +297,7 @@ await fleet.spawn({
 ## Usage with GitHubClient
 
 ```typescript
-import { GitHubClient, getTokenForRepo } from '@agentic-dev-library/control';
+import { GitHubClient, getTokenForRepo } from '@jbcom/agentic';
 
 // Token is automatically selected
 const client = new GitHubClient('my-company/my-repo');
@@ -339,7 +339,7 @@ Set up a dedicated bot for consistent identity:
 ### 3. Validate on Startup
 
 ```typescript
-import { validateTokens } from '@agentic-dev-library/control';
+import { validateTokens } from '@jbcom/agentic';
 
 const result = validateTokens();
 if (!result.valid) {
