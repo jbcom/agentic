@@ -43,6 +43,22 @@ venv/
 .ruff_cache/
 .mypy_cache/
 
+# Nx
+.nx/
+
+# uv
+uv.lock
+
+# Tox
+.tox/
+
+# Sphinx output (auto-generated)
+docs/src/content/docs/api/_generated/
+
+# Astro
+docs/.astro/
+docs/dist/
+
 # AI / Agents
 memory-bank/
 # .cursor/ is managed below

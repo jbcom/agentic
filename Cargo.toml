@@ -1,0 +1,83 @@
+[workspace]
+members = [
+    "packages/vintage-game-generator",
+    "packages/vintage-ai-client",
+    "packages/vintage-blending-core",
+    "packages/vintage-build-tools",
+    "packages/bevy-combat",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT OR Apache-2.0"
+authors = ["Jon Bogaty"]
+repository = "https://github.com/agentic-dev-library/agentic-control"
+
+[workspace.dependencies]
+# Game engine
+bevy = "0.16.1"
+bevy_egui = "0.35"
+bevy-inspector-egui = "0.32"
+egui_dock = "0.16"
+catppuccin-egui = "5.7"
+
+# AI
+async-openai = "0.32"
+tiktoken-rs = "0.7"
+
+# Async
+tokio = { version = "1.48", features = ["full"] }
+futures = "0.3"
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.9"
+ron = "0.9"
+bincode = "1.3"
+
+# Templating
+minijinja = { version = "2.14", features = ["loader"] }
+
+# Caching
+sled = "0.34"
+
+# Graph algorithms
+petgraph = "0.7"
+
+# HTTP
+reqwest = { version = "0.12", features = ["json", "stream"] }
+reqwest-middleware = "0.4"
+
+# Utilities
+anyhow = "1.0"
+thiserror = "2.0"
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1.0", features = ["v4"] }
+dirs = "6.0"
+clap = { version = "4.5", features = ["derive"] }
+dotenv = "0.15"
+base64 = "0.22"
+rayon = "1.10"
+regex = "1.11"
+image = "0.25"
+notify = { version = "8.0", features = ["serde"] }
+syn = { version = "2.0", features = ["full"] }
+fs_extra = "1.3"
+zstd = "0.13"
+
+[workspace.lints.clippy]
+all = "warn"
+pedantic = "warn"
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
