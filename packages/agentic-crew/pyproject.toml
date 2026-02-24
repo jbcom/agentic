@@ -76,10 +76,10 @@ run-crew = "agentic_crew.crew:kickoff"
 train-crew = "agentic_crew.crew:train"
 
 [project.urls]
-Homepage = "https://github.com/agentic-dev-library/agentic-control"
-Repository = "https://github.com/agentic-dev-library/agentic-control"
-Documentation = "https://github.com/agentic-dev-library/agentic-control#readme"
-Issues = "https://github.com/agentic-dev-library/agentic-control/issues"
+Homepage = "https://github.com/jbcom/agentic"
+Repository = "https://github.com/jbcom/agentic"
+Documentation = "https://github.com/jbcom/agentic#readme"
+Issues = "https://github.com/jbcom/agentic/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/agentic_crew"]

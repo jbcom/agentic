@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-dev-library/control",
+  "name": "@jbcom/agentic",
   "version": "1.2.0",
   "description": "Orchestration layer for AI agent fleet management - multi-agent routing, CI resolution, and GitHub Marketplace actions",
   "type": "module",
@@ -76,7 +76,7 @@
     "@inquirer/prompts": "8.1.0",
     "@modelcontextprotocol/sdk": "^1.25.0",
     "@octokit/rest": "^22.0.1",
-    "@agentic-dev-library/triage": "^1.1.0",
+    "@jbcom/agentic": "^1.1.0",
     "ai": "^6.0.3",
     "commander": "^14.0.2",
     "cosmiconfig": "9.0.0",
@@ -148,12 +148,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/agentic-dev-library/control.git",
+    "url": "https://github.com/jbcom/agentic.git",
     "directory": "packages/agentic-control"
   },
-  "homepage": "https://agentic-dev-library.github.io/packages/control/",
+  "homepage": "https://agentic.coach/packages/control/",
   "bugs": {
-    "url": "https://github.com/agentic-dev-library/control/issues"
+    "url": "https://github.com/jbcom/agentic/issues"
   },
   "publishConfig": {
     "access": "public"

@@ -1,5 +1,5 @@
 {
-  "name": "@agentic-dev-library/meshy-content-generator",
+  "name": "@jbcom/agentic",
   "version": "0.1.1",
   "description": "Declarative Meshy content generation pipelines with a CLI and API.",
   "license": "MIT",
@@ -13,10 +13,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/agentic-dev-library/agentic-control.git",
+    "url": "https://github.com/jbcom/agentic.git",
     "directory": "packages/meshy-content-generator"
   },
-  "homepage": "https://agentic-dev-library.github.io/meshy-content-generator",
+  "homepage": "https://agentic.coach/meshy-content-generator",
   "author": "Arcade Cabinet",
   "engines": {
     "node": ">=20.0.0"

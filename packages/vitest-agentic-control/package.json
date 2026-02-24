@@ -1,7 +1,7 @@
 {
   "name": "@agentic-dev-library/vitest-control",
   "version": "1.0.0",
-  "description": "Vitest plugin with fixtures and utilities for @agentic-dev-library/control E2E testing",
+  "description": "Vitest plugin with fixtures and utilities for @jbcom/agentic E2E testing",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -75,12 +75,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/agentic-dev-library/control.git",
+    "url": "https://github.com/jbcom/agentic.git",
     "directory": "packages/vitest-agentic-control"
   },
-  "homepage": "https://agentic-dev-library.github.io/packages/control/",
+  "homepage": "https://agentic.coach/packages/control/",
   "bugs": {
-    "url": "https://github.com/agentic-dev-library/control/issues"
+    "url": "https://github.com/jbcom/agentic/issues"
   },
   "publishConfig": {
     "access": "public"

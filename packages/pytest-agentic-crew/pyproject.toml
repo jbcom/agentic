@@ -41,9 +41,9 @@ all = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/agentic-dev-library/agentic-control"
-Repository = "https://github.com/agentic-dev-library/agentic-control"
-Documentation = "https://github.com/agentic-dev-library/agentic-control/tree/main/packages/pytest-agentic-crew"
+Homepage = "https://github.com/jbcom/agentic"
+Repository = "https://github.com/jbcom/agentic"
+Documentation = "https://github.com/jbcom/agentic/tree/main/packages/pytest-agentic-crew"
 
 [project.entry-points.pytest11]
 agentic_crew = "pytest_agentic_crew.plugin"

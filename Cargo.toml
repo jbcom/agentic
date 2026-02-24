@@ -8,7 +8,7 @@ edition = "2024"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
 authors = ["Jon Bogaty"]
-repository = "https://github.com/agentic-dev-library/agentic-control"
+repository = "https://github.com/jbcom/agentic"
 
 [workspace.lints.clippy]
 all = "warn"

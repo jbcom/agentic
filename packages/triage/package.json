@@ -1,5 +1,5 @@
 {
-    "name": "@agentic-dev-library/triage",
+    "name": "@jbcom/agentic",
     "version": "1.1.0",
     "description": "AI-powered GitHub issue triage, PR review, and sprint planning - Vercel AI SDK primitives",
     "type": "module",
@@ -76,12 +76,12 @@
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/agentic-dev-library/agentic-control.git",
+        "url": "git+https://github.com/jbcom/agentic.git",
         "directory": "packages/triage"
     },
-    "homepage": "https://github.com/agentic-dev-library/agentic-control/tree/main/packages/triage#readme",
+    "homepage": "https://github.com/jbcom/agentic/tree/main/packages/triage#readme",
     "bugs": {
-        "url": "https://github.com/agentic-dev-library/agentic-control/issues"
+        "url": "https://github.com/jbcom/agentic/issues"
     },
     "engines": {
         "node": ">=20"

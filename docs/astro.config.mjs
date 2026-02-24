@@ -4,7 +4,7 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://agentic-dev-library.github.io',
+	site: 'https://agentic.coach',
 	integrations: [
 		starlight({
 			title: 'Agentic',
@@ -15,7 +15,7 @@ export default defineConfig({
 				replacesTitle: false,
 			},
 			social: [
-				{ icon: 'github', label: 'GitHub', href: 'https://github.com/agentic-dev-library' },
+				{ icon: 'github', label: 'GitHub', href: 'https://github.com/jbcom/agentic' },
 			],
 			customCss: [
 				'./src/styles/custom.css',
@@ -25,7 +25,7 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: {
 						property: 'og:image',
-						content: 'https://agentic-dev-library.github.io/og-image.png',
+						content: 'https://agentic.coach/og-image.png',
 					},
 				},
 			],

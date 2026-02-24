@@ -28,7 +28,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@agentic/triage": "github:agentic-dev-library/triage#1a507f900b4aae96eea51f85e6c68ba4b72b54a8"
+    "@agentic/triage": "github:jbcom/agentic#1a507f900b4aae96eea51f85e6c68ba4b72b54a8"
   },
   "peerDependencies": {
     "@agentic/triage": ">=0.2.0"
