@@ -1,0 +1,29 @@
+---
+title: CI Setup
+---
+
+Use VCR recording to make Meshy calls deterministic in CI.
+
+## Record once
+
+```bash
+POLLY_MODE=record pnpm test:unit
+```
+
+This writes recordings to `test/__recordings__`. Commit them so CI can replay.
+
+## Replay in CI
+
+```bash
+POLLY_MODE=replay pnpm test:unit
+```
+
+## Suggested CI steps
+
+```bash
+pnpm install
+pnpm check
+pnpm test
+pnpm test:e2e
+pnpm build
+```

@@ -1,0 +1,38 @@
+---
+title: Meshy Ops
+---
+
+## Cost & rate‑limit guidance
+
+Meshy requests can be credit‑ and time‑intensive. Recommended practices:
+
+- **Batch by asset type** (characters vs props) to reduce pipeline churn.
+- **Record VCR fixtures** for CI to avoid burning credits on tests.
+- **Use preview → refine** intentionally; refine tasks are the most expensive.
+- **Throttle parallel runs** if you are seeing rate‑limit errors.
+
+## When to use each pipeline
+
+- `character-full`: full production asset pipeline (text → image → preview → refine → rig → animation)
+- `character`: reduced flow when you want faster iteration
+- `prop`: fast prop generation (text → 3D)
+
+## Suggested asset folder layout
+
+```text
+assets/
+├── characters/
+│   └── hero/
+│       └── manifest.json
+└── props/
+    └── katana/
+        └── manifest.json
+```
+
+## Recording VCR fixtures
+
+```bash
+POLLY_MODE=record pnpm test:unit
+```
+
+Commit the recordings under `test/__recordings__` so CI can replay.

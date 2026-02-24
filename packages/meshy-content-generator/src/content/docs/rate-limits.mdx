@@ -1,0 +1,24 @@
+---
+title: Rate‑Limit Recovery
+---
+
+## Symptoms
+
+- Meshy requests fail with 429 or rate‑limit errors.
+- Pipelines stall or slow down significantly.
+
+## Immediate mitigation
+
+- Reduce concurrent runs.
+- Back off and retry after a short delay.
+- Prefer preview tasks first; run refine in a separate window.
+
+## Operational strategies
+
+- **Queue runs** instead of firing parallel jobs.
+- **Stagger animation runs** (animations can fan out quickly).
+- **Use VCR in CI** to avoid hitting Meshy from tests.
+
+## Suggested default policy
+
+If you hit a rate limit, retry with exponential backoff. The Meshy client already retries on 429s using a linear backoff. You can increase `maxRetries` and `retryDelayMs` when initializing `MeshyClient`.

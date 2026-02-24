@@ -1,0 +1,53 @@
+---
+title: Getting Started
+---
+
+## Install
+
+```bash
+pnpm add @agentic-dev-library/meshy-content-generator
+```
+
+## Environment
+
+```bash
+MESHY_API_KEY=your_api_key
+```
+
+## Run a pipeline
+
+```bash
+content-gen run character ./assets/characters/hero \
+  --pipelines ./pipelines/definitions \
+  --tasks ./tasks/definitions
+```
+
+## Start the API + preview server
+
+```bash
+pnpm dev
+```
+
+## Use the API
+
+```ts
+import {
+  PipelineRunner,
+  loadJsonDefinitions,
+} from "@agentic-dev-library/meshy-content-generator";
+
+const definitions = await loadJsonDefinitions({
+  pipelinesDir: "./pipelines/definitions",
+  tasksDir: "./tasks/definitions",
+});
+
+const runner = new PipelineRunner({
+  definitions,
+  apiKey: process.env.MESHY_API_KEY!,
+});
+
+await runner.run({
+  pipelineName: "character",
+  assetDir: "./assets/characters/hero",
+});
+```

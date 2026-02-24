@@ -1,0 +1,80 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pytest-agentic-crew"
+version = "0.1.0"
+description = "Pytest plugin with fixtures for agentic-crew E2E testing"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+readme = "README.md"
+authors = [{ name = "Jon Bogaty", email = "jon@jonbogaty.com" }]
+keywords = ["pytest", "testing", "fixtures", "agentic-crew", "e2e", "crewai", "langgraph", "strands"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Pytest",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "pytest>=8.0",
+    "pytest-mock>=3.12.0",
+    "vcrpy>=6.0",
+]
+
+[project.optional-dependencies]
+crewai = ["crewai[tools,anthropic]>=1.5.0"]
+langgraph = ["langgraph>=0.2", "langchain-anthropic>=0.3"]
+strands = ["strands-agents>=0.1"]
+all = [
+    "pytest-agentic-crew[crewai]",
+    "pytest-agentic-crew[langgraph]",
+    "pytest-agentic-crew[strands]",
+]
+
+[project.urls]
+Homepage = "https://github.com/agentic-dev-library/agentic-control"
+Repository = "https://github.com/agentic-dev-library/agentic-control"
+Documentation = "https://github.com/agentic-dev-library/agentic-control/tree/main/packages/pytest-agentic-crew"
+
+[project.entry-points.pytest11]
+agentic_crew = "pytest_agentic_crew.plugin"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pytest_agentic_crew"]
+
+# Semantic Release - per-package versioning
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["src/pytest_agentic_crew/__init__.py:__version__"]
+build_command = "uv build"
+commit_parser = "angular"
+commit_author = "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+tag_format = "pytest-agentic-crew-v{version}"
+changelog_file = "CHANGELOG.md"
+upload_to_vcs_release = true
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "ci", "build"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.remote]
+type = "github"
+token = { env = "GH_TOKEN" }
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true

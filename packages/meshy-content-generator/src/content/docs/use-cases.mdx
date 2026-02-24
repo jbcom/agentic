@@ -1,0 +1,45 @@
+---
+title: Use Cases
+---
+
+## Character pipeline (text → image → 3D → rig → animation)
+
+Use `character-full` when you want the full Meshy workflow and a rigged character ready for animation.
+
+```bash
+content-gen run character-full ./assets/characters/hero \
+  --pipelines ./pipelines/definitions \
+  --tasks ./tasks/definitions
+```
+
+Typical outputs:
+
+- `concept.png`
+- `preview.glb`
+- `refined.glb`
+- `rigged.glb`
+- `animations/*.fbx`
+
+## Prop pipeline (text → 3D)
+
+Use `prop` for rapid asset iteration.
+
+```bash
+content-gen run prop ./assets/props/katana \
+  --pipelines ./pipelines/definitions \
+  --tasks ./tasks/definitions
+```
+
+## API-driven generation
+
+Run the same pipelines over HTTP from build systems or internal tools.
+
+```bash
+curl -X POST http://localhost:5177/runs \
+  -H 'content-type: application/json' \
+  -d '{
+    "pipelineName": "character",
+    "assetDir": "./assets/characters/hero",
+    "wait": true
+  }'
+```

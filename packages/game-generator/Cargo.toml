@@ -1,0 +1,99 @@
+[package]
+name = "game-generator"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+description = "Visual-first vintage game generator with AI assistance"
+repository.workspace = true
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "game-generator"
+path = "src/main.rs"
+
+[lib]
+name = "game_generator"
+path = "src/lib.rs"
+
+[dependencies]
+# Core UI Framework
+bevy = { version = "0.16.1", features = ["dynamic_linking"] }
+bevy_egui = "0.35"
+bevy-inspector-egui = "0.32"
+egui_dock = "0.16"
+catppuccin-egui = { version = "5.7", default-features = false, features = ["egui31"] }
+
+# CLI and Configuration
+clap = { version = "4.5", features = ["derive"] }
+dirs = "6.0"
+uuid = { version = "1.19", features = ["v4", "serde"] }
+
+# Graph algorithms (for blending)
+petgraph = "0.7"
+
+# AI providers
+async-openai = { version = "0.32", features = ["full"] }
+
+# Async runtime
+tokio = { version = "1.48", features = ["full"] }
+async-trait = "0.1"
+tokio-stream = { version = "0.1", features = ["fs"] }
+futures = "0.3"
+async-stream = "0.3.6"
+
+# Template Engine
+minijinja = { version = "2.14", features = ["loader", "preserve_order"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.9"
+ron = "0.9"
+bincode = "1.3"
+
+# Error Handling
+anyhow = "1.0"
+thiserror = "2.0"
+
+# HTTP client
+reqwest = { version = "0.12", features = ["json", "stream", "blocking"] }
+reqwest-middleware = "0.4"
+
+# Caching
+sled = "0.34"
+
+# Utilities
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+notify = "8.2"
+syn = { version = "2.0", features = ["full", "parsing"] }
+base64 = "0.22"
+crossbeam-channel = "0.5"
+open = "5.3"
+sha2 = "0.10"
+zstd = "0.13"
+image = "0.25"
+regex = "1.11"
+tiktoken-rs = "0.7"
+fs_extra = "1.3"
+rayon = "1.10"
+dotenv = "0.15"
+
+# Combat system
+rand = "0.8"
+
+# Optional dependencies for advanced features
+nalgebra = { version = "0.33", optional = true }
+
+[features]
+default = []
+linalg = ["nalgebra"]
+
+[dev-dependencies]
+tempfile = "3.24"
+reqwest-vcr = "0.3.0"
+pretty_assertions = "1.4"

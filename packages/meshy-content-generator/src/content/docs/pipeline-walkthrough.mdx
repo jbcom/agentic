@@ -1,0 +1,83 @@
+---
+title: Pipeline Walkthrough
+---
+
+This walkthrough shows how pipeline steps and task definitions work together.
+
+## 1) Manifest
+
+Each asset directory contains a `manifest.json` that supplies prompts and configuration.
+
+```json
+{
+  "id": "hero",
+  "name": "Hero",
+  "type": "character",
+  "textTo3DPreviewTask": {
+    "prompt": "Stylized anime hero with clean silhouette"
+  },
+  "textTo3DRefineTask": {
+    "texturePrompt": "Cel-shaded materials with crisp outlines"
+  },
+  "animationTask": {
+    "animations": ["WalkAndRun.Walking.Casual_Walk"]
+  }
+}
+```
+
+## 2) Pipeline
+
+Pipelines reference task IDs. Each step can override inputs.
+
+```json
+{
+  "name": "character-full",
+  "steps": [
+    {
+      "id": "preview",
+      "task": "text-to-3d-preview",
+      "inputs": [
+        { "name": "prompt", "source": "manifest", "path": "textTo3DPreviewTask.prompt" }
+      ]
+    },
+    {
+      "id": "refine",
+      "task": "text-to-3d-refine",
+      "dependsOn": ["preview"],
+      "inputs": [
+        { "name": "preview_task_id", "source": "step", "step": "preview", "path": "taskId" },
+        { "name": "texture_prompt", "source": "manifest", "path": "textTo3DRefineTask.texturePrompt" }
+      ]
+    }
+  ]
+}
+```
+
+## 3) Task definition
+
+Tasks map to Meshy endpoints and define how outputs are captured.
+
+```json
+{
+  "id": "text-to-3d-refine",
+  "apiVersion": "v2",
+  "endpoint": "text-to-3d",
+  "inputs": [
+    { "name": "mode", "source": "literal", "value": "refine" },
+    { "name": "preview_task_id", "source": "literal" }
+  ],
+  "outputs": [
+    { "name": "model", "responsePath": "result.model_urls.glb", "artifact": "refined.glb" }
+  ]
+}
+```
+
+## 4) Run
+
+```bash
+content-gen run character-full ./assets/characters/hero \
+  --pipelines ./pipelines/definitions \
+  --tasks ./tasks/definitions
+```
+
+The manifest is updated with task status, outputs, and artifact paths.

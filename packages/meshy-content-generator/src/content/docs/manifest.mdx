@@ -1,0 +1,24 @@
+---
+title: Manifests
+---
+
+Each asset directory contains a `manifest.json`. The manifest feeds input values into tasks and stores task state.
+
+Example:
+
+```json
+{
+  "id": "hero",
+  "name": "Hero",
+  "type": "character",
+  "textToImageTask": {
+    "prompt": "Anime hero in a rooftop setting"
+  },
+  "multiImageTo3DTask": {
+    "texturePrompt": "cel-shaded materials"
+  },
+  "animationTask": {
+    "animations": ["WalkAndRun.Walking.Casual_Walk"]
+  }
+}
+```

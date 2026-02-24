@@ -1,0 +1,24 @@
+---
+title: Preview
+---
+
+The preview route hosts a lightweight viewer for generated assets so you can validate Meshy outputs quickly.
+
+## Start the server
+
+```bash
+pnpm dev
+```
+
+## Open a preview
+
+```bash
+http://localhost:5177/preview?assetDir=./assets/characters/hero&file=model.glb
+```
+
+- `assetDir` must be inside the current working directory.
+- `file` is resolved relative to the asset directory.
+
+The preview uses `<model-viewer>` and supports basic camera controls and lighting out of the box.
+
+The viewer fetches assets through the `/file` endpoint so only the requested file is served.

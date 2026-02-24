@@ -1,0 +1,49 @@
+{
+  "id": "text-to-3d-refine",
+  "apiVersion": "v2",
+  "endpoint": "text-to-3d",
+  "method": "POST",
+  "inputs": [
+    {
+      "name": "mode",
+      "source": "literal",
+      "value": "refine"
+    },
+    {
+      "name": "preview_task_id",
+      "source": "literal"
+    },
+    {
+      "name": "texture_prompt",
+      "source": "manifest",
+      "path": "textTo3DRefineTask.texturePrompt"
+    },
+    {
+      "name": "enable_pbr",
+      "source": "manifest",
+      "path": "textTo3DRefineTask.enablePbr",
+      "default": false
+    },
+    {
+      "name": "moderation",
+      "source": "manifest",
+      "path": "textTo3DRefineTask.moderation",
+      "default": false
+    }
+  ],
+  "outputs": [
+    {
+      "name": "taskId",
+      "responsePath": "id"
+    },
+    {
+      "name": "model",
+      "responsePath": "result.model_urls.glb",
+      "artifact": "refined.glb"
+    },
+    {
+      "name": "textures",
+      "responsePath": "result.texture_urls"
+    }
+  ]
+}

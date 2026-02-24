@@ -1,0 +1,29 @@
+{
+  "id": "animation",
+  "apiVersion": "v1",
+  "endpoint": "animations",
+  "method": "POST",
+  "inputs": [
+    {
+      "name": "rig_task_id",
+      "source": "literal"
+    },
+    {
+      "name": "action_id",
+      "source": "lookup",
+      "table": "ANIMATION_IDS",
+      "key": "{{animationName}}"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "taskId",
+      "responsePath": "id"
+    },
+    {
+      "name": "animation",
+      "responsePath": "result.animation_glb_url",
+      "artifact": "animations/{{animationName}}.glb"
+    }
+  ]
+}

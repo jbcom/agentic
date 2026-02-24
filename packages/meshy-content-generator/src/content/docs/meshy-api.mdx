@@ -1,0 +1,386 @@
+---
+title: Meshy API
+---
+
+# Meshy API Reference
+
+Complete API documentation for all Meshy endpoints used in the content-gen pipeline.
+
+**Base URL:** `https://api.meshy.ai/openapi`
+
+**Authentication:** `Authorization: Bearer ${YOUR_API_KEY}`
+
+---
+
+## Text-to-Image API
+
+Generate concept images from text prompts.
+
+### Create Task
+`POST /v1/text-to-image`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `ai_model` | string | `nano-banana` or `nano-banana-pro` |
+| `prompt` | string | Text description of desired image |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `generate_multi_view` | boolean | false | Produces 3 multi-angle views when true |
+| `pose_mode` | string | "" | `a-pose`, `t-pose`, or empty |
+| `aspect_ratio` | string | `1:1` | `1:1`, `16:9`, `9:16`, `4:3`, `3:4` |
+
+**Response:**
+```json
+{ "result": "task-id" }
+```
+
+**Task Object (on completion):**
+```json
+{
+  "id": "...",
+  "type": "text-to-image",
+  "status": "SUCCEEDED",
+  "image_urls": ["url1", "url2", "url3"],  // 1 or 3 URLs
+  "progress": 100
+}
+```
+
+### Other Endpoints
+- `GET /v1/text-to-image/:id` - Retrieve task
+- `GET /v1/text-to-image/:id/stream` - SSE stream
+- `DELETE /v1/text-to-image/:id` - Delete task
+- `GET /v1/text-to-image` - List tasks
+
+---
+
+## Image-to-3D API (Single Image)
+
+Generate 3D model from a single image.
+
+### Create Task
+`POST /v1/image-to-3d`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `image_url` | string | Publicly accessible URL or base64 data URI (.jpg, .jpeg, .png) |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `model_type` | string | `standard` | `standard` or `lowpoly` |
+| `ai_model` | string | `latest` | `meshy-5` or `latest` (Meshy 6) |
+| `topology` | string | `triangle` | `quad` or `triangle` |
+| `target_polycount` | integer | 30000 | 100-300,000 |
+| `symmetry_mode` | string | `auto` | `off`, `auto`, `on` |
+| `should_remesh` | boolean | true | Enable remesh phase |
+| `should_texture` | boolean | true | Generate textures |
+| `enable_pbr` | boolean | false | Generate PBR maps |
+| `pose_mode` | string | "" | `a-pose`, `t-pose`, or empty |
+| `texture_prompt` | string | - | Texture guidance (max 600 chars) |
+| `texture_image_url` | string | - | 2D image for texture guidance |
+
+**Response:**
+```json
+{ "result": "task-id" }
+```
+
+**Task Object (on completion):**
+```json
+{
+  "id": "...",
+  "type": "image-to-3d",
+  "status": "SUCCEEDED",
+  "model_urls": {
+    "glb": "https://...",
+    "fbx": "https://...",
+    "obj": "https://...",
+    "usdz": "https://..."
+  },
+  "texture_urls": [{
+    "base_color": "https://...",
+    "metallic": "https://...",
+    "normal": "https://...",
+    "roughness": "https://..."
+  }]
+}
+```
+
+### Other Endpoints
+- `GET /v1/image-to-3d/:id` - Retrieve task
+- `GET /v1/image-to-3d/:id/stream` - SSE stream
+- `DELETE /v1/image-to-3d/:id` - Delete task
+- `GET /v1/image-to-3d` - List tasks
+
+---
+
+## Multi-Image-to-3D API
+
+Generate 3D model from multiple images (1-4) of the same object.
+
+### Create Task
+`POST /v1/multi-image-to-3d`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `image_urls` | array | 1-4 publicly accessible URLs or base64 data URIs |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `ai_model` | string | `latest` | `meshy-5` or `latest` |
+| `topology` | string | `triangle` | `quad` or `triangle` |
+| `target_polycount` | integer | 30000 | 100-300,000 |
+| `symmetry_mode` | string | `auto` | `off`, `auto`, `on` |
+| `should_remesh` | boolean | true | Enable remesh phase |
+| `should_texture` | boolean | true | Generate textures |
+| `enable_pbr` | boolean | false | Generate PBR maps |
+| `pose_mode` | string | "" | `a-pose`, `t-pose`, or empty |
+| `texture_prompt` | string | - | Texture guidance (max 600 chars) |
+| `texture_image_url` | string | - | 2D image for texture guidance |
+
+**Response:**
+```json
+{ "result": "task-id" }
+```
+
+**Task Object:** Same structure as Image-to-3D with `type: "multi-image-to-3d"`
+
+### Other Endpoints
+- `GET /v1/multi-image-to-3d/:id` - Retrieve task
+- `GET /v1/multi-image-to-3d/:id/stream` - SSE stream
+- `DELETE /v1/multi-image-to-3d/:id` - Delete task
+- `GET /v1/multi-image-to-3d` - List tasks
+
+---
+
+## Text-to-3D API
+
+Two-stage workflow: preview (mesh) then refine (texture).
+
+### Create Preview Task
+`POST /v2/text-to-3d`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `mode` | string | Must be `"preview"` |
+| `prompt` | string | Object description (max 600 chars) |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `art_style` | string | `realistic` | `realistic` or `sculpture` |
+| `ai_model` | string | `latest` | `meshy-5` or `latest` |
+| `topology` | string | `triangle` | `quad` or `triangle` |
+| `target_polycount` | integer | 30000 | 100-300,000 |
+| `should_remesh` | boolean | true | Enable remesh phase |
+| `symmetry_mode` | string | `auto` | `off`, `auto`, `on` |
+| `pose_mode` | string | "" | `a-pose`, `t-pose`, or empty |
+
+### Create Refine Task
+`POST /v2/text-to-3d`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `mode` | string | Must be `"refine"` |
+| `preview_task_id` | string | ID of SUCCEEDED preview task |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `enable_pbr` | boolean | false | Generate PBR maps |
+| `texture_prompt` | string | - | Texture guidance (max 600 chars) |
+| `texture_image_url` | string | - | 2D image for texture guidance |
+| `ai_model` | string | `latest` | `meshy-5` or `latest` |
+
+### Other Endpoints
+- `GET /v2/text-to-3d/:id` - Retrieve task
+- `GET /v2/text-to-3d/:id/stream` - SSE stream
+- `DELETE /v2/text-to-3d/:id` - Delete task
+- `GET /v2/text-to-3d` - List tasks
+
+---
+
+## Auto-Rigging API
+
+Create skeleton and bind mesh for animation.
+
+### Create Task
+`POST /v1/rigging`
+
+**Required Parameters (one of):**
+| Name | Type | Description |
+|------|------|-------------|
+| `input_task_id` | string | Task ID from Image-to-3D, Multi-Image-to-3D, or Text-to-3D |
+| `model_url` | string | Publicly accessible GLB URL or base64 data URI |
+
+**Optional Parameters:**
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `height_meters` | number | 1.7 | Character height in meters |
+| `texture_image_url` | string | - | UV-unwrapped base color texture (.png) |
+
+**Response:**
+```json
+{ "result": "task-id" }
+```
+
+**Task Object (on completion):**
+```json
+{
+  "id": "...",
+  "type": "rig",
+  "status": "SUCCEEDED",
+  "result": {
+    "rigged_character_glb_url": "https://...",
+    "rigged_character_fbx_url": "https://...",
+    "basic_animations": {
+      "walking_glb_url": "https://...",
+      "walking_fbx_url": "https://...",
+      "running_glb_url": "https://...",
+      "running_fbx_url": "https://..."
+    }
+  }
+}
+```
+
+### Other Endpoints
+- `GET /v1/rigging/:id` - Retrieve task
+- `GET /v1/rigging/:id/stream` - SSE stream
+- `DELETE /v1/rigging/:id` - Delete task
+
+---
+
+## Animation API
+
+Apply animations from library to rigged characters.
+
+### Create Task
+`POST /v1/animations`
+
+**Required Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `rig_task_id` | string | Task ID from completed rigging task |
+| `action_id` | integer | Animation ID from library (see below) |
+
+**Optional Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `post_process` | object | Post-processing options |
+| `post_process.operation_type` | string | `change_fps`, `fbx2usdz`, or `extract_armature` |
+| `post_process.fps` | integer | Target FPS: 24, 25, 30, or 60 (default 30) |
+
+**Response:**
+```json
+{ "result": "task-id" }
+```
+
+**Task Object (on completion):**
+```json
+{
+  "id": "...",
+  "type": "animate",
+  "status": "SUCCEEDED",
+  "result": {
+    "animation_glb_url": "https://...",
+    "animation_fbx_url": "https://...",
+    "processed_usdz_url": "https://...",
+    "processed_armature_fbx_url": "https://...",
+    "processed_animation_fps_fbx_url": "https://..."
+  }
+}
+```
+
+### Other Endpoints
+- `GET /v1/animations/:id` - Retrieve task
+- `GET /v1/animations/:id/stream` - SSE stream
+- `DELETE /v1/animations/:id` - Delete task
+
+---
+
+## Animation Library Reference
+
+Common animation IDs used in our pipeline:
+
+| ID | Name | Description |
+|----|------|-------------|
+| 92 | IDLE_COMBAT | Combat-ready stance |
+| 93 | IDLE_NEUTRAL | Relaxed standing |
+| 1 | WALK | Walking forward |
+| 2 | RUN | Running forward |
+| 45 | ATTACK_MELEE_1 | Basic melee attack |
+| 46 | ATTACK_MELEE_2 | Secondary melee attack |
+| 60 | BLOCK | Defensive block |
+| 70 | HIT_REACTION | Taking damage |
+| 80 | DEATH | Death animation |
+| 30 | JUMP_IDLE | Jumping in place |
+
+See `tasks/registry.ts` for complete mapping.
+
+---
+
+## Common Patterns
+
+### Image Input Formats
+All image parameters accept:
+1. **Publicly accessible URL**: `https://example.com/image.png`
+2. **Base64 Data URI**: `data:image/png;base64,<base64-encoded-data>`
+
+### Task Status Values
+- `PENDING` - In queue
+- `IN_PROGRESS` - Processing
+- `SUCCEEDED` - Complete
+- `FAILED` - Error occurred
+- `CANCELED` - Cancelled by user
+
+### Streaming (SSE)
+
+All `/stream` endpoints use Server-Sent Events:
+
+```text
+event: message
+data: {"id": "...", "progress": 50, "status": "IN_PROGRESS"}
+
+event: message
+data: {"id": "...", "progress": 100, "status": "SUCCEEDED", ...full object...}
+```
+
+### Error Response
+```json
+{
+  "status_code": 400,
+  "message": "Invalid values: ImageURL is a required field"
+}
+```
+
+---
+
+## Pipeline Flow
+
+```text
+text-to-image (multi-view)
+    │
+    ▼ image_urls[3]
+multi-image-to-3d
+    │
+    ▼ model_urls.glb, texture_urls[0].base_color
+rigging (input_task_id OR model_url + texture_image_url)
+    │
+    ▼ result.rigged_character_glb_url
+animations (rig_task_id + action_id)
+    │
+    ▼ result.animation_glb_url
+```
+
+---
+
+*Last Updated: 2025-01-15*
+
+*Source: [Meshy API Documentation](https://docs.meshy.ai/en/api/)*

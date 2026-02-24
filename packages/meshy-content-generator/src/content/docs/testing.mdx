@@ -1,0 +1,38 @@
+---
+title: Testing
+---
+
+## Test layers
+
+- **Unit**: schema validation, pipeline orchestration, input resolution, OpenAPI generation.
+- **Integration**: Fastify API routes via `inject()`.
+- **E2E**: Playwright against the running API server and preview page.
+- **Contracts**: OpenAPI spec assertions (schemas and required fields).
+- **CLI**: Snapshot tests for CLI output.
+- **VCR**: Full Meshy pipeline run recorded once and replayed in CI.
+
+## Commands
+
+```bash
+pnpm test:unit
+pnpm test:e2e
+pnpm test:all
+```
+
+## E2E notes
+
+Playwright starts the API server automatically (`pnpm dev`) and uses a dummy `MESHY_API_KEY`. The E2E suite does not call Meshy endpoints.
+
+Install browsers once:
+
+```bash
+pnpm exec playwright install --with-deps
+```
+
+## VCR pipeline recording
+
+```bash
+POLLY_MODE=record pnpm test:unit
+```
+
+After recording, set `POLLY_MODE=replay` for CI/default runs.

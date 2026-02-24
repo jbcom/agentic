@@ -1,0 +1,14 @@
+scrape_docs:
+  description: Scrape the API documentation from the provided URL to extract endpoint information.
+  expected_output: Raw text containing API endpoint details, schemas, and authentication methods.
+  agent: doc_scraper
+
+analyze_api:
+  description: Analyze the raw documentation text and create a structured representation of the API.
+  expected_output: A JSON object detailing API endpoints, methods, parameters, and schemas.
+  agent: api_analyzer
+
+generate_code:
+  description: Generate Python code for a vendor-connectors compatible HTTP client based on the structured API data in the {output_dir} directory.
+  expected_output: A set of Python files (models.py, client.py, exceptions.py, __init__.py) in the specified output directory.
+  agent: code_generator

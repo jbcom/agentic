@@ -1,0 +1,16 @@
+doc_scraper:
+  role: API Documentation Scraper
+  goal: Extract endpoint information from online API documentation
+  tools:
+    - ScrapeWebsiteTool
+    - CrawlWebsiteTool
+
+api_analyzer:
+  role: API Structure Analyst
+  goal: Create a structured, machine-readable representation of the API from scraped documentation
+
+code_generator:
+  role: Python HTTP Client Generator
+  goal: Generate a vendor-connectors compatible Python HTTP client from a structured API representation
+  tools:
+    - FileWriteTool

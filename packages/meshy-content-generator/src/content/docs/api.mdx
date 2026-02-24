@@ -1,0 +1,43 @@
+---
+title: API Server
+---
+
+The API server exposes pipeline execution, run status, and an OpenAPI spec.
+
+## Run the server
+
+```bash
+pnpm dev
+```
+
+Default endpoints:
+
+- API reference: `http://localhost:5177/api`
+- OpenAPI JSON: `http://localhost:5177/openapi.json`
+- File proxy: `http://localhost:5177/file?assetDir=...&file=...`
+
+## Run a pipeline
+
+```bash
+curl -X POST http://localhost:5177/runs \
+  -H 'content-type: application/json' \
+  -d '{
+    "pipelineName": "character",
+    "assetDir": "./assets/characters/hero",
+    "wait": true
+  }'
+```
+
+## Check run status
+
+```bash
+curl http://localhost:5177/runs/<runId>
+```
+
+## Environment
+
+```bash
+MESHY_API_KEY=your_api_key
+```
+
+The server validates input with Zod and publishes the same schema in the OpenAPI output.

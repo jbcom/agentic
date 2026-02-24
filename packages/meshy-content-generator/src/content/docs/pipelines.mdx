@@ -1,0 +1,18 @@
+---
+title: Pipelines
+---
+
+Pipelines are JSON files in `pipelines/definitions/*.pipeline.json`. Each step references a task definition and can override inputs.
+
+Example:
+
+```json
+{
+  "name": "character",
+  "version": "2.1.0",
+  "steps": [
+    { "id": "concept", "task": "text-to-image" },
+    { "id": "model", "task": "multi-image-to-3d", "dependsOn": ["concept"] }
+  ]
+}
+```

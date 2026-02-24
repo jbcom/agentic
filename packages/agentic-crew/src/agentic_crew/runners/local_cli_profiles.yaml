@@ -1,0 +1,169 @@
+# Local CLI Runner Profiles
+# Verified CLI interfaces for single-agent coding tools
+#
+# These profiles define how to invoke various CLI coding agents.
+# All flags verified from official documentation.
+
+profiles:
+  # ============================================
+  # Aider - AI Pair Programming
+  # Docs: https://aider.chat/docs/config/options.html
+  # ============================================
+  aider:
+    name: "Aider"
+    description: "AI pair programming in your terminal"
+    command: "aider"
+    task_flag: "--message"
+    auth_env:
+      - "OPENAI_API_KEY"
+      - "ANTHROPIC_API_KEY"
+    auto_approve: "--yes-always"
+    model_flag: "--model"
+    additional_flags:
+      - "--no-git"  # Let agentic-crew handle git
+    install_cmd: "pipx install aider-chat"
+    docs_url: "https://aider.chat/docs/config/options.html"
+    notes: "Supports OpenAI, Anthropic, Gemini, Ollama, and more"
+
+  # ============================================
+  # Claude Code - Anthropic's Coding Agent
+  # Docs: https://docs.anthropic.com/en/docs/claude-code/cli-usage
+  # ============================================
+  claude-code:
+    name: "Claude Code"
+    description: "Anthropic's AI coding agent"
+    command: "claude"
+    task_flag: "--print"  # -p also works
+    auth_env:
+      - "ANTHROPIC_API_KEY"
+    auto_approve: "--dangerously-skip-permissions"
+    structured_output: "--output-format json"
+    model_flag: "--model"
+    additional_flags: []
+    install_cmd: "npm install -g @anthropic-ai/claude-code"
+    docs_url: "https://docs.anthropic.com/en/docs/claude-code/cli-usage"
+    notes: |
+      Flags verified:
+      - --print (-p): Query via SDK, then exit
+      - --dangerously-skip-permissions: Skip permission prompts
+      - --output-format json: JSON output
+      - --model: sonnet, opus, or full model name
+      - --max-turns: Limit agentic turns
+      - --verbose: Verbose logging
+
+  # ============================================
+  # OpenAI Codex CLI
+  # Docs: https://github.com/openai/codex/blob/main/docs/exec.md
+  # ============================================
+  codex:
+    name: "OpenAI Codex"
+    description: "OpenAI's local coding agent"
+    command: "codex"
+    subcommand: "exec"  # codex exec "task"
+    task_flag: ""  # Positional after exec
+    auth_env:
+      - "OPENAI_API_KEY"  # Or ChatGPT login
+    auto_approve: "--full-auto"  # Allow file edits
+    structured_output: "--json"  # JSONL streaming output
+    additional_flags:
+      - "--sandbox"
+      - "danger-full-access"  # Full access mode
+    install_cmd: "npm install -g @openai/codex"
+    docs_url: "https://github.com/openai/codex"
+    notes: |
+      Non-interactive mode: codex exec "task"
+      Flags verified:
+      - --full-auto: Allow file edits
+      - --json: Stream JSON events
+      - --sandbox danger-full-access: Full access
+      - --output-schema: JSON schema for structured output
+      - -o/--output-last-message: Output file
+
+  # ============================================
+  # Kiro CLI - AWS AI Coding Assistant
+  # Docs: https://kiro.dev/docs/cli
+  # ============================================
+  kiro:
+    name: "Kiro"
+    description: "AWS AI-assisted development CLI"
+    command: "kiro-cli"
+    task_flag: ""  # Interactive by default, uses chat mode
+    auth_env: []  # Uses AWS credentials or Kiro login
+    auto_approve: null  # Interactive tool
+    model_flag: null
+    additional_flags:
+      - "--agent"  # Specify agent: kiro-cli --agent myagent
+    install_cmd: "curl -fsSL https://cli.kiro.dev/install | bash"
+    docs_url: "https://kiro.dev/docs/cli"
+    notes: |
+      Kiro is primarily interactive. Key features:
+      - --agent <name>: Use specific agent
+      - --resume: Resume conversation
+      - /editor: Multi-line input
+      Best for: Spec-driven development, custom agents
+
+  # ============================================
+  # Ollama - Free Local LLMs
+  # Docs: https://github.com/ollama/ollama
+  # ============================================
+  ollama:
+    name: "Ollama"
+    description: "Free local LLM execution"
+    command: "ollama"
+    subcommand: "run"  # ollama run <model> <prompt>
+    task_flag: ""  # Positional: ollama run codellama "task"
+    auth_env: []  # No auth needed - fully local
+    auto_approve: null  # No confirmations
+    model_flag: null  # Model is positional: ollama run <model>
+    default_model: "codellama"
+    additional_flags: []
+    install_cmd: "curl -fsSL https://ollama.com/install.sh | sh"
+    docs_url: "https://github.com/ollama/ollama"
+    notes: |
+      Usage: ollama run <model> "prompt"
+      Popular coding models:
+      - codellama: Code-focused Llama
+      - deepseek-coder: DeepSeek's coding model
+      - qwen2.5-coder: Alibaba's coding model
+      - starcoder2: BigCode's model
+      Zero cost, fully local, no API keys
+
+  # ============================================
+  # Goose - Block's AI Coding Agent
+  # Docs: https://block.github.io/goose/docs/quickstart
+  # ============================================
+  goose:
+    name: "Goose"
+    description: "Block's extensible AI coding agent"
+    command: "goose"
+    task_flag: ""  # Interactive by default
+    auth_env: []  # Configured via goose configure
+    auto_approve: null  # Interactive
+    model_flag: null
+    additional_flags: []
+    install_cmd: "curl -fsSL https://github.com/block/goose/releases/download/stable/download_cli.sh | bash"
+    docs_url: "https://block.github.io/goose/docs/quickstart"
+    notes: |
+      Goose is primarily interactive desktop/CLI app.
+      Setup: goose configure
+      Supports: Tetrate, OpenRouter, and other providers
+      Features: MCP servers, extensions, recipes
+
+# ============================================
+# Summary: Non-Interactive Execution
+# ============================================
+# 
+# Tool          | Non-Interactive Command
+# --------------|--------------------------------------------------
+# aider         | aider --message "task" --yes-always --no-git
+# claude-code   | claude -p "task" --dangerously-skip-permissions
+# codex         | codex exec "task" --full-auto
+# ollama        | ollama run codellama "task"
+# kiro          | (primarily interactive)
+# goose         | (primarily interactive)
+#
+# For agentic-crew integration, we focus on:
+# - aider (best non-interactive support)
+# - claude-code (excellent --print mode)
+# - codex (dedicated exec mode)
+# - ollama (simple prompt-response)

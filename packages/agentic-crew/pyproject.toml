@@ -1,0 +1,113 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "agentic-crew"
+version = "1.0.0"
+description = "Framework-agnostic AI crew orchestration - declare once, run on CrewAI, LangGraph, or Strands"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+readme = "README.md"
+authors = [{ name = "Jon Bogaty", email = "jon@jonbogaty.com" }]
+keywords = ["crewai", "langgraph", "strands", "ai-agents", "multi-agent", "orchestration"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+# Core dependencies - NO framework required (auto-detected at runtime)
+dependencies = [
+    "pyyaml>=6.0.3",
+    "pydantic>=2.12.4",
+]
+
+[project.optional-dependencies]
+# === AI Framework Extras (install one or more) ===
+crewai = ["crewai[tools,anthropic]>=1.5.0"]
+langgraph = ["langgraph>=0.2.0", "langchain-anthropic>=0.3.0"]
+strands = ["strands-agents>=0.1.0"]
+ai = [
+    "crewai[tools,anthropic]>=1.5.0",
+    "langgraph>=0.2.0",
+    "langchain-anthropic>=0.3.0",
+    "strands-agents>=0.1.0",
+]
+
+# === Feature Extras ===
+mcp = ["mcp>=1.0.0"]
+scraping = ["crewai[tools]>=1.5.0", "beautifulsoup4>=4.12.0", "requests>=2.31.0"]
+
+# === Development ===
+tests = [
+    "pytest>=9.0.1",
+    "pytest-mock>=3.15.1",
+    "pytest-cov>=5.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-timeout>=2.4.0",
+]
+dev = ["ruff>=0.1.0", "mypy>=1.8.0"]
+docs = [
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=2.0.0",
+    "myst-parser>=3.0.0",
+]
+
+# === Full Installation ===
+all = [
+    "crewai[tools,anthropic]>=1.5.0",
+    "langgraph>=0.2.0",
+    "langchain-anthropic>=0.3.0",
+    "strands-agents>=0.1.0",
+    "mcp>=1.0.0",
+    "beautifulsoup4>=4.12.0",
+    "requests>=2.31.0",
+]
+
+[project.scripts]
+agentic-crew = "agentic_crew.main:main"
+run-crew = "agentic_crew.crew:kickoff"
+train-crew = "agentic_crew.crew:train"
+
+[project.urls]
+Homepage = "https://github.com/agentic-dev-library/agentic-control"
+Repository = "https://github.com/agentic-dev-library/agentic-control"
+Documentation = "https://github.com/agentic-dev-library/agentic-control#readme"
+Issues = "https://github.com/agentic-dev-library/agentic-control/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentic_crew"]
+
+# Semantic Release - per-package versioning
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = ["src/agentic_crew/__init__.py:__version__"]
+build_command = "uv build"
+commit_parser = "angular"
+commit_author = "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+tag_format = "agentic-crew-v{version}"
+changelog_file = "CHANGELOG.md"
+upload_to_vcs_release = true
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "ci", "build"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.remote]
+type = "github"
+token = { env = "GH_TOKEN" }
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true

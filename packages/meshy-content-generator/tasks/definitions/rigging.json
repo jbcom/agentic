@@ -1,0 +1,33 @@
+{
+  "id": "rigging",
+  "apiVersion": "v1",
+  "endpoint": "rigging",
+  "method": "POST",
+  "inputs": [
+    {
+      "name": "input_task_id",
+      "source": "literal"
+    },
+    {
+      "name": "height_meters",
+      "source": "manifest",
+      "path": "riggingTask.heightMeters",
+      "default": 1.7
+    },
+    {
+      "name": "texture_image_url",
+      "source": "literal"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "taskId",
+      "responsePath": "id"
+    },
+    {
+      "name": "riggedModel",
+      "responsePath": "result.rigged_character_glb_url",
+      "artifact": "rigged.glb"
+    }
+  ]
+}

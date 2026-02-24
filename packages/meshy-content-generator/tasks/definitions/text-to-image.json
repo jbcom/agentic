@@ -1,0 +1,43 @@
+{
+  "id": "text-to-image",
+  "apiVersion": "v1",
+  "endpoint": "text-to-image",
+  "method": "POST",
+  "inputs": [
+    {
+      "name": "prompt",
+      "source": "manifest",
+      "path": "textToImageTask.prompt"
+    },
+    {
+      "name": "ai_model",
+      "source": "manifest",
+      "path": "textToImageTask.aiModel",
+      "default": "nano-banana"
+    },
+    {
+      "name": "generate_multi_view",
+      "source": "manifest",
+      "path": "textToImageTask.generateMultiView",
+      "default": false
+    },
+    {
+      "name": "pose_mode",
+      "source": "manifest",
+      "path": "textToImageTask.poseMode",
+      "default": ""
+    },
+    {
+      "name": "aspect_ratio",
+      "source": "manifest",
+      "path": "textToImageTask.aspectRatio",
+      "default": "1:1"
+    }
+  ],
+  "outputs": [
+    {
+      "name": "images",
+      "responsePath": "result.image_urls"
+    }
+  ]
+}

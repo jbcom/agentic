@@ -1,0 +1,55 @@
+{
+  "name": "character-full",
+  "description": "Full pipeline: text-to-image → text-to-3d-preview → text-to-3d-refine → rigging → animation",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "id": "concept",
+      "task": "text-to-image",
+      "skipArtifacts": true,
+      "inputs": [
+        { "name": "prompt", "source": "manifest", "path": "textToImageTask.prompt" },
+        { "name": "ai_model", "source": "literal", "value": "nano-banana-pro" }
+      ]
+    },
+    {
+      "id": "preview",
+      "task": "text-to-3d-preview",
+      "dependsOn": ["concept"],
+      "skipArtifacts": true,
+      "inputs": [{ "name": "prompt", "source": "manifest", "path": "textTo3DPreviewTask.prompt" }]
+    },
+    {
+      "id": "refine",
+      "task": "text-to-3d-refine",
+      "dependsOn": ["preview"],
+      "skipArtifacts": true,
+      "inputs": [
+        { "name": "preview_task_id", "source": "step", "step": "preview", "path": "taskId" },
+        {
+          "name": "texture_prompt",
+          "source": "manifest",
+          "path": "textTo3DRefineTask.texturePrompt"
+        }
+      ]
+    },
+    {
+      "id": "rigging",
+      "task": "rigging",
+      "dependsOn": ["refine"],
+      "skipArtifacts": true,
+      "inputs": [{ "name": "input_task_id", "source": "step", "step": "refine", "path": "taskId" }]
+    },
+    {
+      "id": "animations",
+      "task": "animation",
+      "dependsOn": ["rigging"],
+      "forEach": {
+        "source": "manifest",
+        "path": "animationTask.animations",
+        "as": "animationName"
+      },
+      "inputs": [{ "name": "rig_task_id", "source": "step", "step": "rigging", "path": "taskId" }]
+    }
+  ]
+}

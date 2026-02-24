@@ -1,0 +1,20 @@
+{
+  "id": "full-pipeline-test",
+  "name": "Full Pipeline Test",
+  "type": "character",
+  "textToImageTask": {
+    "prompt": "A stylized anime hero standing on a rooftop, clean line art, neutral lighting"
+  },
+  "textTo3DPreviewTask": {
+    "prompt": "Stylized anime hero character with clean silhouette, standing pose"
+  },
+  "textTo3DRefineTask": {
+    "texturePrompt": "Cel-shaded anime materials, crisp outlines, subtle fabric weave"
+  },
+  "riggingTask": {
+    "heightMeters": 1.7
+  },
+  "animationTask": {
+    "animations": ["WalkAndRun.Walking.Casual_Walk"]
+  }
+}

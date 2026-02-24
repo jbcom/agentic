@@ -1,0 +1,60 @@
+{
+  "name": "prop",
+  "description": "Prop pipeline: concept → multi-image-to-3d (no rigging or animations)",
+  "version": "1.1.0",
+  "steps": [
+    {
+      "id": "concept",
+      "task": "text-to-image",
+      "inputs": [
+        {
+          "name": "prompt",
+          "source": "manifest",
+          "path": "textToImageTask.prompt"
+        },
+        {
+          "name": "ai_model",
+          "source": "literal",
+          "value": "nano-banana-pro"
+        },
+        {
+          "name": "generate_multi_view",
+          "source": "manifest",
+          "path": "textToImageTask.generateMultiView",
+          "default": true
+        },
+        {
+          "name": "pose_mode",
+          "source": "manifest",
+          "path": "textToImageTask.poseMode",
+          "default": "a-pose"
+        }
+      ]
+    },
+    {
+      "id": "model",
+      "task": "multi-image-to-3d",
+      "dependsOn": ["concept"],
+      "inputs": [
+        {
+          "name": "image_urls",
+          "source": "step",
+          "step": "concept",
+          "path": "images"
+        },
+        {
+          "name": "target_polycount",
+          "source": "manifest",
+          "path": "multiImageTo3DTask.targetPolycount",
+          "default": 10000
+        },
+        {
+          "name": "symmetry_mode",
+          "source": "manifest",
+          "path": "multiImageTo3DTask.symmetryMode",
+          "default": "off"
+        }
+      ]
+    }
+  ]
+}

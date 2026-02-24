@@ -1,0 +1,83 @@
+{
+  "name": "@agentic-dev-library/meshy-content-generator",
+  "version": "0.1.1",
+  "description": "Declarative Meshy content generation pipelines with a CLI and API.",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "content-generation",
+    "pipeline",
+    "meshy",
+    "cli",
+    "asset-generation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentic-dev-library/agentic-control.git",
+    "directory": "packages/meshy-content-generator"
+  },
+  "homepage": "https://agentic-dev-library.github.io/meshy-content-generator",
+  "author": "Arcade Cabinet",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist",
+    "pipelines",
+    "tasks",
+    "lookups",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    }
+  },
+  "bin": {
+    "content-gen": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "check": "biome check .",
+    "dev": "tsx src/api/server.ts",
+    "lint": "biome check .",
+    "format": "biome format . --write",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:record": "POLLY_MODE=record vitest run",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts",
+    "test:all": "pnpm test:unit && pnpm test:e2e",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "^8.4.0",
+    "@google/model-viewer": "^4.1.0",
+    "@pollyjs/adapter-fetch": "^6.0.7",
+    "@pollyjs/core": "^6.0.6",
+    "@pollyjs/persister-fs": "^6.0.6",
+    "@scalar/fastify-api-reference": "^1.43.17",
+    "commander": "^14.0.2",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.7.2",
+    "seedrandom": "^3.0.5",
+    "three": "^0.172.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.13",
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^25.0.10",
+    "@types/seedrandom": "^3.0.8",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}

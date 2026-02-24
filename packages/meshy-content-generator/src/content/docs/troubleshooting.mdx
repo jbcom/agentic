@@ -1,0 +1,37 @@
+---
+title: Troubleshooting
+---
+
+## Missing MESHY_API_KEY
+
+**Symptom**: `MESHY_API_KEY is required.`
+
+**Fix**: Set the key in your environment or `.env` file.
+
+```bash
+MESHY_API_KEY=your_api_key
+```
+
+## Validation failures
+
+If `content-gen validate` reports missing inputs, check:
+
+- The manifest contains the required fields.
+- The pipeline step path matches the manifest path.
+- Lookup tables referenced by inputs are loaded.
+
+## Pipeline stuck or slow
+
+- Meshy tasks can take time. The runner streams until completion.
+- Check Meshy queue status and credits in your Meshy dashboard.
+- For CI, use VCR replay to avoid long waits.
+
+## Preview not loading
+
+- Ensure the asset is inside the working directory.
+- Verify `assetDir` and `file` query parameters are correct.
+- The preview uses `/file` to serve content; open `http://localhost:5177/file?...` directly to confirm access.
+
+## CORS / local access
+
+The preview is intended for local use. If you expose the API publicly, add authentication and strict CORS.

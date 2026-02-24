@@ -1,0 +1,33 @@
+---
+title: Pricing & Credits FAQ
+---
+
+## How credits are used
+
+Meshy charges credits per task. The most expensive steps are typically:
+
+1. Text‑to‑3D refine
+2. Rigging
+3. Animation
+
+Preview passes are cheaper and faster, so use preview to validate before refine.
+
+## Reduce cost per iteration
+
+- **Prototype with preview only** before running refine.
+- **Reuse manifests** for deterministic runs.
+- **Limit animation sets** during iteration.
+- **Batch runs** (avoid small, repeated single‑asset runs).
+
+## CI best practices
+
+Use VCR recordings to avoid spending credits in CI.
+
+```bash
+POLLY_MODE=record pnpm test:unit
+POLLY_MODE=replay pnpm test:unit
+```
+
+## Where to check balances
+
+Use the Meshy dashboard to monitor credit usage and queue status.

@@ -1,0 +1,130 @@
+# Connector Builder Tasks
+
+analyze_api_docs:
+  description: >
+    Analyze the API documentation at the provided URL: {api_docs_url}
+    
+    Extract:
+    1. Base URL and endpoints
+    2. Authentication scheme (API key, OAuth2, JWT, etc.)
+    3. Request/response schemas for each endpoint
+    4. Query parameters and headers
+    5. Rate limiting information
+    6. Error codes and handling
+    7. Pagination patterns
+    8. WebSocket endpoints (if any)
+    
+    Create a structured JSON representation of the API.
+  expected_output: >
+    A detailed JSON document containing:
+    - API metadata (name, version, base_url)
+    - Authentication configuration
+    - List of endpoints with full specifications
+    - Common error patterns
+    - Rate limiting rules
+  agent: api_analyst
+
+generate_client_code:
+  description: >
+    Generate Python HTTP connector code for {vendor_name} based on the API analysis.
+    
+    Create the following files:
+    1. client.py - Main HTTP client with httpx
+    2. models.py - Pydantic models for requests/responses
+    3. exceptions.py - Custom exceptions
+    4. __init__.py - Package exports
+    
+    Requirements:
+    - Use httpx for async HTTP requests
+    - Use pydantic v2 for data validation
+    - Include proper type hints (mypy strict mode)
+    - Implement rate limiting if needed
+    - Handle authentication properly
+    - Include comprehensive error handling
+    - Add docstrings for all public methods
+    
+    Output to: /tmp/connector-output/{vendor_name}/
+  expected_output: >
+    Complete Python package with:
+    - client.py (HTTP client class)
+    - models.py (Pydantic models)
+    - exceptions.py (Custom exceptions)
+    - __init__.py (Package exports)
+    All files properly formatted and typed.
+  agent: connector_engineer
+
+generate_framework_tools:
+  description: >
+    Generate framework-agnostic tools for the {vendor_name} connector.
+    
+    Create tools.py with a get_tools() function that returns tools
+    in the format needed for CrewAI, LangGraph, or Strands.
+    
+    Each tool should:
+    - Wrap a client method
+    - Have clear name and description
+    - Include proper type hints
+    - Handle errors gracefully
+    - Be usable in AI agent workflows
+    
+    Support frameworks: crewai, langgraph, strands
+    
+    Output to: /tmp/connector-output/{vendor_name}/tools.py
+  expected_output: >
+    tools.py file with:
+    - get_tools(framework: Literal["crewai", "langgraph", "strands"])
+    - Individual tool functions for each API endpoint
+    - Proper error handling and logging
+    - Type hints and docstrings
+  agent: connector_engineer
+
+generate_tests:
+  description: >
+    Generate comprehensive tests for the {vendor_name} connector.
+    
+    Create:
+    1. tests/test_client.py - Client tests with mocked responses
+    2. tests/test_models.py - Pydantic model validation tests
+    3. tests/test_tools.py - Framework tool tests
+    4. tests/conftest.py - Pytest fixtures
+    
+    Use pytest, pytest-mock, pytest-asyncio.
+    Mock HTTP responses with httpx_mock.
+    Test error cases and edge conditions.
+    Aim for >80% coverage.
+    
+    Output to: /tmp/connector-output/{vendor_name}/tests/
+  expected_output: >
+    Complete test suite with:
+    - test_client.py (client tests)
+    - test_models.py (model tests)
+    - test_tools.py (tool tests)
+    - conftest.py (fixtures)
+    All tests passing and well-documented.
+  agent: test_engineer
+
+review_generated_code:
+  description: >
+    Review all generated code for the {vendor_name} connector.
+    
+    Check for:
+    1. Code quality and style (PEP 8, type hints, docstrings)
+    2. Error handling completeness
+    3. Security issues (API key handling, input validation)
+    4. Performance concerns (rate limiting, connection pooling)
+    5. Test coverage gaps
+    6. Documentation completeness
+    7. Compliance with vendor-connectors standards
+    
+    Provide a detailed report with:
+    - Issues found (Critical, High, Medium, Low)
+    - Recommendations for improvements
+    - Missing features or edge cases
+  expected_output: >
+    QA Report containing:
+    - Summary of review findings
+    - Categorized list of issues
+    - Specific recommendations
+    - Overall quality score
+    - Approval status (Approved/Needs Revision)
+  agent: qa_engineer

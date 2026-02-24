@@ -1,0 +1,31 @@
+name: vendor-connectors
+version: "1.0"
+description: AI crews for vendor connector generation and management
+
+# LLM configuration
+llm:
+  provider: anthropic
+  model: claude-sonnet-4-20250514
+
+# Crew definitions
+crews:
+  connector_builder:
+    description: Generate HTTP connector from API documentation
+    agents: crews/connector_builder/agents.yaml
+    tasks: crews/connector_builder/tasks.yaml
+    knowledge:
+      - knowledge/api_patterns
+    # Prefer CrewAI for complex multi-agent workflows
+    preferred_framework: crewai
+
+  connector_validator:
+    description: Validate generated connector against API spec
+    agents: crews/connector_validator/agents.yaml
+    tasks: crews/connector_validator/tasks.yaml
+    preferred_framework: crewai
+
+  docs_generator:
+    description: Generate documentation for connectors
+    agents: crews/docs_generator/agents.yaml
+    tasks: crews/docs_generator/tasks.yaml
+    preferred_framework: auto

@@ -1,0 +1,38 @@
+{
+  "description": "Animation presets for different character archetypes",
+  "presets": {
+    "hero": {
+      "description": "Full animation set for playable main characters",
+      "animations": [
+        "Combat_Stance",
+        "RunFast",
+        "Kung_Fu_Punch",
+        "BeHit_FlyUp",
+        "Dead",
+        "Basic_Jump",
+        "Dodge_and_Counter"
+      ]
+    },
+    "enemy": {
+      "description": "Standard enemy NPC animation set",
+      "animations": ["Combat_Stance", "RunFast", "Double_Combo_Attack", "BeHit_FlyUp", "Dead"]
+    },
+    "boss": {
+      "description": "Enhanced animation set for boss characters",
+      "animations": [
+        "Combat_Stance",
+        "RunFast",
+        "Double_Combo_Attack",
+        "Kung_Fu_Punch",
+        "BeHit_FlyUp",
+        "Dead",
+        "Block1"
+      ]
+    },
+    "prop": {
+      "description": "Minimal animation for animated props/hazards",
+      "animations": ["Idle"]
+    }
+  },
+  "default": "enemy"
+}
