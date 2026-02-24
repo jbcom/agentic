@@ -1,28 +1,45 @@
 <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- AI Brain/Circuit Icon -->
-  <circle cx="16" cy="16" r="14" stroke="#a78bfa" stroke-width="2" fill="none"/>
-  <circle cx="16" cy="16" r="6" fill="#a78bfa"/>
-  <circle cx="16" cy="16" r="3" fill="#1a1033"/>
-  
-  <!-- Neural connections -->
-  <line x1="16" y1="2" x2="16" y2="8" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="16" y1="24" x2="16" y2="30" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="2" y1="16" x2="8" y2="16" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="24" y1="16" x2="30" y2="16" stroke="#a78bfa" stroke-width="2"/>
-  
-  <!-- Diagonal connections -->
-  <line x1="6" y1="6" x2="10" y2="10" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="22" y1="22" x2="26" y2="26" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="6" y1="26" x2="10" y2="22" stroke="#a78bfa" stroke-width="2"/>
-  <line x1="22" y1="10" x2="26" y2="6" stroke="#a78bfa" stroke-width="2"/>
-  
-  <!-- Outer nodes -->
-  <circle cx="16" cy="2" r="2" fill="#a78bfa"/>
-  <circle cx="16" cy="30" r="2" fill="#a78bfa"/>
-  <circle cx="2" cy="16" r="2" fill="#a78bfa"/>
-  <circle cx="30" cy="16" r="2" fill="#a78bfa"/>
-  <circle cx="6" cy="6" r="2" fill="#c4b5fd"/>
-  <circle cx="26" cy="26" r="2" fill="#c4b5fd"/>
-  <circle cx="6" cy="26" r="2" fill="#c4b5fd"/>
-  <circle cx="26" cy="6" r="2" fill="#c4b5fd"/>
+  <defs>
+    <linearGradient id="amber-core-dk" x1="12" y1="10" x2="22" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="amber-signal-dk" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FBBF24"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Signal connections from center to satellite nodes -->
+  <line x1="16" y1="16" x2="16" y2="4" stroke="url(#amber-signal-dk)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="16" y1="16" x2="5.5" y2="22" stroke="url(#amber-signal-dk)" stroke-width="1.5" stroke-linecap="round"/>
+  <line x1="16" y1="16" x2="26.5" y2="22" stroke="url(#amber-signal-dk)" stroke-width="1.5" stroke-linecap="round"/>
+
+  <!-- Signal arcs — radiating waves from center -->
+  <path d="M12.5 12 A5 5 0 0 1 19.5 12" stroke="#FBBF24" stroke-width="1" fill="none" opacity="0.5" stroke-linecap="round"/>
+  <path d="M10 9.5 A8.5 8.5 0 0 1 22 9.5" stroke="#FBBF24" stroke-width="0.8" fill="none" opacity="0.3" stroke-linecap="round"/>
+
+  <!-- Central command node — hexagonal shape -->
+  <polygon points="16,10.5 20.8,13.25 20.8,18.75 16,21.5 11.2,18.75 11.2,13.25" fill="url(#amber-core-dk)"/>
+
+  <!-- Inner ring detail on center node -->
+  <circle cx="16" cy="16" r="3" fill="none" stroke="#FEF3C7" stroke-width="0.8" opacity="0.7"/>
+  <circle cx="16" cy="16" r="1.2" fill="#FEF3C7" opacity="0.95"/>
+
+  <!-- Satellite node — top -->
+  <circle cx="16" cy="4" r="2.5" fill="#F59E0B"/>
+  <circle cx="16" cy="4" r="1" fill="#FEF3C7" opacity="0.85"/>
+
+  <!-- Satellite node — bottom-left -->
+  <circle cx="5.5" cy="22" r="2.5" fill="#F59E0B"/>
+  <circle cx="5.5" cy="22" r="1" fill="#FEF3C7" opacity="0.85"/>
+
+  <!-- Satellite node — bottom-right -->
+  <circle cx="26.5" cy="22" r="2.5" fill="#F59E0B"/>
+  <circle cx="26.5" cy="22" r="1" fill="#FEF3C7" opacity="0.85"/>
+
+  <!-- Small accent dots along connections -->
+  <circle cx="16" cy="8" r="0.7" fill="#FBBF24" opacity="0.7"/>
+  <circle cx="10" cy="19.5" r="0.7" fill="#FBBF24" opacity="0.7"/>
+  <circle cx="22" cy="19.5" r="0.7" fill="#FBBF24" opacity="0.7"/>
 </svg>

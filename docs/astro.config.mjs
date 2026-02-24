@@ -33,7 +33,7 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: {
 						name: 'theme-color',
-						content: '#8b5cf6',
+						content: '#D97706',
 					},
 				},
 				{

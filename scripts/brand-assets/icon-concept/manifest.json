@@ -1,0 +1,10 @@
+{
+  "id": "agentic-icon",
+  "name": "Agentic Icon Concept",
+  "type": "brand",
+  "textToImageTask": {
+    "prompt": "Minimalist geometric logo mark for an AI orchestration platform called Agentic, central node with radiating connections to satellite nodes forming a command network, warm amber and deep orange on transparent dark background, flat vector style, clean precise lines, professional tech brand icon, single mark centered",
+    "aiModel": "nano-banana",
+    "aspectRatio": "1:1"
+  }
+}

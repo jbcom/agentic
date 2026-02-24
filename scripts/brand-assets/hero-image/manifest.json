@@ -1,0 +1,10 @@
+{
+  "id": "agentic-hero",
+  "name": "Agentic Hero Image",
+  "type": "brand",
+  "textToImageTask": {
+    "prompt": "Abstract digital command center visualization, warm amber and deep orange energy streams connecting geometric nodes against a dark background, representing AI agent orchestration and fleet coordination, minimal clean tech aesthetic, dark moody atmosphere with amber glow highlights, no text, no faces, professional brand imagery",
+    "aiModel": "nano-banana",
+    "aspectRatio": "16:9"
+  }
+}

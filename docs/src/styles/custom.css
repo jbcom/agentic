@@ -1,11 +1,20 @@
 /*
-  Agentic Documentation — Command Center Theme
-  A distinctive, dark-first design with glass morphism,
-  animated gradients, and ambient purple glow.
+  Agentic Documentation — Signal Amber Theme
+  A warm, dark-first design with glass morphism,
+  animated amber gradients, and ambient glow.
+
+  Brand direction: Signal Amber — heated metal, sunrise warmth.
+  Palette: Amber (#F59E0B) to Hot Orange (#EA580C) on warm stone backgrounds.
 
   Owner: Jon Bogaty (jbcom)
   Site: https://agentic.coach
 */
+
+/* ================================================================
+   TYPOGRAPHY — Google Fonts
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ================================================================
    0. FOUNDATIONS
@@ -21,30 +30,36 @@ html {
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar — warm gray track, amber-tinted thumb */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(28, 25, 23, 0.3); /* stone-800 tint */
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.3);
+  background: rgba(245, 158, 11, 0.25); /* amber tint */
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.5);
+  background: rgba(245, 158, 11, 0.45); /* stronger amber on hover */
 }
 
-/* Focus-visible accessibility */
+/* Focus-visible accessibility — amber focus ring */
 *:focus-visible {
   outline: 2px solid var(--sl-color-accent);
   outline-offset: 2px;
   border-radius: 2px;
+}
+
+/* Selection — amber highlight */
+::selection {
+  background: rgba(245, 158, 11, 0.25);
+  color: inherit;
 }
 
 /* ================================================================
@@ -52,69 +67,121 @@ html {
    ================================================================ */
 
 :root {
-  /* Core accent palette */
-  --sl-color-accent-low: #1e1040;
-  --sl-color-accent: #8b5cf6;
-  --sl-color-accent-high: #ddd6fe;
-  --sl-color-text-accent: #a78bfa;
+  /* ---- Font families ---- */
+  --sl-font: 'Inter', sans-serif;
+  --sl-font-mono: 'JetBrains Mono', monospace;
+  --font-heading: 'Instrument Sans', sans-serif;
 
-  /* Extended purples */
-  --agentic-purple-50: #faf5ff;
-  --agentic-purple-100: #f3e8ff;
-  --agentic-purple-200: #e9d5ff;
-  --agentic-purple-300: #d8b4fe;
-  --agentic-purple-400: #c084fc;
-  --agentic-purple-500: #a855f7;
-  --agentic-purple-600: #8b5cf6;
-  --agentic-purple-700: #7c3aed;
-  --agentic-purple-800: #6d28d9;
-  --agentic-purple-900: #581c87;
+  /* ---- Core Starlight accent palette (dark mode default) ---- */
+  --sl-color-accent-low: #451a03;       /* amber-950 — deep amber for low-contrast backgrounds */
+  --sl-color-accent: #F59E0B;           /* primary amber */
+  --sl-color-accent-high: #FDE68A;      /* amber-200 — light amber for text on dark */
+  --sl-color-text-accent: #FBBF24;      /* amber-400 — text links / interactive */
 
-  /* Language colors */
+  /* ---- Warm backgrounds (Starlight overrides) ---- */
+  --sl-color-bg: #0C0A09;              /* stone-950 — warm near-black */
+  --sl-color-bg-sidebar: rgba(12, 10, 9, 0.6); /* sidebar with transparency */
+  --sl-color-bg-nav: rgba(12, 10, 9, 0.8);
+
+  /* ---- Starlight gray scale — mapped to warm stone ---- */
+  --sl-color-white: #FAFAF9;           /* stone-50 */
+  --sl-color-gray-1: #E7E5E4;          /* stone-200 */
+  --sl-color-gray-2: #D6D3D1;          /* stone-300 */
+  --sl-color-gray-3: #A8A29E;          /* stone-400 */
+  --sl-color-gray-4: #78716C;          /* stone-500 */
+  --sl-color-gray-5: #44403C;          /* stone-700 */
+  --sl-color-gray-6: #292524;          /* stone-800 */
+  --sl-color-black: #1C1917;           /* stone-800 — primary text light mode */
+
+  /* ---- Extended amber scale ---- */
+  --agentic-amber-50: #FFFBEB;
+  --agentic-amber-100: #FEF3C7;
+  --agentic-amber-200: #FDE68A;
+  --agentic-amber-300: #FCD34D;
+  --agentic-amber-400: #FBBF24;
+  --agentic-amber-500: #F59E0B;        /* primary amber */
+  --agentic-amber-600: #D97706;        /* deep amber */
+  --agentic-amber-700: #B45309;        /* burnt amber */
+  --agentic-amber-800: #92400E;
+  --agentic-amber-900: #78350F;
+
+  /* ---- Secondary accent ---- */
+  --agentic-orange: #EA580C;           /* hot orange */
+
+  /* ---- Language colors (universal, unchanged) ---- */
   --lang-ts: #3178c6;
   --lang-py: #3776ab;
   --lang-rs: #dea584;
 
-  /* Gradients */
-  --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
-  --gradient-text: linear-gradient(135deg, #c084fc 0%, #818cf8 25%, #a78bfa 50%, #f0abfc 100%);
-  --gradient-pink-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
-  --gradient-dark: linear-gradient(180deg, #0f0a1a 0%, #1a1025 100%);
-  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
-  --gradient-divider: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.3), transparent);
+  /* ---- Gradients ---- */
+  --gradient-amber: linear-gradient(135deg, #F59E0B 0%, #D97706 50%, #B45309 100%);
+  --gradient-text: linear-gradient(135deg, #FCD34D 0%, #F59E0B 25%, #EA580C 50%, #FBBF24 100%);
+  --gradient-amber-orange: linear-gradient(135deg, #F59E0B 0%, #EA580C 100%);
+  --gradient-dark: linear-gradient(180deg, #0C0A09 0%, #1C1917 100%);
+  --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(245, 158, 11, 0.15) 0%, transparent 60%);
+  --gradient-divider: linear-gradient(to right, transparent, rgba(245, 158, 11, 0.3), transparent);
 
-  /* Glass morphism */
-  --glass-bg: rgba(139, 92, 246, 0.04);
-  --glass-bg-hover: rgba(139, 92, 246, 0.08);
-  --glass-border: rgba(139, 92, 246, 0.1);
-  --glass-border-hover: rgba(139, 92, 246, 0.3);
-  --glass-glow: 0 0 30px rgba(139, 92, 246, 0.1);
-  --glass-glow-inset: inset 0 0 30px rgba(139, 92, 246, 0.02);
+  /* ---- Glass morphism — warm amber tints ---- */
+  --glass-bg: rgba(245, 158, 11, 0.04);
+  --glass-bg-hover: rgba(245, 158, 11, 0.08);
+  --glass-border: rgba(245, 158, 11, 0.12);
+  --glass-border-hover: rgba(245, 158, 11, 0.3);
+  --glass-glow: 0 0 30px rgba(245, 158, 11, 0.08);
+  --glass-glow-inset: inset 0 0 30px rgba(245, 158, 11, 0.02);
 
-  /* Timing */
+  /* ---- Timing ---- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Sidebar tweaks for dark */
-  --sl-color-bg-sidebar: rgba(15, 10, 26, 0.6);
 }
 
+/* ---- Light mode overrides ---- */
 [data-theme='light'] {
-  --sl-color-accent-low: #ede9fe;
-  --sl-color-accent: #7c3aed;
-  --sl-color-accent-high: #2e1065;
-  --sl-color-text-accent: #6d28d9;
+  --sl-color-accent-low: #FEF3C7;      /* amber-100 — light amber background */
+  --sl-color-accent: #D97706;           /* deep amber — stronger on white */
+  --sl-color-accent-high: #78350F;      /* amber-900 — dark amber for text on light */
+  --sl-color-text-accent: #B45309;      /* burnt amber — readable on white */
 
-  --glass-bg: rgba(139, 92, 246, 0.05);
-  --glass-bg-hover: rgba(139, 92, 246, 0.1);
-  --glass-border: rgba(139, 92, 246, 0.15);
-  --glass-border-hover: rgba(139, 92, 246, 0.35);
-  --glass-glow: 0 0 30px rgba(139, 92, 246, 0.08);
-  --glass-glow-inset: inset 0 0 30px rgba(139, 92, 246, 0.03);
+  --sl-color-bg: #FAFAF9;              /* stone-50 */
+  --sl-color-bg-sidebar: rgba(250, 250, 249, 0.6);
+
+  --glass-bg: rgba(245, 158, 11, 0.05);
+  --glass-bg-hover: rgba(245, 158, 11, 0.10);
+  --glass-border: rgba(245, 158, 11, 0.15);
+  --glass-border-hover: rgba(245, 158, 11, 0.35);
+  --glass-glow: 0 0 30px rgba(245, 158, 11, 0.08);
+  --glass-glow-inset: inset 0 0 30px rgba(245, 158, 11, 0.03);
 }
 
 /* ================================================================
-   2. HERO SECTION — Ambient Glow, Grid, Pulse Line
+   1b. TYPOGRAPHY — Font application
+   ================================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+h1 {
+  font-weight: 700;
+}
+
+h2, h3 {
+  font-weight: 600;
+}
+
+h4, h5, h6 {
+  font-weight: 600;
+}
+
+body {
+  font-family: var(--sl-font);
+}
+
+code, pre, kbd, samp {
+  font-family: var(--sl-font-mono);
+}
+
+/* ================================================================
+   2. HERO SECTION — Ambient Amber Glow, Grid, Pulse Line
    ================================================================ */
 
 .hero {
@@ -123,7 +190,7 @@ html {
   padding-bottom: 3rem !important;
 }
 
-/* Floating glow orb */
+/* Floating amber glow orb — radial gradient like heated metal */
 .hero::before {
   content: '';
   position: absolute;
@@ -134,9 +201,9 @@ html {
   height: 700px;
   background: radial-gradient(
     circle,
-    rgba(139, 92, 246, 0.18) 0%,
-    rgba(168, 85, 247, 0.06) 35%,
-    rgba(236, 72, 153, 0.03) 60%,
+    rgba(245, 158, 11, 0.18) 0%,     /* primary amber core */
+    rgba(234, 88, 12, 0.06) 35%,      /* hot orange mid */
+    rgba(180, 83, 9, 0.03) 60%,       /* burnt amber fade */
     transparent 75%
   );
   pointer-events: none;
@@ -154,14 +221,14 @@ html {
   50% { transform: translateX(-50%) translateY(-20px); }
 }
 
-/* Animated grid pattern */
+/* Animated grid pattern — amber-tinted lines */
 .hero::after {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(245, 158, 11, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 158, 11, 0.04) 1px, transparent 1px);
   background-size: 4rem 4rem;
   mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 70%, transparent);
   -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 70%, transparent);
@@ -171,15 +238,15 @@ html {
 
 [data-theme='light'] .hero::after {
   background-image:
-    linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px);
+    linear-gradient(rgba(245, 158, 11, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(245, 158, 11, 0.06) 1px, transparent 1px);
 }
 
 [data-theme='light'] .hero::before {
   background: radial-gradient(
     circle,
-    rgba(139, 92, 246, 0.1) 0%,
-    rgba(168, 85, 247, 0.04) 35%,
+    rgba(245, 158, 11, 0.10) 0%,
+    rgba(234, 88, 12, 0.04) 35%,
     transparent 70%
   );
 }
@@ -197,15 +264,31 @@ html {
   opacity: 0.9;
 }
 
-/* Hero title gradient (Starlight uses <h1> in the hero) */
+/* Hero title — Instrument Sans heading */
 .hero h1 {
   font-size: clamp(2.2rem, 6vw, 3.5rem) !important;
-  font-weight: 800 !important;
+  font-weight: 700 !important;
+  font-family: var(--font-heading) !important;
   letter-spacing: -0.02em;
   line-height: 1.15 !important;
 }
 
-/* Pulsing accent line under hero */
+/* Light mode: Starlight splash hero uses --sl-color-white for title,
+   which is near-invisible on a white background. Force dark text. */
+[data-theme='light'] .hero h1 {
+  color: var(--sl-color-black) !important;
+}
+
+[data-theme='light'] .hero .tagline {
+  color: var(--sl-color-gray-4) !important;
+}
+
+/* Ensure hero action buttons are readable in light mode */
+[data-theme='light'] .hero .action a {
+  color: var(--sl-color-black);
+}
+
+/* Pulsing amber accent line under hero */
 .hero-accent-line {
   width: 100%;
   max-width: 600px;
@@ -214,9 +297,9 @@ html {
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(139, 92, 246, 0.6) 20%,
-    rgba(168, 85, 247, 0.8) 50%,
-    rgba(139, 92, 246, 0.6) 80%,
+    rgba(245, 158, 11, 0.6) 20%,      /* amber */
+    rgba(234, 88, 12, 0.8) 50%,       /* hot orange peak */
+    rgba(245, 158, 11, 0.6) 80%,      /* amber */
     transparent 100%
   );
   border-radius: 1px;
@@ -234,7 +317,7 @@ html {
 }
 
 /* ================================================================
-   3. GRADIENT TEXT
+   3. GRADIENT TEXT — Amber to Orange
    ================================================================ */
 
 .gradient-text {
@@ -258,7 +341,7 @@ html {
 }
 
 [data-theme='light'] .gradient-text {
-  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 25%, #8b5cf6 50%, #a855f7 100%);
+  background: linear-gradient(135deg, #D97706 0%, #B45309 25%, #EA580C 50%, #F59E0B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -272,7 +355,7 @@ html {
 }
 
 /* ================================================================
-   4. LANGUAGE BADGES
+   4. LANGUAGE BADGES — Universal colors preserved
    ================================================================ */
 
 .lang-badge {
@@ -283,6 +366,7 @@ html {
   border-radius: 9999px;
   font-size: 0.72rem;
   font-weight: 700;
+  font-family: var(--sl-font);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -293,6 +377,7 @@ html {
   transform: translateY(-1px);
 }
 
+/* TypeScript — blue (standard) */
 .lang-badge--ts {
   background: rgba(49, 120, 198, 0.15);
   color: #60a5fa;
@@ -303,6 +388,7 @@ html {
   box-shadow: 0 0 12px rgba(49, 120, 198, 0.2);
 }
 
+/* Python — blue (standard) */
 .lang-badge--py {
   background: rgba(55, 118, 171, 0.15);
   color: #93c5fd;
@@ -313,6 +399,7 @@ html {
   box-shadow: 0 0 12px rgba(55, 118, 171, 0.2);
 }
 
+/* Rust — warm orange (standard) */
 .lang-badge--rs {
   background: rgba(222, 165, 132, 0.15);
   color: #fdba74;
@@ -323,6 +410,7 @@ html {
   box-shadow: 0 0 12px rgba(222, 165, 132, 0.2);
 }
 
+/* Light mode language badges */
 [data-theme='light'] .lang-badge--ts {
   background: rgba(49, 120, 198, 0.1);
   color: #1d4ed8;
@@ -365,6 +453,7 @@ html {
   transition: all 0.35s var(--ease-spring);
 }
 
+/* Top accent line — amber glow on hover */
 .bento-card::before {
   content: '';
   position: absolute;
@@ -375,7 +464,7 @@ html {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(139, 92, 246, 0.3),
+    rgba(245, 158, 11, 0.3),
     transparent
   );
   opacity: 0;
@@ -415,7 +504,7 @@ html {
   margin: 0 0 0.5rem 0;
   font-size: 1.1rem;
   font-weight: 700;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+  font-family: var(--sl-font-mono);
 }
 
 .bento-card p {
@@ -436,7 +525,7 @@ html {
 }
 
 .bento-card a:hover {
-  color: var(--agentic-purple-400);
+  color: var(--agentic-amber-400);
 }
 
 .bento-card a::after {
@@ -485,7 +574,8 @@ html {
 .stat-number {
   font-size: 3rem;
   font-weight: 800;
-  background: var(--gradient-pink-purple);
+  font-family: var(--font-heading);
+  background: var(--gradient-amber-orange);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -525,7 +615,8 @@ html {
 
 .mission-section h2 {
   font-size: clamp(1.5rem, 4vw, 2.2rem);
-  font-weight: 800;
+  font-weight: 700;
+  font-family: var(--font-heading);
   margin-bottom: 1.25rem;
   line-height: 1.25;
 }
@@ -539,7 +630,7 @@ html {
 }
 
 /* ================================================================
-   8. SECTION DIVIDERS — Gradient with Subtle Pulse
+   8. SECTION DIVIDERS — Amber Gradient with Warm Pulse
    ================================================================ */
 
 .section-divider {
@@ -561,7 +652,7 @@ html {
   50% { opacity: 1; }
 }
 
-/* Also style Starlight's horizontal rules for consistency */
+/* Starlight horizontal rules — consistent amber gradient */
 .sl-markdown-content hr {
   border: none;
   height: 1px;
@@ -570,7 +661,7 @@ html {
 }
 
 /* ================================================================
-   9. PERSONA / FEATURE CARDS — Glass Style
+   9. PERSONA / FEATURE CARDS — Warm Glass Style
    ================================================================ */
 
 .feature-grid {
@@ -608,6 +699,7 @@ html {
   margin: 0 0 0.5rem 0;
   font-size: 1.05rem;
   font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .feature-card p {
@@ -618,13 +710,13 @@ html {
 }
 
 [data-theme='light'] .feature-card {
-  background: rgba(139, 92, 246, 0.04);
-  border-color: rgba(139, 92, 246, 0.12);
+  background: rgba(245, 158, 11, 0.04);
+  border-color: rgba(245, 158, 11, 0.12);
 }
 
 [data-theme='light'] .feature-card:hover {
-  background: rgba(139, 92, 246, 0.08);
-  border-color: rgba(139, 92, 246, 0.25);
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
 }
 
 /* ================================================================
@@ -641,6 +733,7 @@ html {
   border-radius: 0.75rem 0.75rem 0 0;
 }
 
+/* Terminal dots — standard red/yellow/green (universal) */
 .terminal-dot {
   width: 12px;
   height: 12px;
@@ -654,12 +747,12 @@ html {
 .terminal-title {
   margin-left: 0.5rem;
   font-size: 0.75rem;
-  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-family: var(--sl-font-mono);
   opacity: 0.5;
   letter-spacing: 0.02em;
 }
 
-/* Expressive Code (Starlight built-in) polish */
+/* Expressive Code (Starlight built-in) — amber-tinted border */
 .expressive-code {
   border-radius: 0.75rem !important;
   overflow: hidden;
@@ -712,7 +805,7 @@ nav.sidebar {
   transform: translateY(-3px);
 }
 
-/* Card title gradient on hover */
+/* Card title accent on hover */
 .sl-markdown-content .card:hover .card__title {
   color: var(--sl-color-text-accent);
 }
@@ -747,8 +840,18 @@ starlight-toc a[aria-current="true"] {
   font-weight: 600;
 }
 
+/* --- Starlight links — amber accent --- */
+.sl-markdown-content a {
+  color: var(--sl-color-text-accent);
+  transition: color 0.2s;
+}
+
+.sl-markdown-content a:hover {
+  color: var(--agentic-amber-400);
+}
+
 /* ================================================================
-   13. TABLES — Command Center Style
+   13. TABLES — Command Center Style, Amber Tint
    ================================================================ */
 
 .sl-markdown-content table {
@@ -762,7 +865,7 @@ starlight-toc a[aria-current="true"] {
 }
 
 .sl-markdown-content table thead {
-  background: rgba(139, 92, 246, 0.06);
+  background: rgba(245, 158, 11, 0.06);
 }
 
 .sl-markdown-content table th {
@@ -777,7 +880,7 @@ starlight-toc a[aria-current="true"] {
 
 .sl-markdown-content table td {
   padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(139, 92, 246, 0.05);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.05);
 }
 
 .sl-markdown-content table tr:last-child td {
@@ -785,15 +888,15 @@ starlight-toc a[aria-current="true"] {
 }
 
 .sl-markdown-content table tr:hover td {
-  background: rgba(139, 92, 246, 0.03);
+  background: rgba(245, 158, 11, 0.03);
 }
 
 [data-theme='light'] .sl-markdown-content table thead {
-  background: rgba(139, 92, 246, 0.05);
+  background: rgba(245, 158, 11, 0.05);
 }
 
 [data-theme='light'] .sl-markdown-content table tr:hover td {
-  background: rgba(139, 92, 246, 0.04);
+  background: rgba(245, 158, 11, 0.04);
 }
 
 /* ================================================================
@@ -805,7 +908,7 @@ starlight-toc a[aria-current="true"] {
   border: 1px solid var(--glass-border);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+  font-family: var(--sl-font-mono);
   font-size: 0.82rem;
   line-height: 1.55;
   overflow-x: auto;
@@ -814,15 +917,15 @@ starlight-toc a[aria-current="true"] {
 }
 
 [data-theme='light'] .arch-diagram {
-  background: rgba(139, 92, 246, 0.04);
-  border-color: rgba(139, 92, 246, 0.15);
+  background: rgba(245, 158, 11, 0.04);
+  border-color: rgba(245, 158, 11, 0.15);
 }
 
 /* ================================================================
-   15. CTA BUTTONS
+   15. CTA BUTTONS — Amber glow effect
    ================================================================ */
 
-/* Primary actions get a glow effect */
+/* Primary actions get an amber glow on hover */
 .hero .action a[href*="getting-started"],
 .hero .action a:first-child {
   position: relative;
@@ -835,7 +938,7 @@ starlight-toc a[aria-current="true"] {
     content: '';
     position: absolute;
     inset: -1px;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.2));
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(234, 88, 12, 0.2));
     border-radius: inherit;
     z-index: -1;
     opacity: 0;
@@ -849,7 +952,7 @@ starlight-toc a[aria-current="true"] {
 }
 
 /* ================================================================
-   16. "WHO IS THIS FOR?" PERSONA SECTION
+   16. PERSONA SECTION
    ================================================================ */
 
 .persona-grid {
@@ -887,6 +990,7 @@ starlight-toc a[aria-current="true"] {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .persona-card p {
@@ -924,6 +1028,7 @@ starlight-toc a[aria-current="true"] {
   transform: translateY(-2px);
 }
 
+/* Principle icon container — amber-tinted background */
 .principle-card__icon {
   font-size: 1.5rem;
   margin-bottom: 0.75rem;
@@ -933,7 +1038,7 @@ starlight-toc a[aria-current="true"] {
   justify-content: center;
   width: 2.5rem;
   height: 2.5rem;
-  background: rgba(139, 92, 246, 0.1);
+  background: rgba(245, 158, 11, 0.1);
   border-radius: 0.5rem;
   border: 1px solid var(--glass-border);
 }
@@ -942,6 +1047,7 @@ starlight-toc a[aria-current="true"] {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .principle-card p {
@@ -995,6 +1101,7 @@ starlight-toc a[aria-current="true"] {
   margin: 0 0 0.5rem 0;
   font-size: 1rem;
   font-weight: 700;
+  font-family: var(--font-heading);
   color: var(--sl-color-white);
 }
 
@@ -1038,17 +1145,18 @@ starlight-toc a[aria-current="true"] {
 }
 
 .footer-section a:hover {
-  color: var(--agentic-purple-400);
+  color: var(--agentic-amber-400);
 }
 
 /* ================================================================
-   20. HEADING ACCENTS — All section headings get a subtle style
+   20. HEADING ACCENTS — Amber gradient underline
    ================================================================ */
 
 .sl-markdown-content > h2 {
   position: relative;
   padding-bottom: 0.75rem;
   margin-top: 3rem;
+  font-family: var(--font-heading);
 }
 
 .sl-markdown-content > h2::after {
@@ -1058,7 +1166,7 @@ starlight-toc a[aria-current="true"] {
   left: 0;
   width: 3rem;
   height: 2px;
-  background: var(--gradient-purple);
+  background: var(--gradient-amber);
   border-radius: 1px;
 }
 
@@ -1234,7 +1342,7 @@ starlight-toc a[aria-current="true"] {
 }
 
 /* ================================================================
-   24. QUICK START TAB SECTION — Better spacing
+   24. QUICK START TAB SECTION
    ================================================================ */
 
 .quick-start-section {
@@ -1243,6 +1351,7 @@ starlight-toc a[aria-current="true"] {
 
 .quick-start-section h2 {
   text-align: center;
+  font-family: var(--font-heading);
 }
 
 /* ================================================================
@@ -1256,7 +1365,8 @@ starlight-toc a[aria-current="true"] {
 
 .section-heading h2 {
   font-size: clamp(1.4rem, 3.5vw, 2rem);
-  font-weight: 800;
+  font-weight: 700;
+  font-family: var(--font-heading);
 }
 
 .section-subheading {
@@ -1269,7 +1379,7 @@ starlight-toc a[aria-current="true"] {
 }
 
 /* ================================================================
-   26. AMBIENT SECOND ORB (for longer pages)
+   26. AMBIENT SECOND ORB — Amber glow for longer pages
    ================================================================ */
 
 .ambient-orb {
@@ -1286,7 +1396,7 @@ starlight-toc a[aria-current="true"] {
   height: 500px;
   background: radial-gradient(
     circle,
-    rgba(139, 92, 246, 0.06) 0%,
+    rgba(245, 158, 11, 0.06) 0%,
     transparent 60%
   );
   pointer-events: none;

@@ -33,7 +33,7 @@ describe("CLI", () => {
 
     expect(status).toBe(0);
     expect(stdout).toMatchInlineSnapshot(`
-      "Pipelines:\n- character\n- character-full\n- prop\n\nTasks:\n- animation\n- multi-image-to-3d\n- rigging\n- text-to-3d-preview\n- text-to-3d-refine\n- text-to-image"
+      "Pipelines:\n- brand-image\n- character\n- character-full\n- prop\n\nTasks:\n- animation\n- multi-image-to-3d\n- rigging\n- text-to-3d-preview\n- text-to-3d-refine\n- text-to-image\n- text-to-image-download"
     `);
   });
 });

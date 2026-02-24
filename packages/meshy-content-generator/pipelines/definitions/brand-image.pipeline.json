@@ -1,0 +1,11 @@
+{
+  "name": "brand-image",
+  "description": "Generate brand imagery from text prompts with download",
+  "version": "1.0.0",
+  "steps": [
+    {
+      "id": "generate",
+      "task": "text-to-image-download"
+    }
+  ]
+}

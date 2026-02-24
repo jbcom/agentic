@@ -1,0 +1,10 @@
+{
+  "id": "agentic-og-bg",
+  "name": "Agentic OG Image Background",
+  "type": "brand",
+  "textToImageTask": {
+    "prompt": "Abstract dark background texture with subtle amber and orange geometric patterns, hexagonal grid dissolving into warm light particles, dark near-black base with warm amber energy accents, suitable for text overlay, professional tech brand background, no text",
+    "aiModel": "nano-banana",
+    "aspectRatio": "16:9"
+  }
+}
