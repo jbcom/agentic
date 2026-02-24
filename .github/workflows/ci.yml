@@ -88,7 +88,7 @@ jobs:
 
       - name: Test with coverage
         run: >
-          uv run pytest packages/agentic-crew/tests/ packages/pytest-agentic-crew/tests/
+          uv run pytest packages/agentic-crew/tests/
           -v --tb=short
           --cov=packages/agentic-crew/src
           --cov-report=xml:packages/agentic-crew/coverage.xml
