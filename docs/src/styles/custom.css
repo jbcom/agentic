@@ -1,0 +1,32 @@
+/* 
+  agentic-dev-library Documentation Portal
+  
+  BRANDING HIERARCHY:
+  1. Enterprise base (jbcom.github.io) - fonts, core colors, layout
+  2. Org theme - accent colors (below)
+  3. Org customizations - unique to this org
+  
+  Owner: Jon Bogaty (jbcom)
+  Part of the jbcom Enterprise ecosystem
+*/
+
+/* ===== LAYER 1: Enterprise Base ===== */
+@import url('https://raw.githubusercontent.com/jbcom/jbcom.github.io/main/enterprise-branding/starlight-base.css');
+
+/* ===== LAYER 2: Org Theme (Purple) ===== */
+/* 
+  Agentic Division - Branding Override
+  Org: agentic-dev-library
+*/
+
+:root {
+  /* Purple Theme */
+  --sl-color-accent-low: #2e1065;
+  --sl-color-accent: #8b5cf6;
+  --sl-color-accent-high: #ddd6fe;
+  --sl-color-text-accent: #8b5cf6;
+}
+
+/* ===== LAYER 3: Org-Specific Customizations ===== */
+/* Add styles unique to agentic-dev-library below */
+

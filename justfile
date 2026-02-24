@@ -74,7 +74,7 @@ build-docs: build-sphinx
 
 # Build Sphinx markdown output for Python API docs
 build-sphinx:
-    uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api
+    uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated
 
 # Start docs dev server
 docs-dev:
