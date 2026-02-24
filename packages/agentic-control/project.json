@@ -3,16 +3,20 @@
   "tags": ["lang:ts", "scope:control"],
   "targets": {
     "build": {
-      "command": "tsc"
+      "command": "tsc",
+      "options": { "cwd": "{projectRoot}" }
     },
     "test": {
-      "command": "vitest"
+      "command": "vitest",
+      "options": { "cwd": "{projectRoot}" }
     },
     "lint": {
-      "command": "biome lint src/ tests/"
+      "command": "biome lint src/ tests/",
+      "options": { "cwd": "{projectRoot}" }
     },
     "typecheck": {
-      "command": "tsc --noEmit"
+      "command": "tsc --noEmit",
+      "options": { "cwd": "{projectRoot}" }
     }
   }
 }

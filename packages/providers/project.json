@@ -3,13 +3,16 @@
   "tags": ["lang:ts", "scope:providers"],
   "targets": {
     "build": {
-      "command": "tsc"
+      "command": "tsc",
+      "options": { "cwd": "{projectRoot}" }
     },
     "lint": {
-      "command": "biome lint src/"
+      "command": "biome lint src/",
+      "options": { "cwd": "{projectRoot}" }
     },
     "typecheck": {
-      "command": "tsc --noEmit"
+      "command": "tsc --noEmit",
+      "options": { "cwd": "{projectRoot}" }
     }
   }
 }

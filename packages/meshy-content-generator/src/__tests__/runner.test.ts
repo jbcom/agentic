@@ -64,7 +64,7 @@ describe("PipelineRunner", () => {
       lookups: {
         ANIMATION_IDS: loadAnimationIds(),
       },
-      logger: () => {},
+      logger: () => { /* noop logger for tests */ },
     });
 
     const tempDir = path.join(baseDir, ".tmp-test");

@@ -75,7 +75,7 @@ describe('Astro site configuration', () => {
   it('includes og:image meta tag in head config', () => {
     const config = readConfig();
     expect(config).toContain("property: 'og:image'");
-    expect(config).toContain('og-image.png');
+    expect(config).toContain('og-image.svg');
   });
 });
 
@@ -119,10 +119,20 @@ describe('Sidebar structure', () => {
     expect(config).toContain('typeDocSidebarGroup');
   });
 
-  it('includes Python API autogenerate directory', () => {
+  it('includes Architecture and Troubleshooting guides', () => {
     const config = readConfig();
-    expect(config).toContain("label: 'Python API (Generated)'");
-    expect(config).toContain("directory: 'api/_generated'");
+    expect(config).toContain("label: 'Architecture'");
+    expect(config).toContain("slug: 'guides/architecture'");
+    expect(config).toContain("label: 'Troubleshooting'");
+    expect(config).toContain("slug: 'guides/troubleshooting'");
+  });
+
+  it('includes crew and game-gen API Reference entries', () => {
+    const config = readConfig();
+    expect(config).toContain("label: 'Python (agentic-crew)'");
+    expect(config).toContain("slug: 'api/crew'");
+    expect(config).toContain("label: 'Rust (game-gen)'");
+    expect(config).toContain("slug: 'api/game-gen'");
   });
 });
 
@@ -161,6 +171,10 @@ describe('Sidebar slugs have corresponding content files', () => {
     'api/triage-tools': ['api/triage-tools.md', 'api/triage-tools.mdx'],
     'api/token-management': ['api/token-management.md', 'api/token-management.mdx'],
     'api/configuration': ['api/configuration.md', 'api/configuration.mdx'],
+    'api/crew': ['api/crew/index.md', 'api/crew/index.mdx', 'api/crew.md', 'api/crew.mdx'],
+    'api/game-gen': ['api/game-gen/index.md', 'api/game-gen/index.mdx', 'api/game-gen.md', 'api/game-gen.mdx'],
+    'guides/architecture': ['guides/architecture.md', 'guides/architecture.mdx'],
+    'guides/troubleshooting': ['guides/troubleshooting.md', 'guides/troubleshooting.mdx'],
   };
 
   for (const [slug, possibleFiles] of Object.entries(slugToFile)) {

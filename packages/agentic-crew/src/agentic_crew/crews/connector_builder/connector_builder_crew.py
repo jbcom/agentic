@@ -9,9 +9,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from crewai import Agent, Crew, Task
-
 from agentic_crew.utils import load_config
+from crewai import Agent, Crew, Task
 
 
 class ConnectorBuilderCrew:

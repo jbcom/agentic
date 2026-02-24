@@ -209,12 +209,11 @@ describe('Homepage content', () => {
     expect(bodyText).toContain('Ecosystem');
   });
 
-  it('contains the packages-at-a-glance table', () => {
+  it('contains the ecosystem bento grid with package info', () => {
     const $ = loadPage('index.html');
-    const tables = $('table');
-    expect(tables.length).toBeGreaterThan(0);
-    const tableText = tables.first().text();
-    expect(tableText).toContain('@jbcom/agentic');
+    const bodyText = $('body').text();
+    expect(bodyText).toContain('@jbcom/agentic');
+    expect(bodyText).toContain('agentic-crew');
   });
 
   it('contains the stats section with package count', () => {
