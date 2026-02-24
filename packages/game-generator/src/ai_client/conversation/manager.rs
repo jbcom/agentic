@@ -19,7 +19,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 
-use crate::{AiGenerator, tokens::TokenCounter};
+use crate::ai_client::{AiGenerator, tokens::TokenCounter};
 
 use super::types::*;
 

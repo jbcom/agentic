@@ -1,6 +1,6 @@
 //! Main game data generator orchestrator
 
-use crate::{
+use super::{
     ai_analysis::{AIAnalyzer, EnrichedGameMetadata},
     api::GiantBombClient,
     graph::GraphBuilder,

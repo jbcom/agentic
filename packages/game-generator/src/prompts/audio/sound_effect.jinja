@@ -1,0 +1,5 @@
+Generate a {{ effect_type }} sound effect.
+Duration: {{ duration | default(0.5) }} seconds
+Constraints: {{ constraints | default("16-bit era limitations") }}
+Waveforms: {{ waveforms | default(["square", "triangle", "sawtooth", "noise"]) }}
+Console: {{ console | default("SNES/Genesis era") }}

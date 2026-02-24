@@ -1,6 +1,6 @@
 use crate::vintage_games::TimelineGame;
 use std::collections::HashMap;
-use vintage_blending_core::types::{
+use crate::blending::types::{
     FeatureVector, GameMetadata, STANDARD_GENRES, STANDARD_MECHANICS, get_era_category,
 };
 

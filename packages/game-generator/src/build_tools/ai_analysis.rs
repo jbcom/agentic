@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 use tiktoken_rs::{CoreBPE, get_bpe_from_model};
-use vintage_ai_client::{
+use crate::ai_client::{
     AiService,
     text::{TextConfig, TextGenerator},
 };

@@ -124,7 +124,7 @@ impl ImageDownloader {
     }
 
     /// Download platform logos (if available)
-    pub fn download_platform_logos(&self, platforms: &[crate::types::PlatformInfo]) -> Result<()> {
+    pub fn download_platform_logos(&self, platforms: &[super::types::PlatformInfo]) -> Result<()> {
         println!("Downloading platform logos...");
         let logos_dir = Path::new(&self.images_dir).join("platforms");
         fs::create_dir_all(&logos_dir)?;

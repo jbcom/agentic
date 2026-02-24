@@ -5,7 +5,7 @@ use super::{
     starters,
     types::{GenerationPhase, GenerationProgress, MessageConfig},
 };
-use crate::game_types::{GameConfig, WorldData};
+use crate::ai_client::game_types::{GameConfig, WorldData};
 use anyhow::Result;
 use minijinja::context;
 use std::path::{Path, PathBuf};

@@ -25,7 +25,7 @@ impl TemplateProcessor {
     pub fn generate_modules(
         &self,
         timeline_games: &[serde_json::Value],
-        platforms: &[crate::types::PlatformInfo],
+        platforms: &[super::types::PlatformInfo],
         graph_data: &serde_json::Value,
         timeline_start: i32,
         timeline_end: i32,

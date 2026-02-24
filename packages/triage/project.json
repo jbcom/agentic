@@ -1,10 +1,12 @@
 {
   "name": "triage",
   "tags": ["lang:ts", "scope:triage"],
+  "implicitDependencies": [],
   "targets": {
     "build": {
       "command": "tsup",
-      "options": { "cwd": "{projectRoot}" }
+      "options": { "cwd": "{projectRoot}" },
+      "dependsOn": []
     },
     "test": {
       "command": "vitest run",

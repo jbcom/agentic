@@ -39,9 +39,9 @@ impl Plugin for CombatPlugin {
 
 /// Prelude for easy access to combat types
 pub mod prelude {
-    pub use crate::damage::{CombatStats, DamageConfig, DamageEvent, DamageType};
-    pub use crate::effects::{EffectRegistry, EffectType, StatusEffect};
-    pub use crate::progression::{LevelUpEvent, Progression};
-    pub use crate::state::{CombatManager, CombatState};
-    pub use crate::CombatPlugin;
+    pub use super::damage::{CombatStats, DamageConfig, DamageEvent, DamageType};
+    pub use super::effects::{EffectRegistry, EffectType, StatusEffect};
+    pub use super::progression::{LevelUpEvent, Progression};
+    pub use super::state::{CombatManager, CombatState};
+    pub use super::CombatPlugin;
 }

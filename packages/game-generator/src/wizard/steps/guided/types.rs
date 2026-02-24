@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy_egui::egui;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use vintage_blending_core::graph::BlendPath;
+use crate::blending::graph::BlendPath;
 
 /// State for the guided mode workflow
 #[derive(Debug, Default, Resource)]

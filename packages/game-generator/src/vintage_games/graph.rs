@@ -5,7 +5,7 @@ use super::games::{TIMELINE_GAMES, TimelineGame};
 
 use petgraph::graph::Graph;
 use std::collections::HashMap;
-use vintage_blending_core::{GameMetadata, similarity::SimilarityEngine};
+use crate::blending::{GameMetadata, SimilarityEngine};
 
 /// Node representation for the game graph
 #[derive(Debug, Clone)]
@@ -49,7 +49,7 @@ pub fn build_game_graph() -> Graph<GameNode, f32> {
 
 /// Convert a TimelineGame to GameMetadata for similarity calculations
 fn game_to_metadata(game: &TimelineGame) -> GameMetadata {
-    use vintage_blending_core::types::{STANDARD_GENRES, STANDARD_MECHANICS, get_era_category};
+    use crate::blending::types::{STANDARD_GENRES, STANDARD_MECHANICS, get_era_category};
 
     // Create feature vector
     let mut genre_weights = vec![0.0; STANDARD_GENRES.len()];
@@ -211,7 +211,7 @@ fn game_to_metadata(game: &TimelineGame) -> GameMetadata {
         _ => {}
     }
 
-    let feature_vector = vintage_blending_core::FeatureVector {
+    let feature_vector = crate::blending::FeatureVector {
         genre_weights,
         mechanic_flags,
         platform_generation,

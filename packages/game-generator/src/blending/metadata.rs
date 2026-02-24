@@ -6,7 +6,7 @@ use anyhow::Result;
 use serde_json::Value;
 use std::collections::HashMap;
 
-use crate::types::{
+use super::types::{
     FeatureVector, GameMetadata, STANDARD_GENRES, STANDARD_MECHANICS, get_era_category,
 };
 

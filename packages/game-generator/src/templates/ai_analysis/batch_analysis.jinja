@@ -1,0 +1,17 @@
+Analyze the following {{ games | length }} vintage games. For each game, provide detailed analysis.
+Analysis date: {{ analysis_date }}
+
+Games to analyze:
+{% for game in games %}
+- ID: {{ game.id }}, Name: {{ game.name }}, Year: {{ game.year }}, Genre: {{ game.genre }}
+  Platforms: {{ game.platforms }}, Developer: {{ game.developer }}
+  Description: {{ game.deck }}
+{% endfor %}
+
+For each game, respond with a JSON object containing:
+- themes, narrative_elements, mechanics, mood_tags, innovation_aspects
+- cultural_impact, design_philosophy, player_experience, difficulty_curve
+- replayability_factors, artistic_style, audio_design, pacing
+- target_audience, unique_features, influenced_by, influenced_games
+- genre_blend, era_significance, technical_achievements, memorable_moments
+- core_loop, progression_system, social_features, accessibility_notes

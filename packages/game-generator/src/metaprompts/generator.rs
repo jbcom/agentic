@@ -3,8 +3,8 @@ use serde::{Deserialize, Serialize};
 use crate::wizard::config::ProjectConfig;
 use futures::{Stream, StreamExt};
 
-// Import from vintage_ai_client - updated to new API
-use vintage_ai_client::{
+// Import from ai_client module (previously vintage_ai_client crate)
+use crate::ai_client::{
     AiService, conversation::ConversationContext, game_types::GameConfig, text::TextConfig,
 };
 
@@ -284,9 +284,9 @@ impl GameGenerator {
             .iter()
             .map(|m| {
                 let role = match m.role {
-                    vintage_ai_client::conversation::MessageRole::User => "user",
-                    vintage_ai_client::conversation::MessageRole::Assistant => "assistant",
-                    vintage_ai_client::conversation::MessageRole::System => "system",
+                    crate::ai_client::conversation::MessageRole::User => "user",
+                    crate::ai_client::conversation::MessageRole::Assistant => "assistant",
+                    crate::ai_client::conversation::MessageRole::System => "system",
                 };
                 (role.to_string(), m.content.clone())
             })

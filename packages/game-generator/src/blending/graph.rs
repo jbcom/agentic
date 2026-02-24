@@ -11,7 +11,7 @@ use petgraph::visit::EdgeRef;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::types::{CompatibilityEdge, Conflict, GameMetadata, Synergy};
+use super::types::{CompatibilityEdge, Conflict, GameMetadata, Synergy};
 
 /// Weighted graph of game relationships
 pub struct GameGraph {

@@ -2,7 +2,7 @@
 //!
 //! Provides various similarity metrics and algorithms
 
-use crate::types::GameMetadata;
+use super::types::GameMetadata;
 
 /// Engine for computing game similarities
 pub struct SimilarityEngine {
@@ -132,7 +132,7 @@ impl Default for SimilarityEngine {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::FeatureVector;
+    use crate::blending::types::FeatureVector;
     use std::collections::HashMap;
 
     #[test]

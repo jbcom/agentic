@@ -1,6 +1,6 @@
 //! GiantBomb API client
 
-use crate::types::*;
+use super::types::*;
 use anyhow::{Context, Result};
 use std::collections::{HashMap, HashSet};
 use std::thread;

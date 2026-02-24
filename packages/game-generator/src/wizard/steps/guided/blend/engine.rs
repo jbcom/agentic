@@ -1,9 +1,9 @@
 use crate::wizard::steps::guided::types::{BlendResult, GuidedModeState};
 use std::collections::{HashMap, HashSet};
-use vintage_blending_core::{
+use crate::blending::{
     CompatibilityEdge,
     graph::{BlendPath, GameGraph},
-    similarity::SimilarityEngine,
+    SimilarityEngine,
 };
 
 use super::analysis::{analyze_conflicts, analyze_synergies, generate_recommendations};
@@ -69,7 +69,7 @@ pub fn create_blend(state: &mut GuidedModeState) {
 /// Generate the final blend result
 fn generate_blend_result(
     games: &[&crate::vintage_games::TimelineGame],
-    metadata: &HashMap<String, vintage_blending_core::GameMetadata>,
+    metadata: &HashMap<String, crate::blending::GameMetadata>,
     blend_path: &BlendPath,
 ) -> BlendResult {
     // Aggregate genres with weights

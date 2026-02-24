@@ -1,10 +1,10 @@
 //! Game similarity graph pre-computation
 
-use crate::ai_analysis::EnrichedGameMetadata;
+use super::ai_analysis::EnrichedGameMetadata;
 use anyhow::Result;
 use serde_json::Value;
 use std::collections::HashMap;
-use vintage_blending_core::{
+use crate::blending::types::{
     FeatureVector, GameMetadata, STANDARD_GENRES, STANDARD_MECHANICS, get_era_category,
 };
 

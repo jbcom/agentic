@@ -1,7 +1,7 @@
 use crate::vintage_games::TimelineGame;
 use crate::wizard::steps::guided::types::{Conflict, Synergy};
 use std::collections::HashMap;
-use vintage_blending_core::types::{
+use crate::blending::types::{
     Conflict as CoreConflict, GameMetadata, Synergy as CoreSynergy,
 };
 
@@ -147,7 +147,7 @@ pub fn analyze_conflicts(
 
 /// Extract synergies from blend path with game names
 pub fn extract_synergies(
-    edges: &[vintage_blending_core::CompatibilityEdge],
+    edges: &[crate::blending::CompatibilityEdge],
     games: &[&TimelineGame],
 ) -> Vec<Synergy> {
     // Since edges don't have game IDs, we'll extract synergies from the edges themselves
@@ -177,7 +177,7 @@ pub fn extract_synergies(
 
 /// Extract conflicts from blend path with game names
 pub fn extract_conflicts(
-    edges: &[vintage_blending_core::CompatibilityEdge],
+    edges: &[crate::blending::CompatibilityEdge],
     games: &[&TimelineGame],
 ) -> Vec<Conflict> {
     // Since edges don't have game IDs, we'll extract conflicts from the edges themselves

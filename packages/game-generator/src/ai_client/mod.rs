@@ -118,7 +118,7 @@ pub trait AiGenerator: Send + Sync {
 
 /// Configuration for AI services
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "bevy", derive(bevy::prelude::Resource))]
+#[derive(bevy::prelude::Resource)]
 pub struct AiConfig {
     // Model Selection
     /// Text generation model (e.g., gpt-4, gpt-3.5-turbo, claude-3-opus)
