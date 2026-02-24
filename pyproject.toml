@@ -43,6 +43,9 @@ testpaths = ["packages/agentic-crew", "packages/pytest-agentic-crew"]
 markers = [
     "e2e: end-to-end tests (may require external services)",
     "slow: slow-running tests",
+    "crewai: tests specific to the CrewAI framework backend",
+    "langgraph: tests specific to the LangGraph framework backend",
+    "strands: tests specific to the Strands framework backend",
 ]
 
 [tool.mypy]

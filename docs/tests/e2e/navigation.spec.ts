@@ -12,6 +12,34 @@
 import { test, expect } from '@playwright/test';
 
 // ---------------------------------------------------------------------------
+// Helper: detect mobile viewport and open sidebar menu
+// ---------------------------------------------------------------------------
+
+function isMobileProject(testInfo: import('@playwright/test').TestInfo): boolean {
+  return testInfo.project.name === 'mobile-chrome';
+}
+
+/**
+ * On mobile viewports Starlight hides the sidebar behind a hamburger menu.
+ * This helper opens the menu so sidebar-dependent assertions can proceed.
+ */
+async function openMobileMenuIfNeeded(
+  page: import('@playwright/test').Page,
+  testInfo: import('@playwright/test').TestInfo
+): Promise<void> {
+  if (!isMobileProject(testInfo)) return;
+  const menuButton = page.locator('starlight-menu-button button');
+  await expect(menuButton).toBeVisible({ timeout: 10_000 });
+  await page.evaluate(() => {
+    const el = document.querySelector('starlight-menu-button') as any;
+    el.toggleExpanded();
+  });
+  // Wait for the sidebar content to become visible after toggling
+  const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+  await expect(sidebarContent).toBeVisible({ timeout: 5_000 });
+}
+
+// ---------------------------------------------------------------------------
 // 1. Homepage
 // ---------------------------------------------------------------------------
 
@@ -67,9 +95,11 @@ test.describe('Homepage', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('Sidebar navigation', () => {
-  test('sidebar is visible on desktop', async ({ page }) => {
+  test('sidebar is visible on desktop', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
     await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     // Starlight renders #starlight__sidebar as a fixed-position container whose
     // bounding-rect height can be 0 due to CSS inset-block.  The actual content
     // inside .sidebar-content has the real dimensions, so assert on that instead.
@@ -95,9 +125,11 @@ test.describe('Sidebar navigation', () => {
     await expect(sidebarPane).toContainText('Packages');
   });
 
-  test('clicking sidebar link navigates to correct page', async ({ page }) => {
+  test('clicking sidebar link navigates to correct page', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
     await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
     await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
     // Starlight's sidebar sits below the main-frame in z-index stacking,
@@ -112,9 +144,11 @@ test.describe('Sidebar navigation', () => {
     await expect(page).toHaveTitle(/Quick Start/);
   });
 
-  test('clicking through to a guide page works', async ({ page }) => {
+  test('clicking through to a guide page works', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
     await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
     await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
     await page.evaluate(() => {
@@ -127,9 +161,11 @@ test.describe('Sidebar navigation', () => {
     await expect(page.locator('h1').first()).toContainText(/spawn/i);
   });
 
-  test('clicking through to an integration page works', async ({ page }) => {
+  test('clicking through to an integration page works', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
     await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
     await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
     await page.evaluate(() => {
@@ -142,8 +178,11 @@ test.describe('Sidebar navigation', () => {
     await expect(page).toHaveTitle(/GitHub Actions/);
   });
 
-  test('current page is highlighted in sidebar', async ({ page }) => {
+  test('current page is highlighted in sidebar', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
+    await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     const sidebarPane = page.locator('#starlight__sidebar');
     const currentLink = sidebarPane.locator('a[aria-current="page"]');
     await expect(currentLink).toBeVisible();
@@ -277,12 +316,23 @@ test.describe('Subpage deep links', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('External links', () => {
-  test('GitHub link in header/social points to correct repo', async ({ page }) => {
+  test('GitHub link in header/social points to correct repo', async ({ page }, testInfo) => {
     await page.goto('/');
-    const githubLink = page.locator('a[href*="github.com/jbcom/agentic"]').first();
-    await expect(githubLink).toBeVisible();
-    const href = await githubLink.getAttribute('href');
-    expect(href).toContain('github.com/jbcom/agentic');
+    if (isMobileProject(testInfo)) {
+      // The homepage uses Starlight's landing page layout which hides the
+      // header social-icons row on mobile via CSS.  The hero "View on
+      // GitHub" link inside <main> contains the same repo URL and is
+      // visible, so scope the locator to <main>.
+      const githubLink = page.locator('main a[href*="github.com/jbcom/agentic"]').first();
+      await expect(githubLink).toBeVisible();
+      const href = await githubLink.getAttribute('href');
+      expect(href).toContain('github.com/jbcom/agentic');
+    } else {
+      const githubLink = page.locator('a[href*="github.com/jbcom/agentic"]').first();
+      await expect(githubLink).toBeVisible();
+      const href = await githubLink.getAttribute('href');
+      expect(href).toContain('github.com/jbcom/agentic');
+    }
   });
 
   test('"View on GitHub" hero link targets correct repository', async ({ page }) => {

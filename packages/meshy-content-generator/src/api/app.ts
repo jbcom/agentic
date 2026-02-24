@@ -94,7 +94,7 @@ export function buildServer(options?: { cwd?: string }) {
         const manifest = await runner.run({
           pipelineName,
           assetDir: absoluteAssetDir,
-          step,
+          ...(step !== undefined ? { step } : {}),
         });
         runs.set(runId, { status: "SUCCEEDED", manifest });
       } catch (error) {

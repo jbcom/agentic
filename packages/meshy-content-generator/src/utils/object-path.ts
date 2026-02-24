@@ -16,12 +16,15 @@ export function setPathValue(obj: Record<string, unknown>, path: string, value: 
   if (parts.length === 0) return;
   let current: Record<string, unknown> = obj;
   for (let i = 0; i < parts.length - 1; i += 1) {
-    const part = parts[i];
+    const part = parts[i] as string;
     const next = current[part];
     if (!next || typeof next !== "object") {
       current[part] = {};
     }
     current = current[part] as Record<string, unknown>;
   }
-  current[parts[parts.length - 1]] = value;
+  const lastPart = parts[parts.length - 1];
+  if (lastPart !== undefined) {
+    current[lastPart] = value;
+  }
 }

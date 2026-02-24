@@ -12,6 +12,34 @@
 import { test, expect } from '@playwright/test';
 
 // ---------------------------------------------------------------------------
+// Helper: detect mobile viewport and open sidebar menu
+// ---------------------------------------------------------------------------
+
+function isMobileProject(testInfo: import('@playwright/test').TestInfo): boolean {
+  return testInfo.project.name === 'mobile-chrome';
+}
+
+/**
+ * On mobile viewports Starlight hides the sidebar behind a hamburger menu.
+ * This helper opens the menu so sidebar-dependent assertions can proceed.
+ */
+async function openMobileMenuIfNeeded(
+  page: import('@playwright/test').Page,
+  testInfo: import('@playwright/test').TestInfo
+): Promise<void> {
+  if (!isMobileProject(testInfo)) return;
+  const menuButton = page.locator('starlight-menu-button button');
+  await expect(menuButton).toBeVisible({ timeout: 10_000 });
+  await page.evaluate(() => {
+    const el = document.querySelector('starlight-menu-button') as any;
+    el.toggleExpanded();
+  });
+  // Wait for the sidebar content to become visible after toggling
+  const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+  await expect(sidebarContent).toBeVisible({ timeout: 5_000 });
+}
+
+// ---------------------------------------------------------------------------
 // Helper: collect heading levels from a page
 // ---------------------------------------------------------------------------
 
@@ -85,9 +113,11 @@ test.describe('ARIA landmarks', () => {
     expect(mainCount).toBe(1);
   });
 
-  test('page has a sidebar navigation region', async ({ page }) => {
+  test('page has a sidebar navigation region', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
     await page.waitForLoadState('networkidle');
+    // On mobile the sidebar is behind a hamburger menu -- open it first.
+    await openMobileMenuIfNeeded(page, testInfo);
     // Starlight uses <nav aria-label="Main"> with a child pane #starlight__sidebar.
     // The pane itself reports height 0 due to CSS inset-block fixed positioning,
     // so check .sidebar-content which has the real dimensions.
@@ -165,8 +195,11 @@ test.describe('Keyboard navigation', () => {
     expect(secondFocused.tag).toBeTruthy();
   });
 
-  test('sidebar links are keyboard-navigable', async ({ page }) => {
+  test('sidebar links are keyboard-navigable', async ({ page }, testInfo) => {
     await page.goto('/getting-started/introduction/');
+    // On mobile the sidebar is behind a hamburger menu -- open it first so
+    // sidebar links enter the tab order.
+    await openMobileMenuIfNeeded(page, testInfo);
     // Navigate to sidebar links via Tab
     let foundSidebarLink = false;
     for (let i = 0; i < 40; i++) {
@@ -424,9 +457,24 @@ test.describe('Theme support', () => {
     expect(theme).toMatch(/^(dark|light)$/);
   });
 
-  test('theme selector is present', async ({ page }) => {
-    await page.goto('/');
-    const themeSelect = page.locator('starlight-theme-select select');
-    await expect(themeSelect).toBeVisible();
+  test('theme selector is present', async ({ page }, testInfo) => {
+    if (isMobileProject(testInfo)) {
+      // The homepage uses Starlight's landing page layout which has no
+      // sidebar or hamburger menu on mobile, so the theme selector is not
+      // rendered.  Navigate to a content page and open the mobile menu
+      // where the theme selector lives.
+      await page.goto('/getting-started/introduction/');
+      await page.waitForLoadState('networkidle');
+      await openMobileMenuIfNeeded(page, testInfo);
+      // On mobile with sidebar open, Starlight renders two theme selects
+      // (one in the header -- CSS-hidden, one in the sidebar nav -- visible).
+      // Scope the locator to the sidebar nav to target the visible one.
+      const themeSelect = page.locator('nav[aria-label="Main"] starlight-theme-select select');
+      await expect(themeSelect).toBeVisible();
+    } else {
+      await page.goto('/');
+      const themeSelect = page.locator('starlight-theme-select select');
+      await expect(themeSelect).toBeVisible();
+    }
   });
 });

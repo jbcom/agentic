@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytest.importorskip("crewai", reason="crewai not installed")
+
 from agentic_crew.crews.connector_builder.connector_builder_crew import ConnectorBuilderCrew
 
 

@@ -34,7 +34,7 @@ export const RunRecordSchema = z.object({
 /**
  * Build the OpenAPI document describing the Meshy content generation API.
  */
-export function buildOpenApiSpec() {
+export function buildOpenApiSpec(): ReturnType<InstanceType<typeof OpenApiGeneratorV3>["generateDocument"]> {
   const registry = new OpenAPIRegistry();
 
   registry.register("RunRequest", RunRequestSchema);

@@ -1,5 +1,6 @@
 import path from "node:path";
 import FetchAdapter from "@pollyjs/adapter-fetch";
+import type { MODE } from "@pollyjs/core";
 import { Polly } from "@pollyjs/core";
 import FSPersister from "@pollyjs/persister-fs";
 
@@ -8,7 +9,7 @@ Polly.register(FSPersister);
 
 export function createPolly(recordingName: string) {
   const recordingsDir = path.resolve(process.cwd(), "test/__recordings__");
-  const mode = process.env.POLLY_MODE ?? "replay";
+  const mode = (process.env.POLLY_MODE ?? "replay") as MODE;
 
   const polly = new Polly(recordingName, {
     adapters: ["fetch"],
