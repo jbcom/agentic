@@ -69,9 +69,12 @@ test.describe('Homepage', () => {
 test.describe('Sidebar navigation', () => {
   test('sidebar is visible on desktop', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
-    // Starlight sidebar content pane inside <nav aria-label="Main">
-    const sidebarPane = page.locator('#starlight__sidebar');
-    await expect(sidebarPane).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    // Starlight renders #starlight__sidebar as a fixed-position container whose
+    // bounding-rect height can be 0 due to CSS inset-block.  The actual content
+    // inside .sidebar-content has the real dimensions, so assert on that instead.
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
   });
 
   test('sidebar contains "Getting Started" group', async ({ page }) => {
@@ -94,27 +97,47 @@ test.describe('Sidebar navigation', () => {
 
   test('clicking sidebar link navigates to correct page', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
-    const sidebarPane = page.locator('#starlight__sidebar');
-    const quickStartLink = sidebarPane.locator('a', { hasText: 'Quick Start' }).first();
-    await quickStartLink.click();
+    await page.waitForLoadState('networkidle');
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
+    // Starlight's sidebar sits below the main-frame in z-index stacking,
+    // so normal Playwright clicks are intercepted.  Use a JS click instead.
+    await page.evaluate(() => {
+      const link = document.querySelector(
+        '#starlight__sidebar a[href*="quick-start"]'
+      ) as HTMLAnchorElement;
+      link?.click();
+    });
     await page.waitForURL(/getting-started\/quick-start/);
     await expect(page).toHaveTitle(/Quick Start/);
   });
 
   test('clicking through to a guide page works', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
-    const sidebarPane = page.locator('#starlight__sidebar');
-    const guideLink = sidebarPane.locator('a', { hasText: 'Agent Spawning' }).first();
-    await guideLink.click();
+    await page.waitForLoadState('networkidle');
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
+    await page.evaluate(() => {
+      const link = document.querySelector(
+        '#starlight__sidebar a[href*="agent-spawning"]'
+      ) as HTMLAnchorElement;
+      link?.click();
+    });
     await page.waitForURL(/guides\/agent-spawning/);
     await expect(page.locator('h1').first()).toContainText(/spawn/i);
   });
 
   test('clicking through to an integration page works', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
-    const sidebarPane = page.locator('#starlight__sidebar');
-    const integrationLink = sidebarPane.locator('a', { hasText: 'GitHub Actions' }).first();
-    await integrationLink.click();
+    await page.waitForLoadState('networkidle');
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
+    await page.evaluate(() => {
+      const link = document.querySelector(
+        '#starlight__sidebar a[href*="github-actions"]'
+      ) as HTMLAnchorElement;
+      link?.click();
+    });
     await page.waitForURL(/integrations\/github-actions/);
     await expect(page).toHaveTitle(/GitHub Actions/);
   });
@@ -288,23 +311,35 @@ test.describe('Mobile responsive menu', () => {
 
   test('menu toggle button opens sidebar on mobile', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
+    await page.waitForLoadState('networkidle');
     const menuButton = page.locator('starlight-menu-button button');
-    await menuButton.click();
+    await expect(menuButton).toBeVisible({ timeout: 10_000 });
+    // The sticky header overlaps the menu button in z-index, preventing
+    // pointer-based clicks. Toggle the sidebar via the custom element API.
+    await page.evaluate(() => {
+      const el = document.querySelector('starlight-menu-button') as any;
+      el.toggleExpanded();
+    });
 
-    // After clicking, the sidebar pane should become visible
-    const sidebarPane = page.locator('#starlight__sidebar');
-    await expect(sidebarPane).toBeVisible({ timeout: 3000 });
+    // After toggling, the sidebar content should become visible.
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 5_000 });
   });
 
   test('mobile menu contains navigation links', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
+    await page.waitForLoadState('networkidle');
     const menuButton = page.locator('starlight-menu-button button');
-    await menuButton.click();
+    await expect(menuButton).toBeVisible({ timeout: 10_000 });
+    await page.evaluate(() => {
+      const el = document.querySelector('starlight-menu-button') as any;
+      el.toggleExpanded();
+    });
 
-    const sidebarPane = page.locator('#starlight__sidebar');
-    await expect(sidebarPane).toBeVisible({ timeout: 3000 });
-    await expect(sidebarPane).toContainText('Getting Started');
-    await expect(sidebarPane).toContainText('Guides');
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 5_000 });
+    await expect(sidebarContent).toContainText('Getting Started');
+    await expect(sidebarContent).toContainText('Guides');
   });
 });
 

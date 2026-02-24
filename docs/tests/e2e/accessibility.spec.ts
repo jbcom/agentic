@@ -87,9 +87,12 @@ test.describe('ARIA landmarks', () => {
 
   test('page has a sidebar navigation region', async ({ page }) => {
     await page.goto('/getting-started/introduction/');
-    // Starlight uses <nav aria-label="Main"> with a child pane #starlight__sidebar
-    const sidebarPane = page.locator('#starlight__sidebar');
-    await expect(sidebarPane).toBeVisible();
+    await page.waitForLoadState('networkidle');
+    // Starlight uses <nav aria-label="Main"> with a child pane #starlight__sidebar.
+    // The pane itself reports height 0 due to CSS inset-block fixed positioning,
+    // so check .sidebar-content which has the real dimensions.
+    const sidebarContent = page.locator('#starlight__sidebar .sidebar-content');
+    await expect(sidebarContent).toBeVisible({ timeout: 10_000 });
     // The parent nav should have the correct aria-label
     const navLabel = await page.locator('nav[aria-label="Main"]').getAttribute('aria-label');
     expect(navLabel).toBe('Main');
