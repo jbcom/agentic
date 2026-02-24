@@ -210,6 +210,20 @@ jobs:
       - name: Generate Python API docs
         run: uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated 2>/dev/null || true
 
+      # Inject Starlight frontmatter into generated markdown files that lack it
+      - name: Add frontmatter to generated docs
+        run: |
+          find docs/src/content/docs/api/_generated -name '*.md' | while read -r f; do
+            if ! head -1 "$f" | grep -q '^---'; then
+              TITLE=$(head -5 "$f" | grep -m1 '^# ' | sed 's/^# //' || basename "$f" .md)
+              [ -z "$TITLE" ] && TITLE=$(basename "$f" .md)
+              TMPFILE=$(mktemp)
+              printf -- '---\ntitle: "%s"\n---\n' "$TITLE" > "$TMPFILE"
+              cat "$f" >> "$TMPFILE"
+              mv "$TMPFILE" "$f"
+            fi
+          done
+
       # Build Astro site (starlight-typedoc generates TS docs at build time)
       - name: Build Astro docs
         run: pnpm run build

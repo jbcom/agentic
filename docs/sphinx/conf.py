@@ -35,7 +35,14 @@ extensions = [
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
+exclude_patterns = [
+    "_build", "Thumbs.db", ".DS_Store",
+    # Exclude everything except API reference — non-API docs already live in Starlight
+    # and sphinx-markdown-builder doesn't add the frontmatter Starlight requires.
+    "DESIGN-SYSTEM.md", "DOMAIN-STANDARD.md", "ECOSYSTEM.md",
+    "getting-started/*", "development/*", "examples/*", "guides/*",
+    "architecture/*", "contributing.md",
+]
 
 source_suffix = {
     ".rst": "restructuredtext",
