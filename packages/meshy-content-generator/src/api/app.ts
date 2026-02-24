@@ -32,9 +32,7 @@ export function buildServer(options?: { cwd?: string }) {
     routePrefix: "/api",
     logLevel: "silent",
     configuration: {
-      spec: {
-        content: openapi,
-      },
+      content: openapi,
       theme: "purple",
       customCss: `
         :root {
