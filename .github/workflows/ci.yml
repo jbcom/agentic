@@ -1,5 +1,5 @@
 # CI - Polyglot Build, Lint, Test
-# Runs TypeScript, Python, and Rust checks in parallel
+# Runs TypeScript, Python, Rust, and Docs checks in parallel
 name: CI
 
 on:
@@ -122,6 +122,51 @@ jobs:
 
       - name: Test
         run: cargo test --workspace
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          STORE_PATH=$(pnpm store path --silent 2>/dev/null || true)
+          STORE_PATH="${STORE_PATH:-${XDG_DATA_HOME:-$HOME/.local/share}/pnpm/store}"
+          echo "store=$STORE_PATH" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.store }}
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml', 'package.json') }}
+          restore-keys: pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build docs
+        run: pnpm run build
+        working-directory: docs
+
+      - name: Unit tests
+        run: pnpm run test
+        working-directory: docs
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+        working-directory: docs
+
+      - name: E2E tests
+        run: pnpm run test:e2e --project=chromium
+        working-directory: docs
 
   sonarcloud:
     name: SonarCloud
