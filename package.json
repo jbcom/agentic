@@ -68,10 +68,24 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jbdevprimary/agentic-control.git"
+    "url": "https://github.com/jbcom/agentic.git"
   },
-  "homepage": "https://github.com/jbdevprimary/agentic-control#readme",
+  "homepage": "https://github.com/jbcom/agentic#readme",
   "bugs": {
-    "url": "https://github.com/jbdevprimary/agentic-control/issues"
+    "url": "https://github.com/jbcom/agentic/issues"
+  },
+  "pnpm": {
+    "overrides": {
+      "minimatch": ">=10.2.1",
+      "@isaacs/brace-expansion": ">=5.0.1",
+      "hono": ">=4.11.10",
+      "qs": ">=6.14.2",
+      "lodash": ">=4.17.23",
+      "lodash-es": ">=4.17.23",
+      "undici": ">=7.18.2",
+      "ajv": ">=8.18.0",
+      "markdown-it": ">=14.1.1",
+      "@playwright/mcp": ">=0.0.40"
+    }
   }
 }

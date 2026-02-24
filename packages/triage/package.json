@@ -96,7 +96,7 @@
         "@ai-sdk/google": "^3.0.1",
         "@ai-sdk/mcp": "^1.0.1",
         "@linear/sdk": "^68.1.0",
-        "@modelcontextprotocol/sdk": "^1.25.1",
+        "@modelcontextprotocol/sdk": "^1.26.0",
         "@playwright/mcp": "latest",
         "ai": "^6.0.0",
         "ai-sdk-ollama": "^3.0.0",
