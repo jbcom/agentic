@@ -26,7 +26,28 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: {
 						property: 'og:image',
-						content: 'https://agentic.coach/og-image.png',
+						content: 'https://agentic.coach/og-image.svg',
+					},
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						name: 'theme-color',
+						content: '#8b5cf6',
+					},
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:title',
+						content: 'Agentic — Command Your AI Fleet',
+					},
+				},
+				{
+					tag: 'meta',
+					attrs: {
+						property: 'og:description',
+						content: 'The polyglot AI agent toolkit. Fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.',
 					},
 				},
 			],
@@ -94,6 +115,8 @@ export default defineConfig({
 						{ label: 'Orchestration Patterns', slug: 'guides/orchestration-patterns' },
 						{ label: 'AI Triage', slug: 'guides/ai-triage' },
 						{ label: 'Sandbox Execution', slug: 'guides/sandbox-execution' },
+						{ label: 'Architecture', slug: 'guides/architecture' },
+						{ label: 'Troubleshooting', slug: 'guides/troubleshooting' },
 					],
 				},
 				{
@@ -126,10 +149,6 @@ export default defineConfig({
 					],
 				},
 				typeDocSidebarGroup,
-				{
-					label: 'Python API (Generated)',
-					autogenerate: { directory: 'api/_generated' },
-				},
 			],
 		}),
 	],

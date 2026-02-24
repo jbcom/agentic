@@ -1,53 +1,48 @@
-# meshy-content-generator
+# @jbcom/agentic-meshy
 
-Ship Meshy-powered 3D asset pipelines without bespoke scripts. Define pipelines and tasks as JSON, run them from a CLI or API, and preview results instantly.
+[![npm version](https://img.shields.io/npm/v/@jbcom/agentic-meshy.svg)](https://www.npmjs.com/package/@jbcom/agentic-meshy)
+[![CI](https://github.com/jbcom/agentic/actions/workflows/ci.yml/badge.svg)](https://github.com/jbcom/agentic/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Why teams adopt it
+Declarative Meshy 3D asset generation pipelines. Define text-to-image, text-to-3D, rigging, and animation workflows as JSON, then run them from a CLI, REST API, or programmatically as a library. Includes a built-in 3D model preview server powered by `@google/model-viewer`.
 
-- **Meshy-first**: built around Meshy’s text-to-image, text-to-3D, rigging, and animation endpoints.
-- **Declarative pipelines**: orchestration lives in JSON, not in brittle glue code.
-- **Reusable assets**: one manifest per asset; replay the exact pipeline anytime.
-- **CLI + API + Preview**: run locally, in CI, or embed as a library.
-- **Testable**: VCR recording for Meshy calls, contract tests for OpenAPI.
+[Full Documentation](https://agentic.coach) | [Package Docs](https://agentic.coach/packages/meshy-content-generator/)
 
-## Install
+## Installation
 
 ```bash
+npm install @jbcom/agentic-meshy
+# or
 pnpm add @jbcom/agentic-meshy
 ```
 
-## Quick start (CLI)
+## Quick Start
+
+### CLI
 
 ```bash
-# list built-in pipelines and tasks
+# List built-in pipelines and tasks
 content-gen list --pipelines ./pipelines/definitions --tasks ./tasks/definitions
 
-# validate an asset manifest
+# Validate an asset manifest
 content-gen validate ./assets/characters/hero \
   --pipelines ./pipelines/definitions \
   --tasks ./tasks/definitions
 
-# run a pipeline
+# Run a pipeline
 content-gen run character ./assets/characters/hero \
   --pipelines ./pipelines/definitions \
   --tasks ./tasks/definitions
 ```
 
-### Environment
+### Programmatic API
 
-```bash
-MESHY_API_KEY=your_api_key
-POLLY_MODE=replay
-```
-
-## Programmatic API
-
-```ts
-import { PipelineRunner, loadJsonDefinitions } from "@jbcom/agentic-meshy";
+```typescript
+import { PipelineRunner, loadJsonDefinitions } from '@jbcom/agentic-meshy';
 
 const definitions = await loadJsonDefinitions({
-  pipelinesDir: "./pipelines/definitions",
-  tasksDir: "./tasks/definitions",
+  pipelinesDir: './pipelines/definitions',
+  tasksDir: './tasks/definitions',
 });
 
 const runner = new PipelineRunner({
@@ -56,12 +51,12 @@ const runner = new PipelineRunner({
 });
 
 await runner.run({
-  pipelineName: "character",
-  assetDir: "./assets/characters/hero",
+  pipelineName: 'character',
+  assetDir: './assets/characters/hero',
 });
 ```
 
-## API server + preview
+### API Server and Preview
 
 ```bash
 pnpm dev
@@ -69,54 +64,27 @@ pnpm dev
 
 - API reference: `http://localhost:5177/api`
 - OpenAPI spec: `http://localhost:5177/openapi.json`
-- Preview: `http://localhost:5177/preview?assetDir=./assets/characters/hero&file=model.glb`
+- 3D preview: `http://localhost:5177/preview?assetDir=./assets/characters/hero&file=model.glb`
 
-The preview loads `@google/model-viewer` from your local install (no CDN).
+## Key Features
 
-## Concepts
+- **Meshy-first** -- built around Meshy's text-to-image, text-to-3D, rigging, and animation endpoints
+- **Declarative pipelines** -- orchestration defined in JSON, not brittle scripts
+- **Reusable manifests** -- one manifest per asset, replay the exact pipeline anytime
+- **CLI + API + library** -- use from the command line, embed in a server, or import directly
+- **VCR-tested** -- Polly.js recording for deterministic Meshy API tests
+- **OpenAPI spec** -- auto-generated spec with Scalar API reference
 
-### Pipeline definitions
-
-`pipelines/definitions/*.pipeline.json` describe **orchestration**. Each step references a task and can override inputs.
-
-### Task definitions
-
-`tasks/definitions/*.json` describe **Meshy calls**. Inputs resolve from manifests, previous steps, literals, env vars, or lookup tables.
-
-### Manifest
-
-Each asset directory contains a `manifest.json` that supplies task inputs and stores task state.
-
-## Testing
+## Environment
 
 ```bash
-pnpm test:unit
-pnpm test:e2e
-pnpm test:all
-```
-
-To record Meshy calls once and replay in CI:
-
-```bash
-POLLY_MODE=record pnpm test:unit
-```
-
-## Scripts
-
-```bash
-pnpm check
-pnpm test
-pnpm build
+MESHY_API_KEY=your_api_key   # Required for Meshy API calls
+POLLY_MODE=replay            # VCR mode: record | replay | passthrough
 ```
 
 ## Documentation
 
-The docs site is built with Astro + Starlight. Source content lives in `src/content/docs`.
-
-## Security
-
-- Only serve the API locally unless you add authentication.
-- The preview endpoint serves files only within the working directory.
+Visit [agentic.coach](https://agentic.coach) for full documentation including the [Meshy Content Generator guide](https://agentic.coach/packages/meshy-content-generator/).
 
 ## License
 

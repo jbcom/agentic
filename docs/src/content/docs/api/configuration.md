@@ -1,275 +1,530 @@
 ---
-title: Configuration API
-description: API reference for @jbcom/agentic configuration
+title: "Configuration API"
+description: "Complete API reference for the configuration system in @jbcom/agentic-control, including cosmiconfig loading, schema validation, and environment variable overrides."
 ---
 
 # Configuration API Reference
 
-Complete reference for configuration functions and types from `@jbcom/agentic`.
-
-## Overview
-
-Agentic uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for configuration management, supporting multiple file formats and locations.
+The configuration system uses [cosmiconfig](https://github.com/cosmiconfig/cosmiconfig) for file discovery and [Zod](https://zod.dev/) for schema validation. Configuration is loaded from multiple sources with a clear priority order: CLI arguments > environment variables > config file > defaults.
 
 ## Import
 
 ```typescript
 import {
-  loadConfig,
+  // Loading
+  initConfig,
+  loadConfigFromPath,
+
+  // Getters
   getConfig,
+  getConfigPath,
+  getConfigValue,
+
+  // Setters
   setConfig,
-  mergeConfig,
-} from '@jbcom/agentic';
-```
+  resetConfig,
 
-## Functions
+  // Convenience
+  getTriageConfig,
+  getFleetDefaults,
+  getDefaultModel,
+  getLogLevel,
+  getCursorApiKey,
+  getTriageApiKey,
+  getDefaultApiKeyEnvVar,
+  isVerbose,
 
-### loadConfig()
-
-Load configuration from file.
-
-```typescript
-loadConfig(searchPath?: string): Promise<AgenticConfig>
-```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `searchPath` | `string` | Directory to search (default: `process.cwd()`) |
-
-**Returns:** `AgenticConfig` object.
-
-**Search Locations (in order):**
-1. `agentic.config.json`
-2. `agentic.config.js`
-3. `.agenticrc`
-4. `.agenticrc.json`
-5. `package.json` → `"agentic"` key
-
-**Example:**
-```typescript
-const config = await loadConfig();
-console.log('Default repo:', config.defaultRepository);
-
-// Search specific directory
-const config = await loadConfig('/path/to/project');
+  // Logging
+  log,
+} from '@jbcom/agentic-control';
 ```
 
 ---
 
+## Config File Discovery
+
+cosmiconfig searches for configuration in these locations (first match wins):
+
+1. `package.json` -- `"agentic"` key
+2. `agentic.config.json`
+3. `.agenticrc`
+4. `.agenticrc.json`
+
+**Security note:** JavaScript config files (`agentic.config.js`, `.agenticrc.cjs`) are deliberately disabled to prevent arbitrary code execution during `require()`. Only JSON-based formats are supported.
+
+---
+
+## Full Configuration Schema
+
+### AgenticConfig
+
+```typescript
+interface AgenticConfig {
+  /** Token configuration for multi-org GitHub access */
+  tokens?: Partial<TokenConfig>;
+
+  /** Default repository for fleet operations (owner/repo format) */
+  defaultRepository?: string;
+
+  /** PR number for fleet coordination */
+  coordinationPr?: number;
+
+  /** Log level (default: "info") */
+  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+
+  /** Enable verbose output */
+  verbose?: boolean;
+
+  /** Cursor API configuration */
+  cursor?: {
+    /** API key environment variable name (default: "CURSOR_API_KEY") */
+    apiKeyEnvVar?: string;
+    /** Base URL for Cursor API (only via programmatic config, not env) */
+    baseUrl?: string;
+  };
+
+  /** Fleet default options */
+  fleet?: FleetConfig;
+
+  /** Triage (AI analysis) configuration */
+  triage?: TriageConfig;
+
+  /** MCP server configuration */
+  mcp?: MCPConfig;
+}
+```
+
+### FleetConfig
+
+```typescript
+interface FleetConfig {
+  /** Auto-create PR when agent completes */
+  autoCreatePr?: boolean;
+  /** Open PR as Cursor GitHub App */
+  openAsCursorGithubApp?: boolean;
+  /** Skip adding user as reviewer */
+  skipReviewerRequest?: boolean;
+}
+```
+
+### TriageConfig
+
+```typescript
+interface TriageConfig {
+  /** AI provider: anthropic, openai, google, mistral, azure */
+  provider?: string;
+  /** Model ID for the provider (default: "claude-sonnet-4-20250514") */
+  model?: string;
+  /** API key environment variable name */
+  apiKeyEnvVar?: string;
+}
+```
+
+### MCPConfig
+
+```typescript
+interface MCPConfig {
+  /** Cursor Background Agent MCP */
+  cursor?: MCPServerConfig;
+  /** GitHub MCP */
+  github?: MCPServerConfig;
+  /** Context7 documentation MCP */
+  context7?: MCPServerConfig;
+  /** 21st.dev Magic MCP */
+  '21st-magic'?: MCPServerConfig;
+  /** Custom MCP servers (any key) */
+  [key: string]: MCPServerConfig | undefined;
+}
+
+interface MCPServerConfig {
+  /** Whether this MCP server is enabled */
+  enabled?: boolean;
+  /** Environment variable name for the API key/token */
+  tokenEnvVar?: string;
+  /** Fallback env vars to try if primary not found */
+  tokenEnvVarFallbacks?: string[];
+  /** Transport mode: stdio or proxy */
+  mode?: 'stdio' | 'proxy';
+  /** Command to run for stdio transport */
+  command?: string;
+  /** Arguments for the command */
+  args?: string[];
+  /** Proxy URL for proxy mode (must be a valid URL) */
+  proxyUrl?: string;
+}
+```
+
+### TokenConfig
+
+See [Token Management API](/api/token-management/) for the complete `TokenConfig` schema.
+
+---
+
+## Loading Functions
+
+### initConfig()
+
+Initialize configuration from all sources. This is the primary loading function, typically called once at startup.
+
+```typescript
+initConfig(overrides?: Partial<AgenticConfig>): AgenticConfig
+```
+
+**Priority order:**
+
+1. Search for config file via cosmiconfig
+2. Validate file config against Zod schema
+3. Merge environment variable overrides
+4. Apply programmatic `overrides` parameter
+5. Validate final merged configuration
+6. Apply token configuration to the token module
+
+```typescript
+import { initConfig } from '@jbcom/agentic-control';
+
+// Basic initialization
+const config = initConfig();
+
+// With overrides
+const config = initConfig({
+  logLevel: 'debug',
+  fleet: { autoCreatePr: true },
+});
+```
+
+### loadConfigFromPath()
+
+Load configuration from a specific file path instead of searching.
+
+```typescript
+loadConfigFromPath(filepath: string): AgenticConfig
+```
+
+```typescript
+import { loadConfigFromPath } from '@jbcom/agentic-control';
+
+const config = loadConfigFromPath('/path/to/agentic.config.json');
+```
+
+**Throws:** `Error` if the file cannot be loaded or is empty.
+
+---
+
+## Getter Functions
+
 ### getConfig()
 
-Get the current in-memory configuration.
+Get the current configuration. Automatically calls `initConfig()` on first access if not already loaded.
 
 ```typescript
 getConfig(): AgenticConfig
 ```
 
-**Returns:** Current `AgenticConfig` object.
-
-**Example:**
 ```typescript
 const config = getConfig();
+console.log('Default repo:', config.defaultRepository);
 console.log('Log level:', config.logLevel);
-console.log('Triage provider:', config.triage?.provider);
+console.log('Provider:', config.triage?.provider);
 ```
 
+### getConfigPath()
+
+Get the filesystem path of the loaded config file.
+
+```typescript
+getConfigPath(): string | null
+```
+
+Returns `null` if no config file was found (using defaults only).
+
+### getConfigValue()
+
+Get a specific top-level configuration value. Triggers `initConfig()` if needed.
+
+```typescript
+getConfigValue<K extends keyof AgenticConfig>(key: K): AgenticConfig[K]
+```
+
+```typescript
+const logLevel = getConfigValue('logLevel');
+const repo = getConfigValue('defaultRepository');
+```
+
+### getTriageConfig()
+
+Get the triage configuration with defaults applied.
+
+```typescript
+getTriageConfig(): TriageConfig
+```
+
+**Default values:**
+
+```typescript
+{
+  provider: 'anthropic',
+  model: 'claude-sonnet-4-20250514',
+  apiKeyEnvVar: 'ANTHROPIC_API_KEY',
+}
+```
+
+### getFleetDefaults()
+
+Get fleet default configuration.
+
+```typescript
+getFleetDefaults(): FleetConfig
+```
+
+### getDefaultModel()
+
+Get the default AI model name. Deprecated in favor of `getTriageConfig().model`.
+
+```typescript
+getDefaultModel(): string
+// Returns triage config model or "claude-sonnet-4-20250514"
+```
+
+### getLogLevel()
+
+Get the current log level.
+
+```typescript
+getLogLevel(): string
+// Returns config.logLevel or "info"
+```
+
+### isVerbose()
+
+Check if verbose mode is enabled.
+
+```typescript
+isVerbose(): boolean
+```
+
+### getCursorApiKey()
+
+Get the Cursor API key from the configured environment variable.
+
+```typescript
+getCursorApiKey(): string | undefined
+```
+
+Reads from `config.cursor.apiKeyEnvVar` (default: `CURSOR_API_KEY`).
+
+### getTriageApiKey()
+
+Get the triage API key for the configured or specified provider.
+
+```typescript
+getTriageApiKey(providerOverride?: string): string | undefined
+```
+
+```typescript
+// Use configured provider
+const key = getTriageApiKey();
+
+// Override provider
+const openaiKey = getTriageApiKey('openai');
+```
+
+### getDefaultApiKeyEnvVar()
+
+Get the default API key environment variable name for a given provider.
+
+```typescript
+getDefaultApiKeyEnvVar(provider?: string): string
+```
+
+| Provider | Default Env Var |
+|----------|----------------|
+| `anthropic` (default) | `ANTHROPIC_API_KEY` |
+| `openai` | `OPENAI_API_KEY` |
+| `google` | `GOOGLE_API_KEY` |
+| `mistral` | `MISTRAL_API_KEY` |
+| `azure` | `AZURE_API_KEY` |
+| `ollama` | `OLLAMA_API_KEY` |
+
 ---
+
+## Setter Functions
 
 ### setConfig()
 
-Set the complete configuration.
+Update configuration at runtime. Merges with the existing configuration (deep merge for nested objects).
 
 ```typescript
-setConfig(config: AgenticConfig): void
+setConfig(updates: Partial<AgenticConfig>): void
 ```
 
-**Example:**
 ```typescript
+import { setConfig } from '@jbcom/agentic-control';
+
 setConfig({
-  defaultRepository: 'my-org/my-repo',
   logLevel: 'debug',
-  tokens: {
-    organizations: {},
-    defaultTokenEnvVar: 'GITHUB_TOKEN',
-  },
-  fleet: {
-    autoCreatePr: true,
-  },
-  triage: {
-    provider: 'anthropic',
-    model: 'claude-sonnet-4-20250514',
-    apiKeyEnvVar: 'ANTHROPIC_API_KEY',
-  },
+  triage: { model: 'claude-opus-4-20250514' },
 });
 ```
 
----
+If `updates` includes `tokens`, the token module is also updated via `setTokenConfig()`.
 
-### mergeConfig()
+### resetConfig()
 
-Merge partial configuration with current config.
-
-```typescript
-mergeConfig(partial: Partial<AgenticConfig>): AgenticConfig
-```
-
-**Returns:** Merged `AgenticConfig` object.
-
-**Example:**
-```typescript
-// Only update specific fields
-mergeConfig({
-  logLevel: 'debug',
-  triage: {
-    model: 'claude-opus-4-20250514',
-  },
-});
-```
-
-## Types
-
-### AgenticConfig
-
-Complete configuration object.
+Reset all configuration to unloaded state. The next call to `getConfig()` will re-initialize.
 
 ```typescript
-interface AgenticConfig {
-  // Default repository for operations
-  defaultRepository?: string;
-  
-  // Logging level
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
-  
-  // Token configuration
-  tokens?: TokenConfig;
-  
-  // Fleet configuration
-  fleet?: FleetConfig;
-  
-  // Triage configuration
-  triage?: TriageConfig;
-}
+resetConfig(): void
 ```
 
 ---
 
-### TokenConfig
+## Logging
 
-Token management configuration.
+The `log` object provides level-aware logging that respects `config.logLevel`:
 
 ```typescript
-interface TokenConfig {
-  // Organization-specific tokens
-  organizations: Record<string, OrganizationConfig>;
-  
-  // Default token for unconfigured orgs
-  defaultTokenEnvVar?: string;
-  
-  // Token for PR review operations
-  prReviewTokenEnvVar?: string;
-}
+import { log } from '@jbcom/agentic-control';
 
-interface OrganizationConfig {
-  name: string;
-  tokenEnvVar: string;
-}
+log.debug('Detailed debugging information');
+log.info('Normal operational messages');
+log.warn('Warning conditions');
+log.error('Error conditions');
+```
+
+Each method only outputs if the configured log level permits it. Levels in ascending severity order: `debug` (0) < `info` (1) < `warn` (2) < `error` (3).
+
+Output format: `[agentic:<level>] <message>`
+
+---
+
+## Environment Variable Overrides
+
+Environment variables take precedence over config file values:
+
+| Variable | Config Field | Description |
+|----------|-------------|-------------|
+| `AGENTIC_REPOSITORY` | `defaultRepository` | Default repository |
+| `AGENTIC_PROVIDER` | `triage.provider` | AI provider name |
+| `AGENTIC_MODEL` | `triage.model` | AI model name |
+| `AGENTIC_LOG_LEVEL` | `logLevel` | Log level (debug/info/warn/error) |
+| `AGENTIC_VERBOSE` | `verbose` | Enable verbose (`true` or `1`) |
+| `AGENTIC_COORDINATION_PR` | `coordinationPr` | Coordination PR number (positive int) |
+
+```bash
+# Override provider and model via environment
+export AGENTIC_PROVIDER=openai
+export AGENTIC_MODEL=gpt-4o
+export AGENTIC_LOG_LEVEL=debug
+export AGENTIC_VERBOSE=true
 ```
 
 ---
 
-### FleetConfig
+## Validation
 
-Fleet management configuration.
+Configuration is validated at load time using Zod schemas. The `AgenticConfigSchema` is exported for custom validation:
 
 ```typescript
-interface FleetConfig {
-  // Automatically create PR when agent completes
-  autoCreatePr?: boolean;
-  
-  // Open PR as Cursor GitHub App
-  openAsCursorGithubApp?: boolean;
-  
-  // Don't add user as reviewer
-  skipReviewerRequest?: boolean;
+import { AgenticConfigSchema } from '@jbcom/agentic-control';
+import { validateConfig } from '@jbcom/agentic-control';
+
+// Validate an arbitrary object
+try {
+  validateConfig(myConfig);
+} catch (error) {
+  // ConfigurationError with:
+  //   - message: "Invalid configuration at 'triage.provider': Invalid enum value..."
+  //   - code: ConfigErrorCode.INVALID_SCHEMA
+  //   - field: "triage.provider"
 }
+```
+
+Additional validation utilities:
+
+```typescript
+import {
+  validateEnvVar,
+  validateEnvVarWithMessage,
+  validateRepository,
+  validateGitRef,
+  validatePositiveInt,
+} from '@jbcom/agentic-control';
+
+// Validate required environment variable
+const apiKey = validateEnvVar('ANTHROPIC_API_KEY', 'Anthropic API key');
+
+// Validate with custom error message
+const token = validateEnvVarWithMessage('GITHUB_TOKEN', 'Fleet operations');
+
+// Validate repository format
+validateRepository('my-org/my-repo');  // OK
+validateRepository('not-valid');        // Throws ConfigurationError
+
+// Validate git ref
+validateGitRef('main');               // OK
+validateGitRef('feature/my-branch');  // OK
+
+// Validate positive integer
+const prNumber = validatePositiveInt('42', 'PR number');
 ```
 
 ---
 
-### TriageConfig
-
-AI triage configuration.
-
-```typescript
-interface TriageConfig {
-  // AI provider
-  provider?: 'anthropic' | 'openai' | 'google' | 'mistral' | 'azure';
-  
-  // Model name
-  model?: string;
-  
-  // Environment variable containing API key
-  apiKeyEnvVar?: string;
-}
-```
-
-## Configuration File Examples
-
-### JSON Format
+## Complete Configuration Example
 
 ```json
 {
   "defaultRepository": "my-org/my-repo",
   "logLevel": "info",
+  "verbose": false,
+  "coordinationPr": 42,
   "tokens": {
     "organizations": {
       "my-company": {
         "name": "my-company",
-        "tokenEnvVar": "GITHUB_COMPANY_TOKEN"
+        "tokenEnvVar": "GITHUB_COMPANY_TOKEN",
+        "defaultBranch": "main",
+        "isEnterprise": false
+      },
+      "open-source": {
+        "name": "open-source",
+        "tokenEnvVar": "GITHUB_OSS_TOKEN"
       }
     },
     "defaultTokenEnvVar": "GITHUB_TOKEN",
-    "prReviewTokenEnvVar": "GITHUB_TOKEN"
+    "prReviewTokenEnvVar": "GITHUB_BOT_TOKEN"
+  },
+  "cursor": {
+    "apiKeyEnvVar": "CURSOR_API_KEY"
   },
   "fleet": {
     "autoCreatePr": true,
-    "openAsCursorGithubApp": false
+    "openAsCursorGithubApp": false,
+    "skipReviewerRequest": false
   },
   "triage": {
     "provider": "anthropic",
     "model": "claude-sonnet-4-20250514",
     "apiKeyEnvVar": "ANTHROPIC_API_KEY"
+  },
+  "mcp": {
+    "cursor": {
+      "enabled": true,
+      "tokenEnvVar": "CURSOR_API_KEY",
+      "mode": "stdio",
+      "command": "npx",
+      "args": ["-y", "@anthropic-ai/claude-code", "--mcp"]
+    },
+    "github": {
+      "enabled": true,
+      "tokenEnvVar": "GITHUB_TOKEN",
+      "tokenEnvVarFallbacks": ["GH_TOKEN"],
+      "mode": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    }
   }
 }
-```
-
-### JavaScript Format
-
-```javascript
-// agentic.config.js
-module.exports = {
-  defaultRepository: process.env.AGENTIC_REPOSITORY || 'my-org/my-repo',
-  logLevel: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-  tokens: {
-    organizations: {
-      'my-company': {
-        name: 'my-company',
-        tokenEnvVar: 'GITHUB_COMPANY_TOKEN',
-      },
-    },
-    defaultTokenEnvVar: 'GITHUB_TOKEN',
-  },
-  fleet: {
-    autoCreatePr: true,
-  },
-  triage: {
-    provider: 'anthropic',
-    model: 'claude-sonnet-4-20250514',
-    apiKeyEnvVar: 'ANTHROPIC_API_KEY',
-  },
-};
 ```
 
 ### In package.json
@@ -279,29 +534,16 @@ module.exports = {
   "name": "my-project",
   "agentic": {
     "defaultRepository": "my-org/my-repo",
+    "logLevel": "info",
     "triage": {
-      "provider": "anthropic"
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514"
     }
   }
 }
 ```
 
-## Environment Variable Overrides
-
-Environment variables take precedence over config files:
-
-| Variable | Overrides |
-|----------|-----------|
-| `AGENTIC_REPOSITORY` | `defaultRepository` |
-| `AGENTIC_PROVIDER` | `triage.provider` |
-| `AGENTIC_MODEL` | `triage.model` |
-| `AGENTIC_LOG_LEVEL` | `logLevel` |
-
-```bash
-# Override via environment
-export AGENTIC_REPOSITORY="other-org/other-repo"
-export AGENTIC_MODEL="gpt-4o"
-```
+---
 
 ## Provider Configuration
 
@@ -317,11 +559,7 @@ export AGENTIC_MODEL="gpt-4o"
 }
 ```
 
-Available models:
-- `claude-opus-4-20250514`
-- `claude-sonnet-4-20250514`
-- `claude-3-5-sonnet-20241022`
-- `claude-3-haiku-20240307`
+Available models: `claude-opus-4-20250514`, `claude-sonnet-4-20250514`, `claude-3-5-sonnet-20241022`, `claude-3-haiku-20240307`
 
 ### OpenAI
 
@@ -334,12 +572,6 @@ Available models:
   }
 }
 ```
-
-Available models:
-- `gpt-4o`
-- `gpt-4-turbo`
-- `gpt-4`
-- `gpt-3.5-turbo`
 
 ### Google
 
@@ -377,6 +609,8 @@ Available models:
 }
 ```
 
+---
+
 ## CLI Configuration
 
 Initialize configuration interactively:
@@ -390,29 +624,16 @@ agentic init --non-interactive
 ```
 
 The `init` command:
-1. Detects Git repository from remotes
-2. Scans for existing tokens in environment
+
+1. Detects the Git repository from remotes
+2. Scans for existing tokens in the environment
 3. Prompts for missing configuration
 4. Generates `agentic.config.json`
 
-## Validation
+---
 
-Validate configuration at runtime:
+## Related Pages
 
-```typescript
-import { loadConfig, validateConfig } from '@jbcom/agentic';
-
-const config = await loadConfig();
-const result = validateConfig(config);
-
-if (!result.valid) {
-  console.error('Configuration errors:', result.errors);
-  process.exit(1);
-}
-```
-
-## Next Steps
-
-- [Token Management API](/api/token-management/) - Token functions
-- [Fleet API Reference](/api/fleet-management/) - Fleet management
-- [Configuration Guide](/getting-started/configuration/) - User guide
+- [Token Management API](/api/token-management/) -- Token functions reference
+- [Fleet API Reference](/api/fleet-management/) -- Fleet management
+- [Getting Started: Configuration](/getting-started/configuration/) -- Setup guide

@@ -1,6 +1,13 @@
 # pytest-agentic-crew
 
-Pytest plugin with fixtures for agentic-crew E2E testing.
+[![PyPI version](https://img.shields.io/pypi/v/pytest-agentic-crew.svg)](https://pypi.org/project/pytest-agentic-crew/)
+[![CI](https://github.com/jbcom/agentic/actions/workflows/ci.yml/badge.svg)](https://github.com/jbcom/agentic/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python](https://img.shields.io/pypi/pyversions/pytest-agentic-crew.svg)](https://pypi.org/project/pytest-agentic-crew/)
+
+Pytest plugin with fixtures for end-to-end testing of `agentic-crew` projects. Provides VCR.py integration for recording and replaying LLM API calls, framework mocking fixtures for CrewAI/LangGraph/Strands, crew configuration helpers, and CLI options for filtering tests by framework.
+
+[Full Documentation](https://agentic.coach) | [Package Docs](https://agentic.coach/packages/crew/)
 
 ## Installation
 
@@ -15,9 +22,9 @@ pip install pytest-agentic-crew[strands]
 pip install pytest-agentic-crew[all]
 ```
 
-## Usage
+## Quick Start
 
-Fixtures are automatically available when the package is installed:
+Fixtures are automatically available when the package is installed (registered via `pytest11` entry point):
 
 ```python
 import pytest
@@ -35,7 +42,7 @@ def test_my_crew(check_api_key, simple_crew_config):
 
 ### VCR Cassette Recording
 
-Record and replay LLM API calls for deterministic tests:
+Record and replay LLM API calls for deterministic, offline tests:
 
 ```python
 @pytest.mark.vcr
@@ -48,29 +55,14 @@ def test_llm_call():
 
 API keys are automatically filtered from recordings.
 
-### Command Line Options
+## CLI Options
 
 ```bash
-# Run E2E tests (disabled by default)
-pytest --e2e
-
-# Run only CrewAI tests
-pytest --e2e --framework=crewai
-
-# Run only LangGraph tests
-pytest --e2e --framework=langgraph
-
-# Run only Strands tests
-pytest --e2e --framework=strands
-
-# VCR recording modes
-pytest --vcr-record=once       # Record once, replay thereafter (default)
-pytest --vcr-record=none       # Never record, only playback
-pytest --vcr-record=new_episodes  # Record new requests, replay existing
-pytest --vcr-record=all        # Always record (overwrite cassettes)
-
-# Disable VCR entirely (make real API calls)
-pytest --disable-vcr
+pytest --e2e                        # Enable E2E tests (disabled by default)
+pytest --e2e --framework=crewai     # Run only CrewAI tests
+pytest --vcr-record=once            # Record once, replay thereafter (default)
+pytest --vcr-record=none            # Playback only
+pytest --disable-vcr                # Disable VCR, make real API calls
 ```
 
 ## Available Fixtures
@@ -79,38 +71,21 @@ pytest --disable-vcr
 |---------|-------------|
 | `check_api_key` | Skips test if `ANTHROPIC_API_KEY` not set |
 | `check_aws_credentials` | Skips test if AWS credentials not configured |
-| `simple_agent_config` | Basic agent configuration dict |
-| `simple_task_config` | Basic task configuration dict |
 | `simple_crew_config` | Single agent/task crew configuration |
-| `multi_agent_crew_config` | Multi-agent crew with researcher/writer |
+| `multi_agent_crew_config` | Multi-agent crew with researcher and writer |
 | `crew_with_knowledge` | Crew with knowledge sources |
 | `temp_crew_dir` | Temporary `.crewai` directory |
+| `simple_agent_config` | Basic agent configuration dict |
+| `simple_task_config` | Basic task configuration dict |
 
 ## Model Helpers
 
 ```python
-from pytest_agentic_crew import (
-    DEFAULT_MODEL,           # claude-haiku-4-5-20251001
-    DEFAULT_BEDROCK_MODEL,   # anthropic.claude-haiku-4-5-20251001-v1:0
-    get_anthropic_model,
-    get_bedrock_model,
-)
+from pytest_agentic_crew import get_anthropic_model, get_bedrock_model
 
-# Get model IDs by short name
-model = get_anthropic_model("sonnet-4")  # claude-sonnet-4-20250514
-bedrock = get_bedrock_model("opus-4")    # anthropic.claude-opus-4-20250514-v1:0
+model = get_anthropic_model("sonnet-4")   # claude-sonnet-4-20250514
+bedrock = get_bedrock_model("opus-4")     # anthropic.claude-opus-4-20250514-v1:0
 ```
-
-### Available Models
-
-| Short Name | Anthropic API | Bedrock |
-|------------|---------------|---------|
-| `haiku-4.5` | `claude-haiku-4-5-20251001` | `anthropic.claude-haiku-4-5-20251001-v1:0` |
-| `sonnet-4.5` | `claude-sonnet-4-5-20250929` | `anthropic.claude-sonnet-4-5-20250929-v1:0` |
-| `sonnet-4` | `claude-sonnet-4-20250514` | `anthropic.claude-sonnet-4-20250514-v1:0` |
-| `opus-4` | `claude-opus-4-20250514` | `anthropic.claude-opus-4-20250514-v1:0` |
-
-See [Claude on Amazon Bedrock](https://platform.claude.com/docs/en/build-with-claude/claude-on-amazon-bedrock) for full model documentation.
 
 ## Environment Variables
 
@@ -118,8 +93,11 @@ See [Claude on Amazon Bedrock](https://platform.claude.com/docs/en/build-with-cl
 |----------|----------|-------------|
 | `ANTHROPIC_API_KEY` | For direct API | Claude API key |
 | `AWS_ACCESS_KEY_ID` | For Bedrock | AWS credentials |
-| `AWS_SECRET_ACCESS_KEY` | For Bedrock | AWS credentials |
 | `AWS_PROFILE` | For Bedrock | Alternative to access keys |
+
+## Documentation
+
+Visit [agentic.coach](https://agentic.coach) for full documentation.
 
 ## License
 

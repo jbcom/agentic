@@ -1,0 +1,74 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f0a1a"/>
+      <stop offset="100%" stop-color="#1a1025"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#c084fc"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="600" cy="315" r="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="textGrad" x1="300" y1="250" x2="900" y2="350" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="25%" stop-color="#818cf8"/>
+      <stop offset="50%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#f0abfc"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.06" stroke="#8b5cf6" stroke-width="1">
+    <line x1="0" y1="0" x2="0" y2="630"/><line x1="60" y1="0" x2="60" y2="630"/>
+    <line x1="120" y1="0" x2="120" y2="630"/><line x1="180" y1="0" x2="180" y2="630"/>
+    <line x1="240" y1="0" x2="240" y2="630"/><line x1="300" y1="0" x2="300" y2="630"/>
+    <line x1="360" y1="0" x2="360" y2="630"/><line x1="420" y1="0" x2="420" y2="630"/>
+    <line x1="480" y1="0" x2="480" y2="630"/><line x1="540" y1="0" x2="540" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/><line x1="660" y1="0" x2="660" y2="630"/>
+    <line x1="720" y1="0" x2="720" y2="630"/><line x1="780" y1="0" x2="780" y2="630"/>
+    <line x1="840" y1="0" x2="840" y2="630"/><line x1="900" y1="0" x2="900" y2="630"/>
+    <line x1="960" y1="0" x2="960" y2="630"/><line x1="1020" y1="0" x2="1020" y2="630"/>
+    <line x1="1080" y1="0" x2="1080" y2="630"/><line x1="1140" y1="0" x2="1140" y2="630"/>
+    <line x1="1200" y1="0" x2="1200" y2="630"/>
+    <line x1="0" y1="0" x2="1200" y2="0"/><line x1="0" y1="60" x2="1200" y2="60"/>
+    <line x1="0" y1="120" x2="1200" y2="120"/><line x1="0" y1="180" x2="1200" y2="180"/>
+    <line x1="0" y1="240" x2="1200" y2="240"/><line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="360" x2="1200" y2="360"/><line x1="0" y1="420" x2="1200" y2="420"/>
+    <line x1="0" y1="480" x2="1200" y2="480"/><line x1="0" y1="540" x2="1200" y2="540"/>
+    <line x1="0" y1="600" x2="1200" y2="600"/><line x1="0" y1="630" x2="1200" y2="630"/>
+  </g>
+
+  <!-- Ambient glow -->
+  <circle cx="600" cy="315" r="400" fill="url(#glow)"/>
+
+  <!-- Title -->
+  <text x="600" y="260" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="80" font-weight="800" fill="url(#textGrad)" letter-spacing="-2">Agentic</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="330" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#a78bfa" opacity="0.9">Command Your AI Fleet</text>
+
+  <!-- Accent line -->
+  <rect x="400" y="360" width="400" height="2" rx="1" fill="url(#accent)" opacity="0.6"/>
+
+  <!-- Description -->
+  <text x="600" y="410" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="20" fill="#ddd6fe" opacity="0.75">Polyglot AI agent toolkit</text>
+  <text x="600" y="440" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-size="18" fill="#ddd6fe" opacity="0.55">TypeScript  |  Python  |  Rust</text>
+
+  <!-- Language dots -->
+  <circle cx="518" cy="490" r="8" fill="#3178c6" opacity="0.8"/>
+  <text x="536" y="496" font-family="system-ui, sans-serif" font-size="14" fill="#60a5fa" font-weight="600">TS</text>
+  <circle cx="588" cy="490" r="8" fill="#3776ab" opacity="0.8"/>
+  <text x="606" y="496" font-family="system-ui, sans-serif" font-size="14" fill="#93c5fd" font-weight="600">PY</text>
+  <circle cx="658" cy="490" r="8" fill="#dea584" opacity="0.8"/>
+  <text x="676" y="496" font-family="system-ui, sans-serif" font-size="14" fill="#fdba74" font-weight="600">RS</text>
+
+  <!-- Border glow -->
+  <rect x="1" y="1" width="1198" height="628" rx="0" stroke="url(#accent)" stroke-width="2" fill="none" opacity="0.15"/>
+</svg>

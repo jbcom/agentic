@@ -1,50 +1,79 @@
 ---
-title: Fleet API Reference
-description: Complete API reference for @jbcom/agentic Fleet management
+title: "Fleet API Reference"
+description: "Complete API reference for the Fleet class and Cursor Background Agent management from @jbcom/agentic-control."
 ---
 
 # Fleet API Reference
 
-Complete reference for the `Fleet` class from `@jbcom/agentic`.
+The `Fleet` class is the primary interface for managing Cursor Background Agents. It provides agent lifecycle management, communication, diamond-pattern orchestration, and token-aware GitHub coordination.
 
 ## Installation
 
 ```bash
-npm install @jbcom/agentic
+npm install @jbcom/agentic-control
 ```
 
 ## Import
 
 ```typescript
-import { Fleet } from '@jbcom/agentic';
+import { Fleet, CursorAPI } from '@jbcom/agentic-control';
+import type {
+  FleetConfig,
+  CoordinationConfig,
+  SpawnContext,
+  CursorAPIOptions,
+} from '@jbcom/agentic-control';
 ```
 
 ## Constructor
 
 ```typescript
-const fleet = new Fleet(options?: FleetOptions);
+const fleet = new Fleet(config?: FleetConfig);
 ```
 
-### FleetOptions
+### FleetConfig
 
-| Option | Type | Description |
-|--------|------|-------------|
-| `apiKey` | `string` | Cursor API key (defaults to `CURSOR_API_KEY` env var) |
-| `baseUrl` | `string` | API base URL (rarely needed) |
+`FleetConfig` extends `CursorAPIOptions` with fleet-specific options:
 
-## Methods
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `apiKey` | `string` | `process.env.CURSOR_API_KEY` | Cursor API key |
+| `timeout` | `number` | `60000` | Request timeout in milliseconds |
+| `baseUrl` | `string` | `https://api.cursor.com/v0` | API base URL |
+| `maxRetries` | `number` | `3` | Maximum retries for transient errors |
+| `retryDelay` | `number` | `1000` | Initial retry delay (exponential backoff) |
+| `archivePath` | `string` | `./memory-bank/recovery` | Path for archived conversations |
+
+**Example:**
+
+```typescript
+import { Fleet } from '@jbcom/agentic-control';
+
+const fleet = new Fleet({
+  apiKey: process.env.CURSOR_API_KEY,
+  timeout: 120000,
+  maxRetries: 5,
+  retryDelay: 2000,
+  archivePath: './archives',
+});
+```
+
+If `CURSOR_API_KEY` is not set, the Fleet instance is created but API methods return `{ success: false, error: 'Cursor API not available' }`.
+
+---
+
+## API Availability
 
 ### isApiAvailable()
 
-Check if the Cursor API is available.
+Check if the Cursor API key is configured and the internal client is initialized.
 
 ```typescript
 isApiAvailable(): boolean
 ```
 
-**Returns:** `true` if `CURSOR_API_KEY` is set, `false` otherwise.
+**Returns:** `true` if `CursorAPI` was successfully initialized, `false` otherwise.
 
-**Example:**
 ```typescript
 if (!fleet.isApiAvailable()) {
   console.error('Set CURSOR_API_KEY environment variable');
@@ -54,39 +83,56 @@ if (!fleet.isApiAvailable()) {
 
 ---
 
+## Agent Discovery
+
 ### list()
 
-List all agents.
+List all agents in the fleet.
 
 ```typescript
 list(): Promise<Result<Agent[]>>
 ```
 
-**Returns:** `Result<Agent[]>` - All agents in the fleet.
+**Returns:** `Result<Agent[]>` containing all agents regardless of status.
 
-**Example:**
 ```typescript
 const result = await fleet.list();
 if (result.success && result.data) {
   for (const agent of result.data) {
-    console.log(`${agent.id}: ${agent.status}`);
+    console.log(`${agent.id}: ${agent.status} - ${agent.source.repository}`);
   }
 }
 ```
 
----
+### listByStatus()
+
+Filter agents by a specific status.
+
+```typescript
+listByStatus(status: AgentStatus): Promise<Result<Agent[]>>
+```
+
+**Parameters:**
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `status` | `AgentStatus` | One of `RUNNING`, `FINISHED`, `COMPLETED`, `FAILED`, `CANCELLED`, `PENDING`, `UNKNOWN` |
+
+```typescript
+const failed = await fleet.listByStatus('FAILED');
+if (failed.success && failed.data) {
+  console.log(`${failed.data.length} agents have failed`);
+}
+```
 
 ### running()
 
-List only running agents.
+Convenience method to list only running agents. Equivalent to `listByStatus('RUNNING')`.
 
 ```typescript
 running(): Promise<Result<Agent[]>>
 ```
 
-**Returns:** `Result<Agent[]>` - Only agents with status `RUNNING`.
-
-**Example:**
 ```typescript
 const result = await fleet.running();
 if (result.success && result.data) {
@@ -94,69 +140,101 @@ if (result.success && result.data) {
 }
 ```
 
----
+### find()
 
-### summary()
-
-Get fleet summary statistics.
+Find a specific agent by ID.
 
 ```typescript
-summary(): Promise<Result<FleetSummary>>
+find(agentId: string): Promise<Result<Agent | undefined>>
 ```
 
-**Returns:** `Result<FleetSummary>`
-
 ```typescript
-interface FleetSummary {
-  total: number;
-  running: number;
-  completed: number;
-  failed: number;
-  agents: Agent[];
-}
-```
-
-**Example:**
-```typescript
-const result = await fleet.summary();
+const result = await fleet.find('bc-abc123');
 if (result.success && result.data) {
-  const { total, running, completed, failed } = result.data;
-  console.log(`Fleet: ${total} total, ${running} running`);
+  console.log(`Found agent: ${result.data.status}`);
+}
+```
+
+### status()
+
+Get the current status of a specific agent. Makes a direct API call per agent (unlike `find()` which searches the full list).
+
+```typescript
+status(agentId: string): Promise<Result<Agent>>
+```
+
+```typescript
+const result = await fleet.status('bc-abc123');
+if (result.success && result.data) {
+  console.log(`Agent status: ${result.data.status}`);
+  if (result.data.target?.prUrl) {
+    console.log(`PR: ${result.data.target.prUrl}`);
+  }
 }
 ```
 
 ---
+
+## Agent Spawning
 
 ### spawn()
 
-Spawn a new agent.
+Spawn a new Cursor Background Agent. This is the primary method for launching agents.
 
 ```typescript
-spawn(options: SpawnOptions): Promise<Result<Agent>>
+spawn(options: SpawnOptions & { context?: SpawnContext }): Promise<Result<Agent>>
 ```
 
-**Parameters:**
+**SpawnOptions:**
 
 ```typescript
 interface SpawnOptions {
-  repository: string;  // Full GitHub URL
-  task: string;        // Task description
-  ref?: string;        // Branch/tag/commit (default: 'main')
+  /** GitHub repository URL (e.g., https://github.com/org/repo) */
+  repository: string;
+  /** Task description for the agent */
+  task: string;
+  /** Git ref (branch, tag, commit) - defaults to "main" */
+  ref?: string;
+  /** Target configuration */
   target?: {
-    autoCreatePr?: boolean;     // Create PR on completion
-    branchName?: string;        // Custom branch name
-    openAsCursorGithubApp?: boolean;  // Use Cursor app identity
+    /** Auto-create PR when agent completes */
+    autoCreatePr?: boolean;
+    /** Custom branch name */
+    branchName?: string;
+    /** Open PR as Cursor GitHub App instead of user */
+    openAsCursorGithubApp?: boolean;
+    /** Skip adding user as reviewer */
+    skipReviewerRequest?: boolean;
+  };
+  /** Webhook for status notifications */
+  webhook?: {
+    /** URL to receive notifications (must be HTTPS) */
+    url: string;
+    /** Secret for payload verification (min 32 chars) */
+    secret?: string;
   };
 }
 ```
 
-**Returns:** `Result<Agent>` - The spawned agent.
+**SpawnContext** (optional coordination context):
 
-**Example:**
+```typescript
+interface SpawnContext {
+  controlManagerId?: string;
+  controlCenter?: string;
+  relatedAgents?: string[];
+  metadata?: Record<string, unknown>;
+}
+```
+
+When `context` is provided, a `--- COORDINATION CONTEXT ---` block is appended to the task string with the manager ID, control center URL, related agent IDs, and metadata.
+
+**Example -- basic spawn:**
+
 ```typescript
 const result = await fleet.spawn({
   repository: 'https://github.com/my-org/my-repo',
-  task: 'Fix the failing CI workflow',
+  task: 'Fix the failing CI workflow in .github/workflows/ci.yml',
   ref: 'main',
   target: {
     autoCreatePr: true,
@@ -169,115 +247,64 @@ if (result.success && result.data) {
 }
 ```
 
----
-
-### waitFor()
-
-Wait for an agent to complete.
+**Example -- spawn with webhook:**
 
 ```typescript
-waitFor(agentId: string, options?: WaitOptions): Promise<Result<Agent>>
-```
-
-**Parameters:**
-
-```typescript
-interface WaitOptions {
-  timeout?: number;      // Milliseconds (default: 600000 / 10 min)
-  pollInterval?: number; // Milliseconds (default: 15000 / 15 sec)
-}
-```
-
-**Returns:** `Result<Agent>` - The completed agent.
-
-**Example:**
-```typescript
-const result = await fleet.waitFor(agent.id, {
-  timeout: 1800000,  // 30 minutes
-  pollInterval: 30000,  // 30 seconds
+const result = await fleet.spawn({
+  repository: 'https://github.com/my-org/my-repo',
+  task: 'Refactor the authentication module',
+  target: { autoCreatePr: true },
+  webhook: {
+    url: 'https://hooks.myapp.com/cursor',
+    secret: 'whsec_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6',
+  },
 });
-
-if (result.success && result.data) {
-  console.log(`Agent finished: ${result.data.status}`);
-}
 ```
+
+**Validation rules:**
+
+- `repository` must contain `/` (owner/repo or full URL format), max 200 characters
+- `task` cannot be empty, max 100,000 characters
+- `webhook.url` must be HTTPS and cannot point to internal/private addresses (SSRF protection)
+- `ref` must be under 200 characters
 
 ---
 
-### conversation()
-
-Get an agent's conversation.
-
-```typescript
-conversation(agentId: string): Promise<Result<Conversation>>
-```
-
-**Returns:** `Result<Conversation>`
-
-```typescript
-interface Conversation {
-  agentId: string;
-  totalMessages: number;
-  messages: Message[];
-}
-
-interface Message {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp?: string;
-}
-```
-
-**Example:**
-```typescript
-const result = await fleet.conversation(agent.id);
-if (result.success && result.data) {
-  console.log(`${result.data.totalMessages} messages`);
-  for (const msg of result.data.messages) {
-    console.log(`[${msg.role}] ${msg.content.slice(0, 100)}...`);
-  }
-}
-```
-
----
+## Agent Communication
 
 ### followup()
 
-Send a followup message to an agent.
+Send a follow-up message to a running agent.
 
 ```typescript
 followup(agentId: string, message: string): Promise<Result<void>>
 ```
 
-**Example:**
 ```typescript
 const result = await fleet.followup(
-  agent.id,
-  'Please focus on the authentication module first'
+  'bc-abc123',
+  'Please focus on the authentication module first, then handle the API routes.'
 );
 
 if (result.success) {
-  console.log('Message sent');
+  console.log('Follow-up message sent');
 }
 ```
 
----
-
 ### broadcast()
 
-Send a message to multiple agents.
+Send the same message to multiple agents concurrently.
 
 ```typescript
 broadcast(agentIds: string[], message: string): Promise<Map<string, Result<void>>>
 ```
 
-**Returns:** `Map<string, Result<void>>` - Results for each agent.
+**Returns:** A `Map` where each key is an agent ID and the value is the result of sending the message.
 
-**Example:**
 ```typescript
 const results = await fleet.broadcast(
-  ['agent-1', 'agent-2', 'agent-3'],
-  'STATUS CHECK: Please provide a progress update.'
+  ['bc-abc123', 'bc-def456', 'bc-ghi789'],
+  'STATUS CHECK: Please provide a progress update in the coordination PR.'
 );
 
 for (const [id, result] of results) {
@@ -287,41 +314,87 @@ for (const [id, result] of results) {
 
 ---
 
-### archive()
+## Conversations
 
-Archive an agent's conversation to disk.
+### conversation()
+
+Retrieve the full conversation history for an agent.
 
 ```typescript
-archive(agentId: string, path?: string): Promise<Result<string>>
+conversation(agentId: string): Promise<Result<Conversation>>
 ```
 
-**Returns:** `Result<string>` - Path to the saved file.
+**Returns:** `Result<Conversation>` where:
 
-**Example:**
 ```typescript
-const result = await fleet.archive(agent.id);
+interface Conversation {
+  agentId: string;
+  messages: ConversationMessage[];
+  totalMessages: number;
+}
+
+interface ConversationMessage {
+  type: 'user_message' | 'assistant_message';
+  text: string;
+  timestamp?: string;
+}
+```
+
+```typescript
+const result = await fleet.conversation('bc-abc123');
+if (result.success && result.data) {
+  console.log(`${result.data.totalMessages} messages`);
+  for (const msg of result.data.messages) {
+    console.log(`[${msg.type}] ${msg.text.slice(0, 100)}...`);
+  }
+}
+```
+
+### archive()
+
+Archive an agent's conversation to a JSON file on disk.
+
+```typescript
+archive(agentId: string, outputPath?: string): Promise<Result<string>>
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `agentId` | `string` | -- | Agent ID to archive |
+| `outputPath` | `string` | `{archivePath}/conversation-{agentId}.json` | Custom output path |
+
+**Returns:** `Result<string>` containing the path to the saved file.
+
+```typescript
+// Default path
+const result = await fleet.archive('bc-abc123');
 if (result.success) {
   console.log(`Saved to: ${result.data}`);
+  // -> ./memory-bank/recovery/conversation-bc-abc123.json
 }
 
 // Custom path
-const result2 = await fleet.archive(agent.id, './archives/agent.json');
+const result2 = await fleet.archive('bc-abc123', './archives/agent.json');
 ```
 
 ---
 
+## Repositories and Models
+
 ### repositories()
 
-List available repositories.
+List all repositories available to the Cursor API account.
 
 ```typescript
 repositories(): Promise<Result<Repository[]>>
 ```
 
-**Returns:** `Result<Repository[]>`
-
 ```typescript
 interface Repository {
+  owner: string;
+  name: string;
   fullName: string;
   defaultBranch: string;
   isPrivate: boolean;
@@ -329,7 +402,6 @@ interface Repository {
 }
 ```
 
-**Example:**
 ```typescript
 const result = await fleet.repositories();
 if (result.success && result.data) {
@@ -339,19 +411,14 @@ if (result.success && result.data) {
 }
 ```
 
----
-
 ### listModels()
 
-List available AI models.
+List available AI models for agent execution.
 
 ```typescript
 listModels(): Promise<Result<string[]>>
 ```
 
-**Returns:** `Result<string[]>` - Available model names.
-
-**Example:**
 ```typescript
 const result = await fleet.listModels();
 if (result.success && result.data) {
@@ -361,9 +428,68 @@ if (result.success && result.data) {
 
 ---
 
+## Fleet Monitoring
+
+### summary()
+
+Get aggregate statistics across all agents.
+
+```typescript
+summary(): Promise<Result<FleetSummary>>
+```
+
+**Returns:**
+
+```typescript
+interface FleetSummary {
+  total: number;
+  running: number;
+  completed: number;   // Includes both COMPLETED and FINISHED statuses
+  failed: number;
+  agents: Agent[];
+}
+```
+
+```typescript
+const result = await fleet.summary();
+if (result.success && result.data) {
+  const { total, running, completed, failed } = result.data;
+  console.log(`Fleet: ${total} total, ${running} running, ${completed} done, ${failed} failed`);
+}
+```
+
+### waitFor()
+
+Block until an agent reaches a terminal state (anything other than `RUNNING`).
+
+```typescript
+waitFor(agentId: string, options?: WaitOptions): Promise<Result<Agent>>
+```
+
+**WaitOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `timeout` | `number` | `300000` (5 min) | Maximum wait time in milliseconds |
+| `pollInterval` | `number` | `10000` (10 sec) | Polling interval in milliseconds |
+
+```typescript
+const result = await fleet.waitFor('bc-abc123', {
+  timeout: 1800000,    // 30 minutes
+  pollInterval: 30000, // 30 seconds
+});
+
+if (result.success && result.data) {
+  console.log(`Agent finished with status: ${result.data.status}`);
+} else {
+  console.error(`Wait failed: ${result.error}`);
+  // error is "Timeout waiting for agent bc-abc123" on timeout
+}
+```
+
 ### monitorAgents()
 
-Monitor multiple agents with callbacks.
+Monitor multiple agents until all reach terminal states. Supports progress callbacks.
 
 ```typescript
 monitorAgents(
@@ -372,26 +498,23 @@ monitorAgents(
 ): Promise<Map<string, Agent>>
 ```
 
-**Parameters:**
+**MonitorOptions:**
 
-```typescript
-interface MonitorOptions {
-  pollInterval?: number;  // Milliseconds (default: 30000)
-  onProgress?: (statusMap: Map<string, AgentStatus>) => void;
-}
-```
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `pollInterval` | `number` | `15000` (15 sec) | Polling interval |
+| `onProgress` | `(status: Map<string, AgentStatus>) => void` | -- | Called each poll cycle |
 
-**Returns:** `Map<string, Agent>` - Final states of all agents.
+Terminal states are any status other than `RUNNING` or `PENDING`.
 
-**Example:**
 ```typescript
 const results = await fleet.monitorAgents(
-  ['agent-1', 'agent-2'],
+  ['bc-abc123', 'bc-def456'],
   {
     pollInterval: 30000,
     onProgress: (statusMap) => {
       for (const [id, status] of statusMap) {
-        console.log(`${id}: ${status}`);
+        console.log(`${id.slice(0, 12)}: ${status}`);
       }
     },
   }
@@ -404,81 +527,120 @@ for (const [id, agent] of results) {
 
 ---
 
+## Diamond Pattern Orchestration
+
 ### createDiamond()
 
-Create a diamond orchestration pattern.
+Create a diamond orchestration pattern: spawn multiple target agents in parallel, then a counterparty agent that knows about all targets.
 
 ```typescript
 createDiamond(config: DiamondConfig): Promise<Result<DiamondResult>>
 ```
 
-**Parameters:**
+**DiamondConfig:**
 
 ```typescript
 interface DiamondConfig {
-  targetRepos: SpawnOptions[];   // Parallel agents
-  counterparty: SpawnOptions;    // Aggregator agent
-  controlCenter: string;         // Coordination repo URL
+  /** Parallel target agents */
+  targetRepos: SpawnOptions[];
+  /** Aggregator/verifier agent */
+  counterparty: SpawnOptions;
+  /** Control center repository URL */
+  controlCenter: string;
 }
 ```
 
-**Returns:** `Result<DiamondResult>`
+**DiamondResult:**
 
 ```typescript
 interface DiamondResult {
   targetAgents: Agent[];
   counterpartyAgent: Agent;
-  coordinationPr: number;
 }
 ```
 
-**Example:**
+The diamond pattern works as follows:
+
+1. Identifies the current control manager agent ID
+2. Spawns all `targetRepos` agents with coordination context (control manager ID, control center)
+3. Spawns the `counterparty` agent with knowledge of all target agent IDs and the `diamond` pattern metadata
+4. Sends follow-up messages to all target agents informing them of the counterparty agent
+
 ```typescript
 const result = await fleet.createDiamond({
   targetRepos: [
-    { repository: 'org/frontend', task: 'Update UI' },
-    { repository: 'org/backend', task: 'Update API' },
+    {
+      repository: 'https://github.com/org/frontend',
+      task: 'Update the UI components for the new API',
+      target: { autoCreatePr: true },
+    },
+    {
+      repository: 'https://github.com/org/backend',
+      task: 'Add the new REST endpoints',
+      target: { autoCreatePr: true },
+    },
   ],
   counterparty: {
-    repository: 'org/integration',
-    task: 'Verify integration',
+    repository: 'https://github.com/org/integration-tests',
+    task: 'Verify end-to-end integration between frontend and backend changes',
+    target: { autoCreatePr: true },
   },
   controlCenter: 'https://github.com/org/control',
 });
+
+if (result.success && result.data) {
+  console.log(`Spawned ${result.data.targetAgents.length} target agents`);
+  console.log(`Counterparty: ${result.data.counterpartyAgent.id}`);
+}
 ```
 
 ---
 
+## GitHub Coordination
+
 ### coordinate()
 
-Run coordination loop (runs indefinitely).
+Run a bidirectional coordination loop that bridges PR comments with agent follow-up messages. This method runs indefinitely.
 
 ```typescript
 coordinate(config: CoordinationConfig): Promise<void>
 ```
 
-**Parameters:**
+**CoordinationConfig:**
 
 ```typescript
 interface CoordinationConfig {
-  coordinationPr: number;      // PR number for coordination
-  repo: string;                // Repo in "owner/name" format
-  agentIds: string[];          // Agents to coordinate
-  outboundInterval?: number;   // Check agents (ms)
-  inboundInterval?: number;    // Check PR comments (ms)
+  /** PR number for coordination channel */
+  coordinationPr: number;
+  /** Repository in owner/repo format */
+  repo: string;
+  /** Outbound poll interval (ms) - check agents and send status requests */
+  outboundInterval?: number;  // default: 60000
+  /** Inbound poll interval (ms) - check PR comments for @cursor mentions */
+  inboundInterval?: number;   // default: 15000
+  /** Agent IDs to monitor */
+  agentIds?: string[];
 }
 ```
 
-**Example:**
+The coordination loop runs two concurrent processes:
+
+- **Outbound loop**: Periodically checks each agent's status. If running, sends a follow-up requesting a progress update. If finished, removes the agent from the monitoring set.
+- **Inbound loop**: Watches for new PR comments containing `@cursor`. Processes structured coordination messages like `DONE: <agent-id> <summary>` and `BLOCKED: <agent-id> <issue>`.
+
 ```typescript
 await fleet.coordinate({
-  coordinationPr: 123,
+  coordinationPr: 42,
   repo: 'my-org/control-center',
-  agentIds: ['agent-1', 'agent-2'],
+  agentIds: ['bc-abc123', 'bc-def456'],
   outboundInterval: 60000,
   inboundInterval: 15000,
 });
 ```
+
+Token routing is automatic -- the `GitHubClient` uses the organization extracted from `repo` to select the correct GitHub token via the [Token Management](/api/token-management/) system.
+
+---
 
 ## Types
 
@@ -487,37 +649,46 @@ await fleet.coordinate({
 ```typescript
 interface Agent {
   id: string;
+  name?: string;
   status: AgentStatus;
-  source: {
-    repository: string;
-    ref: string;
-  };
-  target?: {
-    autoCreatePr: boolean;
-    branchName?: string;
-    prUrl?: string;
-  };
-  task: string;
-  createdAt: string;
-  updatedAt: string;
+  source: AgentSource;
+  target?: AgentTarget;
+  createdAt?: string;
+  updatedAt?: string;
   summary?: string;
+  error?: string;
+}
+
+interface AgentSource {
+  repository: string;
+  ref?: string;
+  commitSha?: string;
+}
+
+interface AgentTarget {
+  branchName?: string;
+  url?: string;
+  prUrl?: string;
+  prNumber?: number;
 }
 ```
 
 ### AgentStatus
 
 ```typescript
-type AgentStatus = 
-  | 'PENDING'
-  | 'RUNNING'
-  | 'COMPLETED'
-  | 'FINISHED'
-  | 'FAILED'
-  | 'CANCELLED'
-  | 'UNKNOWN';
+type AgentStatus =
+  | 'RUNNING'     // Agent is actively working
+  | 'FINISHED'    // Agent completed work (Cursor API term)
+  | 'COMPLETED'   // Agent completed work (alias)
+  | 'FAILED'      // Agent encountered an error
+  | 'CANCELLED'   // Agent was cancelled
+  | 'PENDING'     // Agent is queued but not started
+  | 'UNKNOWN';    // Status could not be determined
 ```
 
 ### Result
+
+All Fleet methods return a `Result<T>` wrapper:
 
 ```typescript
 interface Result<T> {
@@ -527,8 +698,58 @@ interface Result<T> {
 }
 ```
 
-## Next Steps
+---
 
-- [Token Management API](/api/token-management/) - Token configuration
-- [Triage Tools API](/api/triage-tools/) - AI triage tools
-- [TypeScript Examples](/examples/typescript/) - Code examples
+## Error Handling
+
+The Fleet class never throws exceptions from API operations. All errors are captured in the `Result` wrapper. The underlying `CursorAPI` client handles:
+
+- **Retryable errors**: HTTP 429, 500, 502, 503, 504 are retried with exponential backoff (up to `maxRetries` times)
+- **Timeout errors**: Retried automatically
+- **Network errors**: `TypeError`, connection failures are retried
+- **Input validation**: Invalid agent IDs, repository formats, or webhook URLs throw synchronously before the API call
+- **Sensitive data**: Error messages are sanitized to redact API keys and tokens
+
+```typescript
+const result = await fleet.spawn({
+  repository: 'https://github.com/org/repo',
+  task: 'Fix the bug',
+});
+
+if (!result.success) {
+  // result.error contains a safe, redacted error message
+  console.error('Spawn failed:', result.error);
+  // e.g., "API Error 401: Unauthorized"
+  // e.g., "Cursor API not available"
+  // e.g., "Request timeout after 60000ms"
+}
+```
+
+---
+
+## CursorAPI (Low-Level)
+
+For direct API access without Fleet's high-level features, use `CursorAPI`:
+
+```typescript
+import { CursorAPI } from '@jbcom/agentic-control';
+
+const api = new CursorAPI({
+  apiKey: process.env.CURSOR_API_KEY,
+});
+
+// Check availability without instantiating
+if (CursorAPI.isAvailable()) {
+  const agents = await api.listAgents();
+  const models = await api.listModels();
+}
+```
+
+---
+
+## Related Pages
+
+- [Token Management API](/api/token-management/) -- Token configuration and multi-org routing
+- [Triage Tools API](/api/triage-tools/) -- AI-powered issue and PR triage
+- [Configuration API](/api/configuration/) -- Full config schema reference
+- [TypeScript Examples](/examples/typescript/) -- Code examples

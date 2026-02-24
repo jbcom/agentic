@@ -1,9 +1,9 @@
 ---
-title: Agentic
-description: The polyglot AI agent toolkit — fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.
+title: "Command Your AI Fleet"
+description: "Agentic — the polyglot AI agent toolkit. Fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust."
 template: splash
 hero:
-  tagline: "The polyglot toolkit for AI agent orchestration. Spawn fleets, coordinate crews, triage issues, and generate games — across TypeScript, Python, and Rust."
+  tagline: "The polyglot command center for AI agent orchestration. Spawn fleets, coordinate crews, triage at scale, and generate entire game worlds — across TypeScript, Python, and Rust."
   image:
     file: ../../assets/houston.webp
   actions:
@@ -16,17 +16,19 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid, Tabs, TabItem, LinkCard } from '@astrojs/starlight/components';
+import { Tabs, TabItem } from '@astrojs/starlight/components';
 
-<div class="polyglot-bar" style="justify-content: center; margin-top: -0.5rem; margin-bottom: 2rem;">
+<div class="polyglot-bar polyglot-bar--center" style="margin-top: -0.5rem; margin-bottom: 1rem;">
   <span class="lang-badge lang-badge--ts">TypeScript</span>
   <span class="lang-badge lang-badge--py">Python</span>
   <span class="lang-badge lang-badge--rs">Rust</span>
 </div>
 
+<div class="hero-accent-line"></div>
+
 <div class="stats-row">
   <div class="stat">
-    <div class="stat-number">5</div>
+    <div class="stat-number">7</div>
     <div class="stat-label">Packages</div>
   </div>
   <div class="stat">
@@ -38,103 +40,138 @@ import { Card, CardGrid, Tabs, TabItem, LinkCard } from '@astrojs/starlight/comp
     <div class="stat-label">AI Providers</div>
   </div>
   <div class="stat">
-    <div class="stat-number">4</div>
-    <div class="stat-label">Frameworks</div>
+    <div class="stat-number">1</div>
+    <div class="stat-label">CLI</div>
   </div>
 </div>
 
----
+<hr class="section-divider" />
 
-## What can you build with Agentic?
+<div class="mission-section">
+  <h2 class="gradient-text">One Toolkit. Three Languages. Infinite Agents.</h2>
+  <p class="mission-text">
+    Agentic is the command center for AI agent orchestration. Whether you are spawning
+    fleets of coding agents, orchestrating AI crews, triaging thousands of issues, or
+    generating entire game worlds — you do it from one unified toolkit that speaks
+    TypeScript, Python, and Rust.
+  </p>
+</div>
 
-<CardGrid>
-  <Card title="Spawn AI agent fleets" icon="rocket">
-    Dispatch multiple AI agents across repositories. They clone, work, and open PRs — all in parallel, with automatic token routing per GitHub org.
+<hr class="section-divider" />
 
-    ```bash
-    agentic fleet spawn "my-org/api" \
-      "Fix the failing CI" --auto-pr
-    ```
-  </Card>
+<div class="section-heading">
+  <h2 class="gradient-text">What Can You Build?</h2>
+</div>
+<p class="section-subheading">Four capabilities, one toolkit. Each solves a real problem for teams working with AI agents at scale.</p>
 
-  <Card title="Orchestrate AI crews" icon="puzzle">
-    Define crews in YAML, run them on CrewAI, LangGraph, or Strands. One format, any framework. Includes CLI runners for aider, claude-code, and ollama.
+<div class="bento-grid">
+  <div class="bento-card bento-card--wide">
+    <div class="bento-card__icon">&#x1F3AF;</div>
+    <h3>Spawn AI Agent Fleets</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Dispatch multiple AI agents across repositories. They clone, branch, work, and open PRs — all in parallel, with automatic token routing per GitHub org.</p>
+    <a href="/guides/fleet-management/">Fleet Management Guide</a>
+  </div>
 
-    ```bash
-    agentic-crew run my-app analyzer \
-      --input "Review auth module"
-    ```
-  </Card>
+  <div class="bento-card">
+    <div class="bento-card__icon">&#x1F9E9;</div>
+    <h3>Orchestrate AI Crews</h3>
+    <span class="lang-badge lang-badge--py">Python</span>
+    <p>Define crews in YAML, run them on CrewAI, LangGraph, or Strands. One format, any framework.</p>
+    <a href="/packages/crew/">Crew Docs</a>
+  </div>
 
-  <Card title="Triage issues at scale" icon="magnifier">
-    Portable Vercel AI SDK tools for issue triage, code review, and sprint planning. Works with GitHub, Jira, Linear, and Beads.
+  <div class="bento-card">
+    <div class="bento-card__icon">&#x1F50D;</div>
+    <h3>Triage at Scale</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Portable Vercel AI SDK tools for issue triage, code review, and sprint planning across trackers.</p>
+    <a href="/packages/triage/">Triage Docs</a>
+  </div>
 
-    ```typescript
-    const result = await generateText({
-      model: anthropic('claude-sonnet-4-20250514'),
-      tools: getTriageTools(),
-      prompt: 'Triage all open critical bugs',
-    });
-    ```
-  </Card>
+  <div class="bento-card">
+    <div class="bento-card__icon">&#x1F3AE;</div>
+    <h3>Generate Retro RPGs</h3>
+    <span class="lang-badge lang-badge--rs">Rust</span>
+    <p>AI-powered game generation with Bevy. Procedural worlds, characters, quests, and assets from config.</p>
+    <a href="/packages/game-generator/">Game Generator Docs</a>
+  </div>
 
-  <Card title="Generate retro RPGs" icon="star">
-    AI-powered game generation with Bevy. Procedural worlds, characters, quests, and assets — from a TOML config file.
+  <div class="bento-card bento-card--wide">
+    <div class="bento-card__icon">&#x1F4A0;</div>
+    <h3>Create 3D Assets</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Declarative 3D asset pipelines powered by Meshy AI. Define text-to-3D, rigging, and animation in JSON manifests. Built-in preview and VCR recording for CI.</p>
+    <a href="/packages/meshy-content-generator/">Meshy Docs</a>
+  </div>
+</div>
 
-    ```rust
-    let game = QuickGenerator::new()
-        .genre(Genre::Jrpg)
-        .theme(Theme::Fantasy)
-        .generate_and_run();
-    ```
-  </Card>
-</CardGrid>
+<hr class="section-divider" />
 
----
+<div class="section-heading">
+  <h2 class="gradient-text">The Ecosystem</h2>
+</div>
+<p class="section-subheading">Seven packages that work together or independently. Each solves a specific problem. All share the same principles: provider-agnostic, declarative config, zero hardcoded credentials.</p>
 
-## The Ecosystem
+<div class="bento-grid">
+  <div class="bento-card bento-card--wide">
+    <h3>@jbcom/agentic</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>The orchestration layer. Fleet management, token routing, sandbox execution, and multi-agent handoff protocols.</p>
+    <a href="/packages/control/">View Package</a>
+  </div>
 
-Five packages that work together — or independently. Each solves a specific problem. All share the same design principles: provider-agnostic, declarative config, and zero hardcoded credentials.
+  <div class="bento-card">
+    <h3>@jbcom/agentic-triage</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Vercel AI SDK tools for issue triage, PR review, and sprint planning. Works with GitHub, Jira, Linear, and Beads.</p>
+    <a href="/packages/triage/">View Package</a>
+  </div>
 
-<div class="arch-diagram">{`
-  ┌─────────────────────────────────────────────────────────────┐
-  │                        agentic CLI                          │
-  │              "agentic fleet | triage | sandbox"             │
-  └──────────────────────────┬──────────────────────────────────┘
-                             │
-          ┌──────────────────┼──────────────────┐
-          │                  │                  │
-          ▼                  ▼                  ▼
-  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐
-  │   @jbcom/    │  │   @jbcom/    │  │   @agentic/  │
-  │   agentic    │──│   agentic    │  │   meshy      │
-  │  (control)   │  │  (triage)    │  │  (3D assets) │
-  │  TypeScript  │  │  TypeScript  │  │  TypeScript  │
-  └──────┬───────┘  └──────────────┘  └──────────────┘
-         │
-         ├───────────────────┐
-         ▼                   ▼
-  ┌──────────────┐  ┌──────────────┐
-  │ agentic-crew │  │    game-     │
-  │  (crews)     │  │  generator   │
-  │   Python     │  │    Rust      │
-  └──────────────┘  └──────────────┘
-`}</div>
+  <div class="bento-card">
+    <h3>agentic-crew</h3>
+    <span class="lang-badge lang-badge--py">Python</span>
+    <p>Framework-agnostic crew orchestration. CrewAI, LangGraph, Strands — one YAML, any runtime.</p>
+    <a href="/packages/crew/">View Package</a>
+  </div>
 
-### Packages at a glance
+  <div class="bento-card">
+    <h3>@agentic/meshy</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Declarative 3D asset pipelines. Text-to-3D, rigging, animation via Meshy AI with manifest state.</p>
+    <a href="/packages/meshy-content-generator/">View Package</a>
+  </div>
 
-| Package | Language | What it does |
-|---------|----------|-------------|
-| **[@jbcom/agentic](/packages/control/)** | <span class="lang-badge lang-badge--ts">TS</span> | Fleet management, token routing, sandbox execution, handoff protocols |
-| **[@jbcom/agentic (triage)](/packages/triage/)** | <span class="lang-badge lang-badge--ts">TS</span> | Vercel AI SDK tools for issue triage, PR review, sprint planning |
-| **[agentic-crew](/packages/crew/)** | <span class="lang-badge lang-badge--py">PY</span> | Framework-agnostic crew orchestration — CrewAI, LangGraph, Strands |
-| **[@agentic/meshy](/packages/meshy-content-generator/)** | <span class="lang-badge lang-badge--ts">TS</span> | Declarative 3D asset pipelines powered by Meshy AI |
-| **[game-generator](/packages/game-generator/)** | <span class="lang-badge lang-badge--rs">RS</span> | AI-powered retro RPG generation with Bevy engine |
+  <div class="bento-card">
+    <h3>game-generator</h3>
+    <span class="lang-badge lang-badge--rs">Rust</span>
+    <p>AI-powered retro RPG generation with Bevy. Procedural worlds, characters, and quests.</p>
+    <a href="/packages/game-generator/">View Package</a>
+  </div>
 
----
+  <div class="bento-card">
+    <h3>@jbcom/agentic-providers</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Unified provider layer for Anthropic, OpenAI, Google, Mistral, Azure, and Ollama.</p>
+    <a href="/api/providers/">View Package</a>
+  </div>
 
-## Quick Start
+  <div class="bento-card">
+    <h3>@jbcom/vitest-agentic</h3>
+    <span class="lang-badge lang-badge--ts">TypeScript</span>
+    <p>Vitest utilities for testing agent workflows. Mock providers, snapshot conversations.</p>
+    <a href="/api/vitest/">View Package</a>
+  </div>
+</div>
 
+<hr class="section-divider" />
+
+<div class="section-heading">
+  <h2 class="gradient-text">Quick Start</h2>
+</div>
+<p class="section-subheading">Pick your language and get running in under five minutes.</p>
+
+<div class="quick-start-section">
 <Tabs>
   <TabItem label="TypeScript (Fleet)">
     ```bash
@@ -190,8 +227,6 @@ Five packages that work together — or independently. Each solves a specific pr
     ```bash
     # Build and run the game generator
     cargo run --bin vintage-game-generator
-
-    # Or use it as a library
     ```
 
     ```rust
@@ -206,83 +241,106 @@ Five packages that work together — or independently. Each solves a specific pr
     ```
   </TabItem>
 </Tabs>
+</div>
 
----
+<hr class="section-divider" />
 
-## Who uses Agentic?
+<div class="section-heading">
+  <h2 class="gradient-text">Who Is This For?</h2>
+</div>
 
-<div class="feature-grid">
-  <div class="feature-card">
+<div class="persona-grid">
+  <div class="persona-card">
+    <div class="persona-card__icon">&#x1F4BB;</div>
     <h4>Solo Developers</h4>
-    <p>Spawn AI agents to handle tedious tasks — dependency updates, code reviews, test generation — while you focus on architecture.</p>
+    <p>Spawn AI agents to handle the tedious work — dependency updates, code reviews, test generation — while you focus on architecture and design decisions.</p>
   </div>
-  <div class="feature-card">
+  <div class="persona-card">
+    <div class="persona-card__icon">&#x1F3D7;</div>
     <h4>Platform Teams</h4>
-    <p>Standardize AI workflows across your org. Define crews once, run them consistently. Multi-org token management handles the auth complexity.</p>
+    <p>Standardize AI workflows across your organization. Define crews once, run them consistently. Multi-org token management handles the authentication complexity.</p>
   </div>
-  <div class="feature-card">
+  <div class="persona-card">
+    <div class="persona-card__icon">&#x1F3AE;</div>
     <h4>Game Studios</h4>
-    <p>Generate retro RPG content procedurally — worlds, characters, quests, assets. Blend classic game styles with AI-driven creativity.</p>
+    <p>Generate retro RPG content procedurally — worlds, characters, quests, and assets. Blend classic game aesthetics with AI-driven creativity.</p>
   </div>
-  <div class="feature-card">
+  <div class="persona-card">
+    <div class="persona-card__icon">&#x1F4A0;</div>
     <h4>3D Content Pipelines</h4>
-    <p>Declarative Meshy-powered pipelines for text-to-3D, rigging, and animation. JSON manifests, not brittle scripts.</p>
+    <p>Declarative Meshy-powered pipelines for text-to-3D, rigging, and animation. JSON manifests, not brittle scripts. CI-friendly with built-in VCR recording.</p>
   </div>
 </div>
 
----
+<hr class="section-divider" />
 
-## Design Principles
+<div class="section-heading">
+  <h2 class="gradient-text">Design Principles</h2>
+</div>
 
-<CardGrid>
-  <Card title="Provider Agnostic" icon="setting">
-    Every package works with multiple AI providers — Anthropic, OpenAI, Google, Mistral, Ollama, Azure. Swap providers without changing code.
-  </Card>
-  <Card title="Declarative Config" icon="document">
-    Crews in YAML. Pipelines in JSON. Fleets from CLI flags. Configuration lives in version control, not in scripts.
-  </Card>
-  <Card title="Security First" icon="approve-check">
-    Token sanitization, SHA-pinned Actions, OIDC publishing, sandboxed execution. No hardcoded credentials anywhere.
-  </Card>
-  <Card title="Polyglot by Design" icon="puzzle">
-    TypeScript for orchestration. Python for AI frameworks. Rust for performance. Nx orchestrates the monorepo. Use what fits.
-  </Card>
-</CardGrid>
+<div class="principles-grid">
+  <div class="principle-card">
+    <div class="principle-card__icon">&#x2699;</div>
+    <h4>Provider Agnostic</h4>
+    <p>Every package works with multiple AI providers — Anthropic, OpenAI, Google, Mistral, Ollama, Azure. Swap providers without changing code.</p>
+  </div>
+  <div class="principle-card">
+    <div class="principle-card__icon">&#x1F4C4;</div>
+    <h4>Declarative Config</h4>
+    <p>Crews in YAML. Pipelines in JSON. Fleets from CLI flags. Configuration lives in version control, not in scripts.</p>
+  </div>
+  <div class="principle-card">
+    <div class="principle-card__icon">&#x1F512;</div>
+    <h4>Security First</h4>
+    <p>Token sanitization, SHA-pinned Actions, OIDC publishing, sandboxed execution. No hardcoded credentials anywhere.</p>
+  </div>
+  <div class="principle-card">
+    <div class="principle-card__icon">&#x1F30D;</div>
+    <h4>Polyglot by Design</h4>
+    <p>TypeScript for orchestration. Python for AI frameworks. Rust for performance. Use the right language for each job.</p>
+  </div>
+</div>
 
----
+<hr class="section-divider" />
 
-## Explore
+<div class="section-heading">
+  <h2 class="gradient-text">Explore</h2>
+</div>
 
-<CardGrid>
-  <Card title="Getting Started" icon="rocket">
-    Install, configure, and spawn your first agent in under 5 minutes.
+<div class="explore-grid">
+  <a class="explore-card" href="/getting-started/introduction/">
+    <div class="explore-card__icon">&#x1F680;</div>
+    <h4>Getting Started</h4>
+    <p>Install, configure, and spawn your first agent in under 5 minutes.</p>
+    <div class="explore-card__arrow">Start here</div>
+  </a>
 
-    [Start here →](/getting-started/introduction/)
-  </Card>
+  <a class="explore-card" href="/guides/agent-spawning/">
+    <div class="explore-card__icon">&#x1F4D6;</div>
+    <h4>Guides</h4>
+    <p>Fleet management, orchestration patterns, sandbox execution, and AI triage workflows.</p>
+    <div class="explore-card__arrow">Read guides</div>
+  </a>
 
-  <Card title="Guides" icon="open-book">
-    Fleet management, orchestration patterns, sandbox execution, and AI triage workflows.
+  <a class="explore-card" href="/integrations/github-actions/">
+    <div class="explore-card__icon">&#x1F517;</div>
+    <h4>Integrations</h4>
+    <p>GitHub Actions, CrewAI, LangGraph, Vercel AI SDK, MCP Server — connect to your stack.</p>
+    <div class="explore-card__arrow">See integrations</div>
+  </a>
 
-    [Read guides →](/guides/agent-spawning/)
-  </Card>
+  <a class="explore-card" href="/api/fleet-management/">
+    <div class="explore-card__icon">&#x1F4DA;</div>
+    <h4>API Reference</h4>
+    <p>Complete API documentation for fleet management, triage tools, and configuration.</p>
+    <div class="explore-card__arrow">Browse API</div>
+  </a>
+</div>
 
-  <Card title="Integrations" icon="puzzle">
-    GitHub Actions, CrewAI, LangGraph, Vercel AI SDK, MCP Server — connect Agentic to your stack.
+<hr class="section-divider" />
 
-    [See integrations →](/integrations/github-actions/)
-  </Card>
-
-  <Card title="API Reference" icon="document">
-    Complete API documentation for fleet management, triage tools, and configuration.
-
-    [Browse API →](/api/fleet-management/)
-  </Card>
-</CardGrid>
-
----
-
-<div style="text-align: center; padding: 1.5rem 0;">
-  <p style="opacity: 0.6; font-size: 0.9rem;">
+<div class="footer-section">
+  <p>
     Part of the <a href="https://jbcom.github.io">jbcom</a> ecosystem &middot;
     <a href="https://strata.game">Strata Games</a> &middot;
     <a href="https://extendeddata.dev">Extended Data</a>

@@ -1,49 +1,24 @@
 # @jbcom/agentic-triage
 
 [![npm version](https://img.shields.io/npm/v/@jbcom/agentic-triage.svg)](https://www.npmjs.com/package/@jbcom/agentic-triage)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=jbcom_agentic_triage&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jbcom_agentic_triage)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jbcom_agentic_triage&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jbcom_agentic_triage)
+[![CI](https://github.com/jbcom/agentic/actions/workflows/ci.yml/badge.svg)](https://github.com/jbcom/agentic/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## 🏢 Enterprise Context
+AI-powered GitHub issue triage, PR review, and sprint planning primitives built on the Vercel AI SDK. Provides portable tools for any AI agent system, an MCP server for Claude Desktop and Cursor, and a direct TypeScript API for programmatic use. Supports GitHub, Linear, Jira, and Beads as triage providers.
 
-**Agentic** is the AI & Agents division of the [jbcom enterprise](https://jbcom.github.io). This package is part of a coherent suite of specialized tools, sharing a unified design system and interconnected with sibling organizations like [Strata](https://strata.game) and [Extended Data](https://extendeddata.dev).
-
-> Portable triage primitives for AI agents - Vercel AI SDK tools, MCP server, and direct API
-
-**@jbcom/agentic-triage** provides reusable triage primitives for AI agent systems. It offers three integration patterns:
-
-1. **Vercel AI SDK Tools** - Portable tools for any Vercel AI SDK application
-2. **MCP Server** - Model Context Protocol server for Claude Desktop, Cursor, etc.
-3. **Direct TypeScript API** - Programmatic access for non-AI use cases
-
-## 🚨 Migration from agentic-triage
-
-This package was previously published as `agentic-triage` and `@agentic/triage`. Starting with v0.3.0, it has been consolidated as `@jbcom/agentic-triage` under the [jbcom](https://www.npmjs.com/org/jbcom) NPM organization.
-
-To migrate from older versions:
-1. Update your `package.json` to use `@jbcom/agentic-triage`.
-2. Update your imports:
-   ```typescript
-   // Old (if using previous package names)
-   import { getTriageTools } from 'agentic-triage';
-   // New
-   import { getTriageTools } from '@jbcom/agentic-triage';
-   ```
+[Full Documentation](https://agentic.coach) | [API Reference](https://agentic.coach/api/triage-tools/) | [Package Docs](https://agentic.coach/packages/triage/)
 
 ## Installation
 
 ```bash
-# npm
 npm install @jbcom/agentic-triage
-
-# pnpm
+# or
 pnpm add @jbcom/agentic-triage
 ```
 
 ## Quick Start
 
-### 1. Vercel AI SDK Tools (Recommended for AI Agents)
+### Vercel AI SDK Tools (Recommended)
 
 ```typescript
 import { getTriageTools } from '@jbcom/agentic-triage';
@@ -57,37 +32,20 @@ const result = await generateText({
 });
 ```
 
-#### Selective Tool Import
+### Selective Tool Import
 
 ```typescript
 import { getIssueTools, getReviewTools, getProjectTools } from '@jbcom/agentic-triage';
 
 // Only import what your agent needs
-const myAgentTools = {
+const tools = {
   ...getIssueTools(),    // Issue CRUD, search, labels
   ...getReviewTools(),   // PR review, comments, approval
+  ...getProjectTools(),  // Sprint planning, backlog
 };
 ```
 
-#### Individual Tools
-
-```typescript
-import {
-  listIssuesTool,
-  createIssueTool,
-  getIssueTool,
-  updateIssueTool,
-  closeIssueTool,
-  searchIssuesTool,
-  addLabelsTool,
-  removeLabelsTool,
-} from '@jbcom/agentic-triage';
-
-// Use individual tools
-const tools = { listIssues: listIssuesTool, createIssue: createIssueTool };
-```
-
-### 2. MCP Server (For Claude Desktop, Cursor, etc.)
+### MCP Server (Claude Desktop, Cursor)
 
 ```json
 {
@@ -100,106 +58,50 @@ const tools = { listIssues: listIssuesTool, createIssue: createIssueTool };
 }
 ```
 
-### 3. Direct TypeScript API
+### Direct TypeScript API
 
 ```typescript
 import { TriageConnectors } from '@jbcom/agentic-triage';
 
 const triage = new TriageConnectors({ provider: 'github' });
-
-// Issue operations
 const issues = await triage.issues.list({ status: 'open', priority: 'high' });
-const issue = await triage.issues.create({
-  title: 'Fix login bug',
-  body: 'Users cannot login with SSO',
-  type: 'bug',
-  priority: 'critical',
-});
-await triage.issues.addLabels(issue.id, ['needs-triage', 'auth']);
-await triage.issues.close(issue.id, 'Fixed in PR #123');
-
-// Project operations
-const sprints = await triage.projects.getSprints();
-const currentSprint = await triage.projects.getCurrentSprint();
-
-// Review operations
-const comments = await triage.reviews.getPRComments(144);
 ```
 
-## Provider Support
+## Key Features
+
+- **Three integration patterns** -- Vercel AI SDK tools, MCP server, and direct API
+- **Multi-provider support** -- GitHub Issues, Linear, Jira, and Beads
+- **Issue triage** -- AI-powered assessment, labeling, prioritization
+- **Code review** -- automated PR reviews with feedback handling
+- **Sprint planning** -- weighted prioritization, backlog balancing
+- **Escalation ladder** -- configurable cost-aware escalation policies
+- **Queue management** -- priority-based task queuing with locking
+- **Test result parsing** -- Vitest and Playwright reporter integration
+
+## Triage Providers
 
 | Provider | Status | Use Case |
 |----------|--------|----------|
-| **GitHub Issues** | ✅ Complete | GitHub-native projects |
-| **Beads** | ✅ Complete | Local-first, AI-native issue tracking |
-| **Jira** | ✅ Complete | Enterprise projects |
-| **Linear** | ✅ Complete | Modern team workflows |
-
-### Auto-Detection
-
-The provider is auto-detected based on environment:
-- `.beads/` directory present → Beads provider
-- `GITHUB_REPOSITORY` set or `.git` remote → GitHub provider
-
-### Explicit Configuration
-
-```typescript
-import { TriageConnectors } from '@jbcom/agentic-triage';
-
-// GitHub
-const github = new TriageConnectors({
-  provider: 'github',
-  github: { owner: 'myorg', repo: 'myrepo' }
-});
-
-// Beads
-const beads = new TriageConnectors({
-  provider: 'beads',
-  beads: { workingDir: '/path/to/project' }
-});
-```
-
-## CLI (Development & Testing)
-
-The CLI is primarily for development and testing the primitives:
-
-```bash
-# Test issue assessment
-triage assess 123
-
-# Test PR review
-triage review 144
-```
+| **GitHub Issues** | Complete | GitHub-native projects |
+| **Beads** | Complete | Local-first, AI-native issue tracking |
+| **Jira** | Complete | Enterprise projects |
+| **Linear** | Complete | Modern team workflows |
 
 ## Environment Variables
 
 ```bash
-# For GitHub provider
 GH_TOKEN=ghp_xxx              # GitHub PAT with repo scope
-
-# For AI operations (when using CLI)
-OLLAMA_API_KEY=xxx            # Ollama Cloud API key
-ANTHROPIC_API_KEY=xxx         # Or Anthropic API key
+OLLAMA_API_KEY=xxx             # Ollama Cloud API key (optional)
+ANTHROPIC_API_KEY=xxx          # Anthropic API key (optional)
 ```
 
-## Development
+## Documentation
 
-```bash
-# Install dependencies
-pnpm install
+Visit [agentic.coach](https://agentic.coach) for full documentation including:
 
-# Run tests
-pnpm test
-
-# Run tests with coverage
-pnpm run test:coverage
-
-# Build
-pnpm run build
-
-# Lint
-pnpm run check
-```
+- [AI Triage Guide](https://agentic.coach/guides/ai-triage/)
+- [Vercel AI SDK Integration](https://agentic.coach/integrations/vercel-ai-sdk/)
+- [MCP Server Integration](https://agentic.coach/integrations/mcp-server/)
 
 ## License
 

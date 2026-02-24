@@ -1,94 +1,97 @@
 ---
-title: Token Management API
-description: API reference for @jbcom/agentic token management
+title: "Token Management API"
+description: "Complete API reference for multi-organization GitHub token management in @jbcom/agentic-control."
 ---
 
 # Token Management API Reference
 
-Complete reference for token management functions from `@jbcom/agentic`.
-
-## Overview
-
-The token management system automatically routes GitHub operations to the correct tokens based on repository organization. This eliminates manual token switching when working across multiple organizations.
+The token management module provides automatic token switching based on repository organization. It eliminates manual token management when working across multiple GitHub organizations by routing API calls to the correct credentials.
 
 ## Import
 
 ```typescript
 import {
-  getTokenForRepo,
-  setTokenConfig,
-  addOrganization,
+  // Configuration
   getTokenConfig,
+  setTokenConfig,
+  resetTokenConfig,
+  addOrganization,
+  removeOrganization,
+
+  // Token resolution
+  getTokenForRepo,
+  getTokenForOrg,
+  getTokenEnvVar,
+  getPRReviewToken,
+  getPRReviewTokenEnvVar,
+
+  // Organization helpers
+  extractOrg,
+  getOrgConfig,
+  getConfiguredOrgs,
+  isOrgConfigured,
+
+  // Validation
   validateTokens,
-} from '@jbcom/agentic';
+  hasTokenForOrg,
+  hasTokenForRepo,
+
+  // Subprocess helpers
+  getEnvForRepo,
+  getEnvForPRReview,
+
+  // Debugging
+  getTokenSummary,
+} from '@jbcom/agentic-control';
 ```
 
-## Functions
+## Configuration
 
-### getTokenForRepo()
+Token configuration can be set through three methods, listed in priority order:
 
-Get the appropriate token for a repository.
+1. **Programmatic**: `setTokenConfig()` / `addOrganization()`
+2. **Config file**: `agentic.config.json` with `"tokens"` section
+3. **Environment variables**: `AGENTIC_ORG_<NAME>_TOKEN` pattern
 
-```typescript
-getTokenForRepo(repoOrFullName: string): string | undefined
-```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `repoOrFullName` | `string` | Repo in `owner/name` format or full URL |
-
-**Returns:** Token value or `undefined` if not found.
-
-**Example:**
-```typescript
-// By owner/name
-const token = getTokenForRepo('my-company/my-repo');
-// Returns value of GITHUB_MY_COMPANY_TOKEN if configured
-
-// By full URL
-const token = getTokenForRepo('https://github.com/my-company/my-repo');
-// Same result
-
-// Unconfigured org falls back to default
-const token = getTokenForRepo('unknown-org/repo');
-// Returns value of GITHUB_TOKEN
-```
-
-**Token Resolution:**
-1. Check if org is in `tokens.organizations` config
-2. If found, return value of configured `tokenEnvVar`
-3. If not found, return value of `defaultTokenEnvVar`
-4. If no default, return `undefined`
-
----
-
-### setTokenConfig()
-
-Set the complete token configuration.
-
-```typescript
-setTokenConfig(config: TokenConfig): void
-```
-
-**Parameters:**
+### TokenConfig Schema
 
 ```typescript
 interface TokenConfig {
+  /** Mapping of org name to configuration */
   organizations: Record<string, OrganizationConfig>;
-  defaultTokenEnvVar?: string;
-  prReviewTokenEnvVar?: string;
+  /** Default token env var when org is unknown (default: "GITHUB_TOKEN") */
+  defaultTokenEnvVar: string;
+  /** Token env var for PR reviews -- ensures consistent identity (default: "GITHUB_TOKEN") */
+  prReviewTokenEnvVar: string;
 }
 
 interface OrganizationConfig {
+  /** Organization name (e.g., "my-org") */
   name: string;
+  /** Environment variable name for the token */
   tokenEnvVar: string;
+  /** Default branch for repos in this org */
+  defaultBranch?: string;
+  /** Whether this is a GitHub Enterprise org */
+  isEnterprise?: boolean;
 }
 ```
 
-**Example:**
+---
+
+## Configuration Functions
+
+### setTokenConfig()
+
+Set or merge token configuration. Organizations are merged (not replaced) with existing config.
+
 ```typescript
+setTokenConfig(config: Partial<TokenConfig>): void
+```
+
+```typescript
+import { setTokenConfig } from '@jbcom/agentic-control';
+
 setTokenConfig({
   organizations: {
     'my-company': {
@@ -105,110 +108,357 @@ setTokenConfig({
 });
 ```
 
----
-
-### addOrganization()
-
-Add a single organization configuration.
-
-```typescript
-addOrganization(config: OrganizationConfig): void
-```
-
-**Parameters:**
-
-```typescript
-interface OrganizationConfig {
-  name: string;
-  tokenEnvVar: string;
-}
-```
-
-**Example:**
-```typescript
-addOrganization({
-  name: 'new-org',
-  tokenEnvVar: 'GITHUB_NEW_ORG_TOKEN',
-});
-
-// Token is now available
-const token = getTokenForRepo('new-org/my-repo');
-```
-
----
-
 ### getTokenConfig()
 
-Get the current token configuration.
+Get the current token configuration. Returns a shallow copy.
 
 ```typescript
 getTokenConfig(): TokenConfig
 ```
 
-**Returns:** Current `TokenConfig` object.
-
-**Example:**
 ```typescript
 const config = getTokenConfig();
 console.log('Configured orgs:', Object.keys(config.organizations));
 console.log('Default token:', config.defaultTokenEnvVar);
+console.log('PR review token:', config.prReviewTokenEnvVar);
+```
+
+### resetTokenConfig()
+
+Reset configuration to defaults and reload from environment variables. Useful for testing.
+
+```typescript
+resetTokenConfig(): void
+```
+
+### addOrganization()
+
+Add or update a single organization configuration.
+
+```typescript
+addOrganization(org: OrganizationConfig): void
+```
+
+```typescript
+import { addOrganization } from '@jbcom/agentic-control';
+
+addOrganization({
+  name: 'my-company',
+  tokenEnvVar: 'GITHUB_MYCOMPANY_TOKEN',
+  defaultBranch: 'main',
+  isEnterprise: true,
+});
+
+// Token is now available for repos in this org
+const token = getTokenForRepo('my-company/my-repo');
+```
+
+### removeOrganization()
+
+Remove an organization from the configuration.
+
+```typescript
+removeOrganization(orgName: string): void
 ```
 
 ---
 
-### validateTokens()
+## Token Resolution
 
-Validate that all configured tokens are available.
+### getTokenForRepo()
 
-```typescript
-validateTokens(): TokenValidationResult
-```
-
-**Returns:**
+Get the actual token value for a repository URL. This is the primary resolution function.
 
 ```typescript
-interface TokenValidationResult {
-  valid: boolean;
-  missing: string[];
-  available: string[];
-}
+getTokenForRepo(repoUrl: string): string | undefined
 ```
 
-**Example:**
+**Resolution order:**
+
+1. Extract organization from the URL using `extractOrg()`
+2. Look up the organization in `config.organizations` (case-insensitive)
+3. If found, return `process.env[org.tokenEnvVar]`
+4. If not found, return `process.env[config.defaultTokenEnvVar]`
+
 ```typescript
-const result = validateTokens();
+import { getTokenForRepo, addOrganization } from '@jbcom/agentic-control';
 
-if (!result.valid) {
-  console.error('Missing tokens:', result.missing.join(', '));
-  process.exit(1);
-}
+addOrganization({
+  name: 'my-company',
+  tokenEnvVar: 'GITHUB_COMPANY_TOKEN',
+});
 
-console.log('All tokens available:', result.available.join(', '));
+// By owner/name format
+const token1 = getTokenForRepo('my-company/my-repo');
+// Returns value of GITHUB_COMPANY_TOKEN
+
+// By full URL
+const token2 = getTokenForRepo('https://github.com/my-company/my-repo');
+// Same result
+
+// By SSH URL
+const token3 = getTokenForRepo('git@github.com:my-company/my-repo.git');
+// Same result
+
+// Unknown org falls back to default
+const token4 = getTokenForRepo('unknown-org/repo');
+// Returns value of GITHUB_TOKEN
 ```
 
----
+### getTokenForOrg()
+
+Get the token value for an organization name directly (without URL parsing).
+
+```typescript
+getTokenForOrg(org: string): string | undefined
+```
+
+```typescript
+const token = getTokenForOrg('my-company');
+// Returns process.env[configured_env_var] or process.env[default]
+```
+
+### getTokenEnvVar()
+
+Get the environment variable name (not the value) for an organization. Case-insensitive lookup with exact match priority.
+
+```typescript
+getTokenEnvVar(org: string): string
+```
+
+```typescript
+const envVar = getTokenEnvVar('my-company');
+// Returns "GITHUB_COMPANY_TOKEN" (or defaultTokenEnvVar if not configured)
+```
 
 ### getPRReviewToken()
 
-Get the token configured for PR review operations.
+Get the token designated for PR review operations. This ensures all PR reviews use a consistent identity (e.g., a bot account).
 
 ```typescript
 getPRReviewToken(): string | undefined
 ```
 
-**Returns:** Value of `prReviewTokenEnvVar` or default token.
-
-**Example:**
 ```typescript
 const token = getPRReviewToken();
-// Use this token for all PR reviews for consistent identity
+// Returns process.env[prReviewTokenEnvVar]
 ```
 
-## Configuration
+### getPRReviewTokenEnvVar()
 
-### Config File
+Get the environment variable name for the PR review token.
 
-Token configuration can be set in `agentic.config.json`:
+```typescript
+getPRReviewTokenEnvVar(): string
+```
+
+---
+
+## Organization Helpers
+
+### extractOrg()
+
+Extract the organization name from a repository URL or `owner/repo` string. Uses safe regex patterns to prevent ReDoS attacks.
+
+```typescript
+extractOrg(repoUrl: string): string | null
+```
+
+**Supported formats:**
+
+```typescript
+extractOrg('https://github.com/my-org/my-repo');     // "my-org"
+extractOrg('my-org/my-repo');                          // "my-org"
+extractOrg('git@github.com:my-org/my-repo.git');       // "my-org"
+extractOrg('not-a-repo');                              // null
+```
+
+### getOrgConfig()
+
+Get the full organization configuration object. Case-insensitive lookup with exact match priority.
+
+```typescript
+getOrgConfig(org: string): OrganizationConfig | undefined
+```
+
+### getConfiguredOrgs()
+
+List all configured organization names.
+
+```typescript
+getConfiguredOrgs(): string[]
+```
+
+```typescript
+const orgs = getConfiguredOrgs();
+console.log('Configured orgs:', orgs);
+// ["my-company", "partner-org"]
+```
+
+### isOrgConfigured()
+
+Check if an organization has been configured (case-insensitive).
+
+```typescript
+isOrgConfigured(org: string): boolean
+```
+
+---
+
+## Validation
+
+### validateTokens()
+
+Validate that all configured tokens are actually available as environment variables.
+
+```typescript
+validateTokens(orgs?: string[]): Result<string[]>
+```
+
+**Parameters:**
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `orgs` | `string[]` | All configured orgs | Specific organizations to validate |
+
+**Returns:** `Result<string[]>` where `data` contains the list of missing tokens and `success` is `true` if no tokens are missing.
+
+Validates:
+- All specified organization tokens
+- The PR review token
+- The default token
+
+```typescript
+import { validateTokens } from '@jbcom/agentic-control';
+
+const result = validateTokens();
+if (!result.success) {
+  console.error('Missing tokens:');
+  for (const missing of result.data ?? []) {
+    console.error(`  - ${missing}`);
+  }
+  // e.g., "my-company: GITHUB_COMPANY_TOKEN not set"
+  // e.g., "PR Review: GITHUB_TOKEN not set"
+  process.exit(1);
+}
+```
+
+### hasTokenForOrg()
+
+Quick check if a valid (non-empty) token is available for an organization.
+
+```typescript
+hasTokenForOrg(org: string): boolean
+```
+
+### hasTokenForRepo()
+
+Quick check if a valid token is available for a repository.
+
+```typescript
+hasTokenForRepo(repoUrl: string): boolean
+```
+
+---
+
+## Subprocess Helpers
+
+### getEnvForRepo()
+
+Create an environment variables object for child processes targeting a specific repository. Sets both `GH_TOKEN` and `GITHUB_TOKEN`.
+
+```typescript
+getEnvForRepo(repoUrl: string): Record<string, string>
+```
+
+```typescript
+import { spawnSync } from 'node:child_process';
+import { getEnvForRepo } from '@jbcom/agentic-control';
+
+const proc = spawnSync('gh', ['pr', 'list'], {
+  env: { ...process.env, ...getEnvForRepo('my-company/my-repo') },
+});
+// Uses GITHUB_COMPANY_TOKEN for GH_TOKEN and GITHUB_TOKEN
+```
+
+### getEnvForPRReview()
+
+Create environment variables for PR review operations using the PR review token.
+
+```typescript
+getEnvForPRReview(): Record<string, string>
+```
+
+```typescript
+const proc = spawnSync('gh', ['pr', 'review', '42', '--approve'], {
+  env: { ...process.env, ...getEnvForPRReview() },
+});
+// Uses the PR review token identity
+```
+
+---
+
+## Debugging
+
+### getTokenSummary()
+
+Get a summary of all configured tokens and their availability. Useful for diagnostic output.
+
+```typescript
+getTokenSummary(): Record<string, {
+  envVar: string;
+  available: boolean;
+  configured: boolean;
+}>
+```
+
+```typescript
+import { getTokenSummary } from '@jbcom/agentic-control';
+
+const summary = getTokenSummary();
+for (const [name, info] of Object.entries(summary)) {
+  const status = info.available ? 'OK' : 'MISSING';
+  console.log(`${name}: ${info.envVar} [${status}]`);
+}
+// my-company: GITHUB_COMPANY_TOKEN [OK]
+// partner-org: PARTNER_GH_PAT [MISSING]
+// _default: GITHUB_TOKEN [OK]
+// _pr_review: GITHUB_BOT_TOKEN [OK]
+```
+
+---
+
+## Environment Variable Patterns
+
+### Automatic Organization Loading
+
+On module initialization, the token system scans `process.env` for variables matching the pattern `AGENTIC_ORG_<NAME>_TOKEN` and automatically registers them.
+
+```bash
+# Pattern: AGENTIC_ORG_<UPPERCASE_NAME>_TOKEN=<TOKEN_ENV_VAR_NAME>
+export AGENTIC_ORG_MYCOMPANY_TOKEN=GITHUB_MYCOMPANY_TOKEN
+export AGENTIC_ORG_PARTNER_TOKEN=PARTNER_GH_PAT
+```
+
+The `<NAME>` portion is converted to lowercase and underscores become hyphens:
+- `AGENTIC_ORG_MYCOMPANY_TOKEN` registers org `mycompany`
+- `AGENTIC_ORG_MY_COMPANY_TOKEN` registers org `my-company`
+
+### Override Variables
+
+```bash
+# Override the default token env var
+export AGENTIC_DEFAULT_TOKEN=GITHUB_TOKEN
+
+# Override the PR review token env var
+export AGENTIC_PR_REVIEW_TOKEN=GITHUB_BOT_TOKEN
+```
+
+---
+
+## Config File Format
+
+Token configuration in `agentic.config.json`:
 
 ```json
 {
@@ -216,7 +466,9 @@ Token configuration can be set in `agentic.config.json`:
     "organizations": {
       "my-company": {
         "name": "my-company",
-        "tokenEnvVar": "GITHUB_COMPANY_TOKEN"
+        "tokenEnvVar": "GITHUB_COMPANY_TOKEN",
+        "defaultBranch": "main",
+        "isEnterprise": false
       },
       "open-source": {
         "name": "open-source",
@@ -224,59 +476,46 @@ Token configuration can be set in `agentic.config.json`:
       }
     },
     "defaultTokenEnvVar": "GITHUB_TOKEN",
-    "prReviewTokenEnvVar": "GITHUB_TOKEN"
+    "prReviewTokenEnvVar": "GITHUB_BOT_TOKEN"
   }
 }
 ```
 
-### Environment Variables
-
-Add organizations dynamically via environment variables:
-
-```bash
-# Pattern: AGENTIC_ORG_<NAME>_TOKEN=<ENV_VAR_NAME>
-export AGENTIC_ORG_MYCOMPANY_TOKEN=GITHUB_MYCOMPANY_TOKEN
-export AGENTIC_ORG_PARTNER_TOKEN=PARTNER_GH_PAT
-
-# Set the default
-export AGENTIC_DEFAULT_TOKEN=GITHUB_TOKEN
-
-# Set the PR review token
-export AGENTIC_PR_REVIEW_TOKEN=GITHUB_BOT_TOKEN
-```
+---
 
 ## Token Resolution Flow
 
 ```
-Repository: my-company/my-repo
-                    │
-                    ▼
-    ┌───────────────────────────────┐
-    │ Check organizations config     │
-    │ for "my-company"              │
-    └───────────────┬───────────────┘
-                    │
-            ┌───────┴───────┐
-            │               │
-        Found           Not Found
-            │               │
-            ▼               ▼
-    ┌───────────────┐ ┌───────────────┐
-    │ Return value  │ │ Return value  │
-    │ of configured │ │ of default    │
-    │ tokenEnvVar   │ │ tokenEnvVar   │
-    └───────────────┘ └───────────────┘
-            │               │
-            ▼               ▼
-    GITHUB_COMPANY_TOKEN   GITHUB_TOKEN
+Repository: "https://github.com/my-company/my-repo"
+                        |
+                        v
+        +-------------------------------+
+        | extractOrg() -> "my-company"  |
+        +---------------+---------------+
+                        |
+                +-------+-------+
+                |               |
+           Configured       Not Found
+                |               |
+                v               v
+        +---------------+ +-------------------+
+        | Return value  | | Return value      |
+        | of configured | | of default        |
+        | tokenEnvVar   | | tokenEnvVar       |
+        +---------------+ +-------------------+
+                |               |
+                v               v
+        GITHUB_COMPANY_TOKEN   GITHUB_TOKEN
 ```
+
+---
 
 ## Usage with Fleet
 
-The Fleet class automatically uses token management:
+The Fleet class automatically uses token management for all GitHub operations:
 
 ```typescript
-import { Fleet, addOrganization } from '@jbcom/agentic';
+import { Fleet, addOrganization } from '@jbcom/agentic-control';
 
 // Configure organizations
 addOrganization({
@@ -284,49 +523,53 @@ addOrganization({
   tokenEnvVar: 'GITHUB_COMPANY_TOKEN',
 });
 
-// Fleet automatically uses correct token
 const fleet = new Fleet();
 
-// This uses GITHUB_COMPANY_TOKEN automatically
+// Fleet uses GITHUB_COMPANY_TOKEN automatically for this repo
 await fleet.spawn({
   repository: 'https://github.com/my-company/my-repo',
-  task: 'Fix the bug',
+  task: 'Fix the authentication bug',
+  target: { autoCreatePr: true },
 });
 ```
 
-## Usage with GitHubClient
+---
 
-```typescript
-import { GitHubClient, getTokenForRepo } from '@jbcom/agentic';
+## CLI Commands
 
-// Token is automatically selected
-const client = new GitHubClient('my-company/my-repo');
+```bash
+# Show token status for all configured organizations
+agentic tokens status
 
-// Or explicitly
-const token = getTokenForRepo('my-company/my-repo');
-const client = new GitHubClient('my-company/my-repo', token);
+# Validate that all configured tokens are set
+agentic tokens validate
+
+# Get the token env var for a specific repo
+agentic tokens for-repo my-org/my-repo
 ```
+
+---
 
 ## Best Practices
 
-### 1. Use Fine-Grained Tokens
+### Use Fine-Grained Tokens
 
-Create separate tokens with minimal permissions:
+Create separate GitHub Personal Access Tokens with minimal scopes:
 
 ```bash
-# Personal repos - full access
+# Personal repos -- full access
 export GITHUB_TOKEN="ghp_personal..."
 
-# Work repos - only repo scope
+# Work repos -- only repo scope
 export GITHUB_WORK_TOKEN="ghp_work..."
 
-# Open source - only public repos
+# Open source contributions -- only public repos
 export GITHUB_OSS_TOKEN="ghp_oss..."
 ```
 
-### 2. Use Bot Account for PR Reviews
+### Use a Bot Account for PR Reviews
 
-Set up a dedicated bot for consistent identity:
+Configure a dedicated bot identity so all automated PR reviews appear consistently:
 
 ```json
 {
@@ -336,44 +579,34 @@ Set up a dedicated bot for consistent identity:
 }
 ```
 
-### 3. Validate on Startup
+### Validate on Startup
+
+Check token availability early to fail fast:
 
 ```typescript
-import { validateTokens } from '@jbcom/agentic';
+import { validateTokens } from '@jbcom/agentic-control';
 
 const result = validateTokens();
-if (!result.valid) {
-  console.error('Missing tokens:', result.missing);
-  console.error('Please set the required environment variables');
+if (!result.success) {
+  console.error('Missing tokens:', result.data);
   process.exit(1);
 }
 ```
 
-### 4. Never Hardcode Tokens
+### Never Hardcode Tokens
 
 ```typescript
-// ❌ Bad
+// Bad -- hardcoded token
 const token = 'ghp_xxx...';
 
-// ✅ Good
+// Good -- resolved from configuration
 const token = getTokenForRepo('my-org/my-repo');
 ```
 
-## CLI Commands
+---
 
-```bash
-# Check all token status
-agentic tokens status
+## Related Pages
 
-# Validate tokens are working
-agentic tokens validate
-
-# Get token for specific repo
-agentic tokens for-repo my-org/my-repo
-```
-
-## Next Steps
-
-- [Configuration Guide](/getting-started/configuration/) - Complete config reference
-- [Fleet API Reference](/api/fleet-management/) - Fleet management
-- [GitHub Actions Integration](/integrations/github-actions/) - CI/CD setup
+- [Configuration API](/api/configuration/) -- Full config schema reference
+- [Fleet API Reference](/api/fleet-management/) -- Fleet management
+- [Getting Started: Configuration](/getting-started/configuration/) -- Setup guide

@@ -1,191 +1,281 @@
 ---
-title: Triage Tools API
-description: Complete API reference for @agentic/triage tools
+title: "Triage Tools API"
+description: "Complete API reference for the AI-powered triage tools from @jbcom/triage, compatible with the Vercel AI SDK."
 ---
 
 # Triage Tools API Reference
 
-Complete reference for the triage tools from `@jbcom/agentic`.
+The triage tools package provides AI-compatible tool definitions for issue management, code review, PR analysis, visual testing, and intelligent routing. All tools are built with the [Vercel AI SDK](https://sdk.vercel.ai/) `tool()` function and use [Zod](https://zod.dev/) schemas for input validation.
 
 ## Installation
 
 ```bash
-npm install @jbcom/agentic
+npm install @jbcom/triage
+```
+
+## Import
+
+```typescript
+import {
+  // Tool collections
+  getTriageTools,
+  triageTools,
+
+  // Issue tools
+  listIssuesTool,
+  getIssueTool,
+  createIssueTool,
+  updateIssueTool,
+  closeIssueTool,
+  searchIssuesTool,
+  addLabelsTool,
+  removeLabelsTool,
+  triageIssueTool,
+
+  // Review tools
+  submitReviewTool,
+
+  // PR tools
+  analyzePRTool,
+
+  // Sage (AI advisor)
+  sageTool,
+
+  // Visual review
+  visualReviewTool,
+} from '@jbcom/triage';
 ```
 
 ## Tool Collections
 
 ### getTriageTools()
 
-Get all available triage tools.
+Returns the complete set of all available triage tools as a single object.
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/triage';
 
 const tools = getTriageTools();
-// Returns all issue, review, and project tools
+// Returns object with all 13 tools
+```
+
+### triageTools
+
+The same collection exported as a named constant:
+
+```typescript
+import { triageTools } from '@jbcom/triage';
+
+// triageTools.listIssues
+// triageTools.getIssue
+// triageTools.createIssue
+// triageTools.updateIssue
+// triageTools.closeIssue
+// triageTools.searchIssues
+// triageTools.addLabels
+// triageTools.removeLabels
+// triageTools.triageIssue
+// triageTools.submitReview
+// triageTools.analyzePR
+// triageTools.sage
+// triageTools.visualReview
 ```
 
 ---
 
-### getIssueTools()
+## Usage with Vercel AI SDK
 
-Get issue management tools.
+All tools work directly with `generateText` and `streamText`:
 
 ```typescript
-import { getIssueTools } from '@jbcom/agentic';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { getTriageTools } from '@jbcom/triage';
 
-const tools = getIssueTools();
-// Returns: listIssues, getIssue, createIssue, updateIssue,
-//          closeIssue, searchIssues, addLabels, removeLabels
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: getTriageTools(),
+  prompt: 'List all open bugs and triage the most critical one.',
+  maxSteps: 10,
+});
+
+console.log(result.text);
+```
+
+For streaming:
+
+```typescript
+import { streamText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { triageTools } from '@jbcom/triage';
+
+const result = streamText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: triageTools,
+  prompt: 'Review PR #42 and provide feedback.',
+  maxSteps: 5,
+});
+
+for await (const chunk of result.textStream) {
+  process.stdout.write(chunk);
+}
 ```
 
 ---
-
-### getReviewTools()
-
-Get code review tools.
-
-```typescript
-import { getReviewTools } from '@jbcom/agentic';
-
-const tools = getReviewTools();
-// Returns: getPRComments, addPRComment, approvePR, requestChanges
-```
-
----
-
-### getProjectTools()
-
-Get project management tools.
-
-```typescript
-import { getProjectTools } from '@jbcom/agentic';
-
-const tools = getProjectTools();
-// Returns: getSprints, getCurrentSprint, getSprintIssues, moveToSprint
-```
 
 ## Issue Tools
 
 ### listIssuesTool
 
-List issues with optional filtering.
+List issues from the configured issue tracker with optional filters.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `status` | `'open' \| 'in_progress' \| 'blocked' \| 'closed'` | No | Filter by issue status |
+| `priority` | `'critical' \| 'high' \| 'medium' \| 'low' \| 'backlog'` | No | Filter by priority |
+| `type` | `'bug' \| 'feature' \| 'task' \| 'epic' \| 'chore' \| 'docs'` | No | Filter by issue type |
+| `labels` | `string[]` | No | Filter by labels |
+| `limit` | `number` | No | Maximum number of results |
+| `assignee` | `string` | No | Filter by assignee username |
+
+**Returns:** Array of issue objects.
 
 ```typescript
-import { listIssuesTool } from '@jbcom/agentic';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { listIssuesTool } from '@jbcom/triage';
+
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: { listIssues: listIssuesTool },
+  prompt: 'Show me all open bugs with critical priority',
+});
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `status` | `'open' \| 'closed' \| 'all'` | Filter by status (default: `'open'`) |
-| `labels` | `string[]` | Filter by labels |
-| `assignee` | `string` | Filter by assignee |
-| `limit` | `number` | Maximum results (default: 30) |
-
-**Returns:** `Issue[]`
 
 ---
 
 ### getIssueTool
 
-Get a specific issue by number.
+Get detailed information about a specific issue by ID.
 
-```typescript
-import { getIssueTool } from '@jbcom/agentic';
-```
+**Input Schema:**
 
-**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID |
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number |
-
-**Returns:** `Issue`
+**Returns:** Complete issue object with title, description, labels, assignees, and metadata.
 
 ---
 
 ### createIssueTool
 
-Create a new issue.
+Create a new issue in the configured issue tracker.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `title` | `string` | Yes | -- | Issue title |
+| `description` | `string` | No | -- | Issue body/description |
+| `type` | `'bug' \| 'feature' \| 'task' \| 'epic' \| 'chore' \| 'docs'` | No | `'task'` | Issue type |
+| `priority` | `'critical' \| 'high' \| 'medium' \| 'low' \| 'backlog'` | No | `'medium'` | Priority level |
+| `labels` | `string[]` | No | -- | Labels to apply |
+| `assignee` | `string` | No | -- | Username to assign |
+
+**Returns:** The created issue object.
 
 ```typescript
-import { createIssueTool } from '@jbcom/agentic';
+import { createIssueTool } from '@jbcom/triage';
+
+// Used by AI:
+// "Create a bug report for the login page timeout issue"
+// -> Calls createIssueTool with { title: "Login page timeout", type: "bug", priority: "high" }
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `title` | `string` | Issue title (required) |
-| `body` | `string` | Issue body/description |
-| `labels` | `string[]` | Labels to add |
-| `assignees` | `string[]` | Users to assign |
-| `milestone` | `string` | Milestone name or number |
-
-**Returns:** `Issue`
 
 ---
 
 ### updateIssueTool
 
-Update an existing issue.
+Update fields on an existing issue.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID to update |
+| `updates.title` | `string` | No | New title |
+| `updates.description` | `string` | No | New description |
+| `updates.status` | `'open' \| 'in_progress' \| 'blocked' \| 'closed'` | No | New status |
+| `updates.priority` | `'critical' \| 'high' \| 'medium' \| 'low' \| 'backlog'` | No | New priority |
+| `updates.type` | `'bug' \| 'feature' \| 'task' \| 'epic' \| 'chore' \| 'docs'` | No | New type |
+| `updates.assignee` | `string` | No | New assignee |
+
+**Returns:** The updated issue object.
+
+---
+
+### triageIssueTool
+
+Apply structured triage analysis to an issue. This tool applies a comprehensive analysis including title optimization, priority assessment, type categorization, label recommendations, and action items.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID to triage |
+| `analysis.title` | `string` | Yes | Cleaned up / optimized title |
+| `analysis.summary` | `string` | Yes | Concise summary of the issue |
+| `analysis.type` | `IssueType` | Yes | Categorized issue type |
+| `analysis.priority` | `IssuePriority` | Yes | Determined priority based on impact and urgency |
+| `analysis.labels` | `string[]` | Yes | Recommended labels |
+| `analysis.estimate` | `number` | No | Optional story point estimate |
+| `analysis.actionItems` | `string[]` | Yes | Concrete next steps discovered from the description |
+
+The `IssueTriageSchema` validates the analysis object:
 
 ```typescript
-import { updateIssueTool } from '@jbcom/agentic';
+import { z } from 'zod';
+
+const IssueTriageSchema = z.object({
+  title: z.string(),
+  summary: z.string(),
+  type: z.enum(['bug', 'feature', 'task', 'epic', 'chore', 'docs']),
+  priority: z.enum(['critical', 'high', 'medium', 'low', 'backlog']),
+  labels: z.array(z.string()),
+  estimate: z.number().optional(),
+  actionItems: z.array(z.string()),
+});
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number (required) |
-| `title` | `string` | New title |
-| `body` | `string` | New body |
-| `state` | `'open' \| 'closed'` | New state |
-
-**Returns:** `Issue`
 
 ---
 
 ### closeIssueTool
 
-Close an issue.
+Close an issue with an optional reason.
 
-```typescript
-import { closeIssueTool } from '@jbcom/agentic';
-```
+**Input Schema:**
 
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number (required) |
-| `reason` | `string` | Closing comment |
-
-**Returns:** `Issue`
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID to close |
+| `reason` | `string` | No | Closing comment/reason |
 
 ---
 
 ### searchIssuesTool
 
-Search issues by query.
+Full-text search across all issues.
 
-```typescript
-import { searchIssuesTool } from '@jbcom/agentic';
-```
+**Input Schema:**
 
-**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | `string` | Yes | Search query string |
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `query` | `string` | Search query (required) |
-| `sort` | `'created' \| 'updated' \| 'comments'` | Sort field |
-| `order` | `'asc' \| 'desc'` | Sort order |
-
-**Returns:** `Issue[]`
+**Returns:** Array of matching issue objects.
 
 ---
 
@@ -193,18 +283,14 @@ import { searchIssuesTool } from '@jbcom/agentic';
 
 Add labels to an issue.
 
-```typescript
-import { addLabelsTool } from '@jbcom/agentic';
-```
+**Input Schema:**
 
-**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID |
+| `labels` | `string[]` | Yes | Labels to add |
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number (required) |
-| `labels` | `string[]` | Labels to add (required) |
-
-**Returns:** `Label[]`
+**Returns:** `{ id, labelsAdded }` confirmation object.
 
 ---
 
@@ -212,156 +298,204 @@ import { addLabelsTool } from '@jbcom/agentic';
 
 Remove labels from an issue.
 
-```typescript
-import { removeLabelsTool } from '@jbcom/agentic';
-```
+**Input Schema:**
 
-**Parameters:**
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | Yes | The issue ID |
+| `labels` | `string[]` | Yes | Labels to remove |
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number (required) |
-| `labels` | `string[]` | Labels to remove (required) |
+**Returns:** `{ id, labelsRemoved }` confirmation object.
 
-**Returns:** `Label[]`
+---
 
 ## Review Tools
 
-### getPRCommentsTool
+### submitReviewTool
 
-Get comments on a pull request.
+Submit a structured code review for a pull request. The review includes per-file comments, an overall summary, a review decision, and suggested labels.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prNumber` | `number` | Yes | The pull request number |
+| `review.summary` | `string` | Yes | Overall review summary |
+| `review.status` | `'approve' \| 'request_changes' \| 'comment'` | Yes | Review decision |
+| `review.comments` | `CodeReviewComment[]` | Yes | Individual file comments |
+| `review.impact` | `'low' \| 'medium' \| 'high' \| 'critical'` | Yes | Estimated impact of changes |
+| `review.suggestedLabels` | `string[]` | Yes | Labels suggested based on code changes |
+
+**CodeReviewComment:**
 
 ```typescript
-import { getPRCommentsTool } from '@jbcom/agentic';
+interface CodeReviewComment {
+  file: string;           // File path
+  line?: number;          // Line number (optional)
+  content: string;        // Review comment text
+  type: 'suggestion' | 'issue' | 'question' | 'praise';
+  severity?: 'low' | 'medium' | 'high';
+}
 ```
 
-**Parameters:**
+```typescript
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { submitReviewTool } from '@jbcom/triage';
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `prNumber` | `number` | PR number (required) |
-
-**Returns:** `Comment[]`
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: { submitReview: submitReviewTool },
+  prompt: `Review PR #42. The diff adds a new authentication middleware.
+           Check for security issues, error handling, and test coverage.`,
+  maxSteps: 5,
+});
+```
 
 ---
 
-### addPRCommentTool
+## PR Analysis Tools
 
-Add a comment to a pull request.
+### analyzePRTool
+
+Submit a structured analysis of a pull request covering scope, risk, testing, and breaking changes.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `prNumber` | `number` | Yes | The pull request number |
+| `analysis.title` | `string` | Yes | Suggested optimized PR title |
+| `analysis.summary` | `string` | Yes | Executive summary of changes |
+| `analysis.scope` | `'minor' \| 'major' \| 'patch' \| 'breaking'` | Yes | Impact scope |
+| `analysis.riskLevel` | `'low' \| 'medium' \| 'high'` | Yes | Risk level of merging |
+| `analysis.testingCoverage` | `'none' \| 'partial' \| 'full'` | Yes | Testing assessment |
+| `analysis.breakingChanges` | `string[]` | Yes | List of breaking changes |
+| `analysis.relatedIssues` | `string[]` | Yes | Related issue IDs or URLs |
+
+The `PRAnalysisSchema` validates the analysis:
 
 ```typescript
-import { addPRCommentTool } from '@jbcom/agentic';
+const PRAnalysisSchema = z.object({
+  title: z.string(),
+  summary: z.string(),
+  scope: z.enum(['minor', 'major', 'patch', 'breaking']),
+  riskLevel: z.enum(['low', 'medium', 'high']),
+  testingCoverage: z.enum(['none', 'partial', 'full']),
+  breakingChanges: z.array(z.string()),
+  relatedIssues: z.array(z.string()),
+});
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `prNumber` | `number` | PR number (required) |
-| `body` | `string` | Comment body (required) |
-| `path` | `string` | File path (for line comments) |
-| `line` | `number` | Line number (for line comments) |
-
-**Returns:** `Comment`
 
 ---
 
-### approvePRTool
+## Sage Tool
 
-Approve a pull request.
+### sageTool
+
+Ask Sage for technical advice, task decomposition, or agent routing based on repository context. Sage uses the configured AI model to provide intelligent recommendations.
+
+**Input Schema:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `query` | `string` | Yes | The question or request for Sage |
+| `context` | `object` | No | Additional repository context |
+| `context.repoStructure` | `string` | No | Repository file structure |
+| `context.keyFiles` | `Record<string, string>` | No | Contents of key files (filename to content mapping) |
+| `context.issueContext` | `string` | No | Context from a GitHub issue or PR |
+| `context.currentContext` | `string` | No | Current working context |
+
+Sage automatically resolves the AI model using the triage configuration. It uses the `createTool` helper (which integrates with the escalation system) rather than the standard `tool()` function.
 
 ```typescript
-import { approvePRTool } from '@jbcom/agentic';
+import { generateText } from 'ai';
+import { anthropic } from '@ai-sdk/anthropic';
+import { sageTool } from '@jbcom/triage';
+
+const result = await generateText({
+  model: anthropic('claude-sonnet-4-20250514'),
+  tools: { sage: sageTool },
+  prompt: 'Should I refactor the auth module into separate files, or keep it monolithic?',
+  maxSteps: 3,
+});
 ```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `prNumber` | `number` | PR number (required) |
-| `comment` | `string` | Approval comment |
-
-**Returns:** `Review`
 
 ---
 
-### requestChangesTool
+## Visual Review Tool
 
-Request changes on a pull request.
+### visualReviewTool
 
-```typescript
-import { requestChangesTool } from '@jbcom/agentic';
-```
+Perform a visual review of a web page using Playwright for screenshot capture and AI for image analysis.
 
-**Parameters:**
+**Input Schema:**
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `prNumber` | `number` | PR number (required) |
-| `body` | `string` | Review body (required) |
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `url` | `string` | Yes | -- | URL of the page to review |
+| `scenario` | `string` | No | -- | Description of the test scenario |
+| `viewport.width` | `number` | No | `1280` | Viewport width in pixels |
+| `viewport.height` | `number` | No | `720` | Viewport height in pixels |
 
-**Returns:** `Review`
-
-## Project Tools
-
-### getSprintsTool
-
-Get all sprints/iterations.
+**Returns:**
 
 ```typescript
-import { getSprintsTool } from '@jbcom/agentic';
+{
+  url: string;
+  status: 'success' | 'error';
+  screenshotTaken?: boolean;
+  analysis?: string;
+  message?: string;  // Error message if status is 'error'
+}
 ```
 
-**Returns:** `Sprint[]`
+This tool launches a Chromium browser via Playwright, navigates to the URL, waits for `networkidle`, and captures a full-page screenshot. The Anthropic model is used for image analysis.
+
+**Requirements:** `@playwright/test` must be installed and browsers must be available (`npx playwright install chromium`).
+
+```typescript
+import { visualReviewTool } from '@jbcom/triage';
+
+// Example usage in AI pipeline:
+// "Take a screenshot of our staging site and check for visual regressions"
+```
 
 ---
 
-### getCurrentSprintTool
+## Provider Configuration
 
-Get the current active sprint.
+The triage tools use `TriageConnectors` internally, which supports multiple issue tracking providers:
 
 ```typescript
-import { getCurrentSprintTool } from '@jbcom/agentic';
-```
+import { TriageConnectors } from '@jbcom/triage';
 
-**Returns:** `Sprint`
+// GitHub (default -- auto-detected from .git)
+const github = new TriageConnectors();
+
+// Jira
+const jira = new TriageConnectors({
+  provider: 'jira',
+  jira: {
+    host: 'company.atlassian.net',
+    projectKey: 'PROJ',
+  },
+});
+
+// Linear
+const linear = new TriageConnectors({
+  provider: 'linear',
+  linear: { teamId: 'TEAM123' },
+});
+
+// Beads (local-first)
+const beads = new TriageConnectors({
+  provider: 'beads',
+  beads: { workingDir: '/path/to/project' },
+});
+```
 
 ---
-
-### getSprintIssuesTool
-
-Get issues in a sprint.
-
-```typescript
-import { getSprintIssuesTool } from '@jbcom/agentic';
-```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `sprintId` | `string` | Sprint ID (required) |
-
-**Returns:** `Issue[]`
-
----
-
-### moveToSprintTool
-
-Move an issue to a sprint.
-
-```typescript
-import { moveToSprintTool } from '@jbcom/agentic';
-```
-
-**Parameters:**
-
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `issueNumber` | `number` | Issue number (required) |
-| `sprintId` | `string` | Target sprint ID (required) |
-
-**Returns:** `Issue`
 
 ## Types
 
@@ -369,140 +503,64 @@ import { moveToSprintTool } from '@jbcom/agentic';
 
 ```typescript
 interface Issue {
-  id: number;
-  number: number;
-  title: string;
-  body: string;
-  state: 'open' | 'closed';
-  labels: Label[];
-  assignees: User[];
-  milestone?: Milestone;
-  createdAt: string;
-  updatedAt: string;
-  closedAt?: string;
-  url: string;
-}
-```
-
-### Label
-
-```typescript
-interface Label {
-  id: number;
-  name: string;
-  color: string;
-  description?: string;
-}
-```
-
-### Comment
-
-```typescript
-interface Comment {
-  id: number;
-  body: string;
-  user: User;
-  createdAt: string;
-  updatedAt: string;
-  path?: string;
-  line?: number;
-}
-```
-
-### Review
-
-```typescript
-interface Review {
-  id: number;
-  state: 'APPROVED' | 'CHANGES_REQUESTED' | 'COMMENTED' | 'PENDING';
-  body: string;
-  user: User;
-  submittedAt: string;
-}
-```
-
-### Sprint
-
-```typescript
-interface Sprint {
   id: string;
   title: string;
-  state: 'PLANNED' | 'ACTIVE' | 'CLOSED';
-  startDate?: string;
-  endDate?: string;
   description?: string;
+  status: 'open' | 'in_progress' | 'blocked' | 'closed';
+  priority: 'critical' | 'high' | 'medium' | 'low' | 'backlog';
+  type: 'bug' | 'feature' | 'task' | 'epic' | 'chore' | 'docs';
+  labels: string[];
+  assignee?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 ```
 
-### User
+### IssueTriage
 
 ```typescript
-interface User {
-  id: number;
-  login: string;
-  avatarUrl: string;
-  url: string;
+interface IssueTriage {
+  title: string;
+  summary: string;
+  type: 'bug' | 'feature' | 'task' | 'epic' | 'chore' | 'docs';
+  priority: 'critical' | 'high' | 'medium' | 'low' | 'backlog';
+  labels: string[];
+  estimate?: number;
+  actionItems: string[];
 }
 ```
 
-## Direct API
-
-For non-AI use cases, use the `TriageConnectors` class directly:
+### CodeReview
 
 ```typescript
-import { TriageConnectors } from '@jbcom/agentic';
-
-const triage = new TriageConnectors({ provider: 'github' });
-
-// Issue operations
-const issues = await triage.issues.list({ status: 'open' });
-const issue = await triage.issues.create({ title: 'Bug', body: 'Details' });
-await triage.issues.addLabels(issue.id, ['bug', 'critical']);
-
-// Review operations
-const comments = await triage.reviews.getPRComments(123);
-await triage.reviews.approve(123, 'LGTM!');
-
-// Project operations
-const sprint = await triage.projects.getCurrentSprint();
-await triage.projects.moveToSprint(456, sprint.id);
+interface CodeReview {
+  summary: string;
+  status: 'approve' | 'request_changes' | 'comment';
+  comments: CodeReviewComment[];
+  impact: 'low' | 'medium' | 'high' | 'critical';
+  suggestedLabels: string[];
+}
 ```
 
-## Provider Configuration
+### PRAnalysis
 
 ```typescript
-import { TriageConnectors } from '@jbcom/agentic';
-
-// GitHub (auto-detected if .git present)
-const github = new TriageConnectors({
-  provider: 'github',
-  github: { owner: 'my-org', repo: 'my-repo' }
-});
-
-// Jira
-const jira = new TriageConnectors({
-  provider: 'jira',
-  jira: {
-    host: 'company.atlassian.net',
-    projectKey: 'PROJ'
-  }
-});
-
-// Linear
-const linear = new TriageConnectors({
-  provider: 'linear',
-  linear: { teamId: 'TEAM123' }
-});
-
-// Beads (local-first)
-const beads = new TriageConnectors({
-  provider: 'beads',
-  beads: { workingDir: '/path/to/project' }
-});
+interface PRAnalysis {
+  title: string;
+  summary: string;
+  scope: 'minor' | 'major' | 'patch' | 'breaking';
+  riskLevel: 'low' | 'medium' | 'high';
+  testingCoverage: 'none' | 'partial' | 'full';
+  breakingChanges: string[];
+  relatedIssues: string[];
+}
 ```
 
-## Next Steps
+---
 
-- [Fleet API Reference](/api/fleet-management/) - Fleet management
-- [Token Management API](/api/token-management/) - Token configuration
-- [Vercel AI SDK Integration](/integrations/vercel-ai-sdk/) - AI integration
+## Related Pages
+
+- [Fleet API Reference](/api/fleet-management/) -- Agent fleet management
+- [Token Management API](/api/token-management/) -- Multi-org token routing
+- [AI Triage Guide](/guides/ai-triage/) -- Usage guide with examples
+- [Configuration API](/api/configuration/) -- Provider and model configuration

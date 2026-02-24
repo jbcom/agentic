@@ -1,25 +1,74 @@
 /*
-  Agentic Documentation — Custom Theme
-
-  BRANDING:
-  1. Enterprise base (jbcom.github.io) - fonts, core colors
-  2. Agentic theme - purple accent, polyglot badges
-  3. Custom layout enhancements
+  Agentic Documentation — Command Center Theme
+  A distinctive, dark-first design with glass morphism,
+  animated gradients, and ambient purple glow.
 
   Owner: Jon Bogaty (jbcom)
+  Site: https://agentic.coach
 */
 
-/* ===== LAYER 1: Enterprise Base ===== */
-@import url('https://raw.githubusercontent.com/jbcom/jbcom.github.io/main/enterprise-branding/starlight-base.css');
+/* ================================================================
+   0. FOUNDATIONS
+   ================================================================ */
 
-/* ===== LAYER 2: Color System ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.5);
+}
+
+/* Focus-visible accessibility */
+*:focus-visible {
+  outline: 2px solid var(--sl-color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ================================================================
+   1. COLOR SYSTEM
+   ================================================================ */
 
 :root {
-  /* Purple accent palette */
+  /* Core accent palette */
   --sl-color-accent-low: #1e1040;
   --sl-color-accent: #8b5cf6;
   --sl-color-accent-high: #ddd6fe;
   --sl-color-text-accent: #a78bfa;
+
+  /* Extended purples */
+  --agentic-purple-50: #faf5ff;
+  --agentic-purple-100: #f3e8ff;
+  --agentic-purple-200: #e9d5ff;
+  --agentic-purple-300: #d8b4fe;
+  --agentic-purple-400: #c084fc;
+  --agentic-purple-500: #a855f7;
+  --agentic-purple-600: #8b5cf6;
+  --agentic-purple-700: #7c3aed;
+  --agentic-purple-800: #6d28d9;
+  --agentic-purple-900: #581c87;
 
   /* Language colors */
   --lang-ts: #3178c6;
@@ -28,8 +77,26 @@
 
   /* Gradients */
   --gradient-purple: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #c084fc 100%);
+  --gradient-text: linear-gradient(135deg, #c084fc 0%, #818cf8 25%, #a78bfa 50%, #f0abfc 100%);
+  --gradient-pink-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
   --gradient-dark: linear-gradient(180deg, #0f0a1a 0%, #1a1025 100%);
   --gradient-glow: radial-gradient(ellipse at 50% 0%, rgba(139, 92, 246, 0.15) 0%, transparent 60%);
+  --gradient-divider: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.3), transparent);
+
+  /* Glass morphism */
+  --glass-bg: rgba(139, 92, 246, 0.04);
+  --glass-bg-hover: rgba(139, 92, 246, 0.08);
+  --glass-border: rgba(139, 92, 246, 0.1);
+  --glass-border-hover: rgba(139, 92, 246, 0.3);
+  --glass-glow: 0 0 30px rgba(139, 92, 246, 0.1);
+  --glass-glow-inset: inset 0 0 30px rgba(139, 92, 246, 0.02);
+
+  /* Timing */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Sidebar tweaks for dark */
+  --sl-color-bg-sidebar: rgba(15, 10, 26, 0.6);
 }
 
 [data-theme='light'] {
@@ -37,49 +104,193 @@
   --sl-color-accent: #7c3aed;
   --sl-color-accent-high: #2e1065;
   --sl-color-text-accent: #6d28d9;
+
+  --glass-bg: rgba(139, 92, 246, 0.05);
+  --glass-bg-hover: rgba(139, 92, 246, 0.1);
+  --glass-border: rgba(139, 92, 246, 0.15);
+  --glass-border-hover: rgba(139, 92, 246, 0.35);
+  --glass-glow: 0 0 30px rgba(139, 92, 246, 0.08);
+  --glass-glow-inset: inset 0 0 30px rgba(139, 92, 246, 0.03);
 }
 
-/* ===== LAYER 3: Hero Section ===== */
+/* ================================================================
+   2. HERO SECTION — Ambient Glow, Grid, Pulse Line
+   ================================================================ */
 
 .hero {
   position: relative;
   overflow: hidden;
+  padding-bottom: 3rem !important;
 }
 
-/* Purple glow behind hero */
+/* Floating glow orb */
 .hero::before {
   content: '';
   position: absolute;
-  top: -40%;
+  top: -20%;
   left: 50%;
   transform: translateX(-50%);
-  width: 120%;
-  height: 100%;
-  background: radial-gradient(ellipse at center, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.18) 0%,
+    rgba(168, 85, 247, 0.06) 35%,
+    rgba(236, 72, 153, 0.03) 60%,
+    transparent 75%
+  );
   pointer-events: none;
   z-index: 0;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .hero::before {
+    animation: hero-float 8s ease-in-out infinite;
+  }
+}
+
+@keyframes hero-float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-20px); }
+}
+
+/* Animated grid pattern */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+  background-size: 4rem 4rem;
+  mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 70%, transparent);
+  -webkit-mask-image: radial-gradient(ellipse 80% 50% at 50% 0%, black 70%, transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme='light'] .hero::after {
+  background-image:
+    linear-gradient(rgba(139, 92, 246, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 92, 246, 0.06) 1px, transparent 1px);
+}
+
+[data-theme='light'] .hero::before {
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.1) 0%,
+    rgba(168, 85, 247, 0.04) 35%,
+    transparent 70%
+  );
+}
+
+/* Make hero content sit above the effects */
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
+
 .hero .tagline {
-  font-size: 1.25rem;
-  line-height: 1.7;
-  max-width: 42rem;
+  font-size: 1.3rem;
+  line-height: 1.75;
+  max-width: 44rem;
   opacity: 0.9;
 }
 
-/* ===== LAYER 4: Language Badges ===== */
+/* Hero title gradient (Starlight uses <h1> in the hero) */
+.hero h1 {
+  font-size: clamp(2.2rem, 6vw, 3.5rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.15 !important;
+}
+
+/* Pulsing accent line under hero */
+.hero-accent-line {
+  width: 100%;
+  max-width: 600px;
+  height: 2px;
+  margin: 2rem auto 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(139, 92, 246, 0.6) 20%,
+    rgba(168, 85, 247, 0.8) 50%,
+    rgba(139, 92, 246, 0.6) 80%,
+    transparent 100%
+  );
+  border-radius: 1px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-accent-line {
+    animation: pulse-line 3s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-line {
+  0%, 100% { opacity: 0.5; transform: scaleX(0.8); }
+  50% { opacity: 1; transform: scaleX(1); }
+}
+
+/* ================================================================
+   3. GRADIENT TEXT
+   ================================================================ */
+
+.gradient-text {
+  background: var(--gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gradient-text {
+    animation: gradient-shift 6s ease infinite;
+  }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+[data-theme='light'] .gradient-text {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 25%, #8b5cf6 50%, #a855f7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme='light'] .gradient-text {
+    animation: gradient-shift 6s ease infinite;
+  }
+}
+
+/* ================================================================
+   4. LANGUAGE BADGES
+   ================================================================ */
 
 .lang-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.2rem 0.6rem;
+  padding: 0.25rem 0.7rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
   white-space: nowrap;
+  transition: transform 0.2s var(--ease-spring), box-shadow 0.2s var(--ease-spring);
+}
+
+.lang-badge:hover {
+  transform: translateY(-1px);
 }
 
 .lang-badge--ts {
@@ -88,16 +299,28 @@
   border: 1px solid rgba(49, 120, 198, 0.3);
 }
 
+.lang-badge--ts:hover {
+  box-shadow: 0 0 12px rgba(49, 120, 198, 0.2);
+}
+
 .lang-badge--py {
   background: rgba(55, 118, 171, 0.15);
   color: #93c5fd;
   border: 1px solid rgba(55, 118, 171, 0.3);
 }
 
+.lang-badge--py:hover {
+  box-shadow: 0 0 12px rgba(55, 118, 171, 0.2);
+}
+
 .lang-badge--rs {
   background: rgba(222, 165, 132, 0.15);
   color: #fdba74;
   border: 1px solid rgba(222, 165, 132, 0.3);
+}
+
+.lang-badge--rs:hover {
+  box-shadow: 0 0 12px rgba(222, 165, 132, 0.2);
 }
 
 [data-theme='light'] .lang-badge--ts {
@@ -118,37 +341,473 @@
   border-color: rgba(222, 165, 132, 0.25);
 }
 
-/* ===== LAYER 5: Card Enhancements ===== */
+/* ================================================================
+   5. GLASS MORPHISM CARDS — Bento Grid
+   ================================================================ */
 
-.card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto;
+  gap: 1rem;
+  margin: 2rem 0;
 }
 
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(139, 92, 246, 0.1);
+.bento-card {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  transition: all 0.35s var(--ease-spring);
 }
 
-/* Package showcase cards */
+.bento-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(139, 92, 246, 0.3),
+    transparent
+  );
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-spring);
+}
+
+.bento-card:hover {
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-glow), var(--glass-glow-inset);
+  transform: translateY(-4px);
+  background: var(--glass-bg-hover);
+}
+
+.bento-card:hover::before {
+  opacity: 1;
+}
+
+.bento-card--wide {
+  grid-column: span 2;
+}
+
+.bento-card--tall {
+  grid-row: span 2;
+}
+
+.bento-card--full {
+  grid-column: span 3;
+}
+
+.bento-card__icon {
+  font-size: 1.75rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.bento-card h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+}
+
+.bento-card p {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+  opacity: 0.85;
+}
+
+.bento-card a {
+  display: inline-block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.bento-card a:hover {
+  color: var(--agentic-purple-400);
+}
+
+.bento-card a::after {
+  content: ' \2192';
+}
+
+@media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bento-card--wide,
+  .bento-card--full {
+    grid-column: span 1;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bento-card--full {
+    grid-column: span 2;
+  }
+}
+
+/* ================================================================
+   6. STATS SECTION
+   ================================================================ */
+
+.stats-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2.5rem;
+  justify-content: center;
+  margin: 2.5rem 0;
+  padding: 2rem 0;
+}
+
+.stat {
+  text-align: center;
+  min-width: 130px;
+}
+
+.stat-number {
+  font-size: 3rem;
+  font-weight: 800;
+  background: var(--gradient-pink-purple);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.65;
+  margin-top: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@media (max-width: 50rem) {
+  .stats-row {
+    gap: 1.5rem;
+  }
+
+  .stat-number {
+    font-size: 2.25rem;
+  }
+}
+
+/* ================================================================
+   7. MISSION SECTION
+   ================================================================ */
+
+.mission-section {
+  text-align: center;
+  max-width: 52rem;
+  margin: 3rem auto;
+  padding: 2.5rem 1.5rem;
+}
+
+.mission-section h2 {
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-weight: 800;
+  margin-bottom: 1.25rem;
+  line-height: 1.25;
+}
+
+.mission-text {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  opacity: 0.88;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+
+/* ================================================================
+   8. SECTION DIVIDERS — Gradient with Subtle Pulse
+   ================================================================ */
+
+.section-divider {
+  border: none;
+  height: 1px;
+  background: var(--gradient-divider);
+  margin: 3.5rem 0;
+  position: relative;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .section-divider {
+    animation: divider-pulse 4s ease-in-out infinite;
+  }
+}
+
+@keyframes divider-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Also style Starlight's horizontal rules for consistency */
+.sl-markdown-content hr {
+  border: none;
+  height: 1px;
+  background: var(--gradient-divider);
+  margin: 3rem 0;
+}
+
+/* ================================================================
+   9. PERSONA / FEATURE CARDS — Glass Style
+   ================================================================ */
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.feature-card {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.feature-card:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-glow);
+  transform: translateY(-3px);
+}
+
+.feature-card__icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.feature-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.feature-card p {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+  line-height: 1.65;
+}
+
+[data-theme='light'] .feature-card {
+  background: rgba(139, 92, 246, 0.04);
+  border-color: rgba(139, 92, 246, 0.12);
+}
+
+[data-theme='light'] .feature-card:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.25);
+}
+
+/* ================================================================
+   10. TERMINAL-STYLE CODE BLOCKS
+   ================================================================ */
+
+.terminal-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid var(--glass-border);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.terminal-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.terminal-dot--red { background: #ff5f57; }
+.terminal-dot--yellow { background: #ffbd2e; }
+.terminal-dot--green { background: #28ca41; }
+
+.terminal-title {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  opacity: 0.5;
+  letter-spacing: 0.02em;
+}
+
+/* Expressive Code (Starlight built-in) polish */
+.expressive-code {
+  border-radius: 0.75rem !important;
+  overflow: hidden;
+  border: 1px solid var(--glass-border) !important;
+  transition: border-color 0.2s;
+}
+
+.expressive-code:hover {
+  border-color: var(--glass-border-hover) !important;
+}
+
+/* ================================================================
+   11. POLYGLOT BAR
+   ================================================================ */
+
+.polyglot-bar {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0.75rem 0;
+}
+
+.polyglot-bar--center {
+  justify-content: center;
+}
+
+/* ================================================================
+   12. STARLIGHT COMPONENT OVERRIDES
+   ================================================================ */
+
+/* --- Sidebar --- */
+nav.sidebar {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* --- Cards (Starlight Card component) --- */
+.sl-markdown-content .card {
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 0.875rem !important;
+  transition: all 0.3s var(--ease-spring);
+  overflow: hidden;
+}
+
+.sl-markdown-content .card:hover {
+  border-color: var(--glass-border-hover) !important;
+  box-shadow: var(--glass-glow) !important;
+  transform: translateY(-3px);
+}
+
+/* Card title gradient on hover */
+.sl-markdown-content .card:hover .card__title {
+  color: var(--sl-color-text-accent);
+}
+
+/* --- Link Cards --- */
 .sl-link-card {
-  transition: transform 0.2s ease, border-color 0.2s ease;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  border-radius: 0.875rem !important;
+  transition: all 0.3s var(--ease-spring) !important;
 }
 
 .sl-link-card:hover {
-  transform: translateY(-1px);
-  border-color: var(--sl-color-accent);
+  transform: translateY(-3px) !important;
+  border-color: var(--glass-border-hover) !important;
+  box-shadow: var(--glass-glow) !important;
 }
 
-/* ===== LAYER 6: Architecture Section ===== */
+/* --- Tabs --- */
+starlight-tabs [role="tablist"] {
+  border-bottom-color: var(--glass-border);
+}
+
+starlight-tabs [role="tab"][aria-selected="true"] {
+  border-color: var(--sl-color-accent);
+  color: var(--sl-color-text-accent);
+}
+
+/* --- Table of Contents --- */
+starlight-toc a[aria-current="true"] {
+  color: var(--sl-color-text-accent);
+  font-weight: 600;
+}
+
+/* ================================================================
+   13. TABLES — Command Center Style
+   ================================================================ */
+
+.sl-markdown-content table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  font-size: 0.9rem;
+}
+
+.sl-markdown-content table thead {
+  background: rgba(139, 92, 246, 0.06);
+}
+
+.sl-markdown-content table th {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  text-align: left;
+}
+
+.sl-markdown-content table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.05);
+}
+
+.sl-markdown-content table tr:last-child td {
+  border-bottom: none;
+}
+
+.sl-markdown-content table tr:hover td {
+  background: rgba(139, 92, 246, 0.03);
+}
+
+[data-theme='light'] .sl-markdown-content table thead {
+  background: rgba(139, 92, 246, 0.05);
+}
+
+[data-theme='light'] .sl-markdown-content table tr:hover td {
+  background: rgba(139, 92, 246, 0.04);
+}
+
+/* ================================================================
+   14. ARCHITECTURE DIAGRAM — Terminal Style
+   ================================================================ */
 
 .arch-diagram {
-  background: rgba(139, 92, 246, 0.03);
-  border: 1px solid rgba(139, 92, 246, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: 0.75rem;
   padding: 1.5rem;
-  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', monospace;
-  font-size: 0.85rem;
-  line-height: 1.5;
+  font-family: 'SF Mono', 'Fira Code', 'Fira Mono', 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
   overflow-x: auto;
   white-space: pre;
   color: var(--sl-color-text);
@@ -159,131 +818,477 @@
   border-color: rgba(139, 92, 246, 0.15);
 }
 
-/* ===== LAYER 7: Feature Grid ===== */
+/* ================================================================
+   15. CTA BUTTONS
+   ================================================================ */
 
-.feature-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-  margin: 1.5rem 0;
-}
-
-.feature-card {
-  padding: 1.25rem;
-  background: rgba(139, 92, 246, 0.03);
-  border: 1px solid rgba(139, 92, 246, 0.08);
-  border-radius: 0.75rem;
-  transition: border-color 0.2s ease, background 0.2s ease;
-}
-
-.feature-card:hover {
-  border-color: rgba(139, 92, 246, 0.2);
-  background: rgba(139, 92, 246, 0.06);
-}
-
-.feature-card h4 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
-  font-size: 1rem;
-}
-
-.feature-card p {
-  margin: 0;
-  font-size: 0.9rem;
-  opacity: 0.85;
-  line-height: 1.6;
-}
-
-[data-theme='light'] .feature-card {
-  background: rgba(139, 92, 246, 0.04);
-  border-color: rgba(139, 92, 246, 0.12);
-}
-
-[data-theme='light'] .feature-card:hover {
-  background: rgba(139, 92, 246, 0.07);
-  border-color: rgba(139, 92, 246, 0.25);
-}
-
-/* ===== LAYER 8: Stats / Numbers ===== */
-
-.stats-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-  justify-content: center;
-  margin: 2rem 0;
-  padding: 1.5rem 0;
-}
-
-.stat {
-  text-align: center;
-  min-width: 120px;
-}
-
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 700;
-  background: var(--gradient-purple);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  line-height: 1.2;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  opacity: 0.7;
-  margin-top: 0.25rem;
-}
-
-/* ===== LAYER 9: Polyglot Indicator ===== */
-
-.polyglot-bar {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0.75rem 0;
-}
-
-/* ===== LAYER 10: Section Dividers ===== */
-
-.section-divider {
-  border: none;
-  height: 1px;
-  background: linear-gradient(to right, transparent, rgba(139, 92, 246, 0.2), transparent);
-  margin: 3rem 0;
-}
-
-/* ===== LAYER 11: Code Block Polish ===== */
-
-.expressive-code {
-  border-radius: 0.75rem !important;
+/* Primary actions get a glow effect */
+.hero .action a[href*="getting-started"],
+.hero .action a:first-child {
+  position: relative;
   overflow: hidden;
 }
 
-/* ===== LAYER 12: Responsive ===== */
-
-@media (max-width: 50rem) {
-  .stats-row {
-    gap: 1.25rem;
+@media (prefers-reduced-motion: no-preference) {
+  .hero .action a[href*="getting-started"]::after,
+  .hero .action a:first-child::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.2));
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.3s;
   }
 
-  .stat-number {
-    font-size: 2rem;
-  }
-
-  .feature-grid {
-    grid-template-columns: 1fr;
+  .hero .action a[href*="getting-started"]:hover::after,
+  .hero .action a:first-child:hover::after {
+    opacity: 1;
   }
 }
 
-/* ===== LAYER 13: Subtle Animations ===== */
+/* ================================================================
+   16. "WHO IS THIS FOR?" PERSONA SECTION
+   ================================================================ */
+
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+.persona-card {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.persona-card:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-glow);
+  transform: translateY(-3px);
+}
+
+.persona-card__icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.persona-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.persona-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.85;
+  line-height: 1.65;
+}
+
+/* ================================================================
+   17. DESIGN PRINCIPLES SECTION
+   ================================================================ */
+
+.principles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+.principle-card {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  transition: all 0.3s var(--ease-spring);
+}
+
+.principle-card:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  transform: translateY(-2px);
+}
+
+.principle-card__icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 0.5rem;
+  border: 1px solid var(--glass-border);
+}
+
+.principle-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.principle-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.85;
+  line-height: 1.65;
+}
+
+/* ================================================================
+   18. EXPLORE / LINK GRID
+   ================================================================ */
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.explore-card {
+  position: relative;
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.3s var(--ease-spring);
+  display: block;
+}
+
+.explore-card:hover {
+  border-color: var(--glass-border-hover);
+  background: var(--glass-bg-hover);
+  box-shadow: var(--glass-glow);
+  transform: translateY(-3px);
+  text-decoration: none;
+  color: inherit;
+}
+
+.explore-card__icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.explore-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--sl-color-white);
+}
+
+.explore-card p {
+  margin: 0;
+  font-size: 0.88rem;
+  opacity: 0.75;
+  line-height: 1.6;
+}
+
+.explore-card .explore-card__arrow {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--sl-color-text-accent);
+  font-weight: 600;
+}
+
+[data-theme='light'] .explore-card h4 {
+  color: var(--sl-color-black);
+}
+
+/* ================================================================
+   19. FOOTER SECTION
+   ================================================================ */
+
+.footer-section {
+  text-align: center;
+  padding: 2rem 0 1rem;
+}
+
+.footer-section p {
+  opacity: 0.5;
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+
+.footer-section a {
+  color: var(--sl-color-text-accent);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-section a:hover {
+  color: var(--agentic-purple-400);
+}
+
+/* ================================================================
+   20. HEADING ACCENTS — All section headings get a subtle style
+   ================================================================ */
+
+.sl-markdown-content > h2 {
+  position: relative;
+  padding-bottom: 0.75rem;
+  margin-top: 3rem;
+}
+
+.sl-markdown-content > h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 3rem;
+  height: 2px;
+  background: var(--gradient-purple);
+  border-radius: 1px;
+}
+
+/* ================================================================
+   21. RESPONSIVE REFINEMENTS
+   ================================================================ */
+
+@media (max-width: 50rem) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .persona-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .principles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .explore-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-section {
+    padding: 1.5rem 1rem;
+  }
+
+  .mission-text {
+    font-size: 1rem;
+  }
+}
+
+/* ================================================================
+   22. ANIMATIONS — Respect prefers-reduced-motion
+   ================================================================ */
 
 @media (prefers-reduced-motion: no-preference) {
-  .card,
+  .bento-card,
+  .feature-card,
+  .persona-card,
+  .principle-card,
+  .explore-card,
   .sl-link-card,
-  .feature-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  .sl-markdown-content .card {
+    transition: all 0.3s var(--ease-spring);
   }
+
+  /* Entrance animation for cards */
+  .bento-card,
+  .feature-card,
+  .persona-card,
+  .principle-card,
+  .explore-card {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: card-enter 0.6s var(--ease-out-expo) forwards;
+  }
+
+  .bento-card:nth-child(1) { animation-delay: 0.05s; }
+  .bento-card:nth-child(2) { animation-delay: 0.1s; }
+  .bento-card:nth-child(3) { animation-delay: 0.15s; }
+  .bento-card:nth-child(4) { animation-delay: 0.2s; }
+  .bento-card:nth-child(5) { animation-delay: 0.25s; }
+  .bento-card:nth-child(6) { animation-delay: 0.3s; }
+  .bento-card:nth-child(7) { animation-delay: 0.35s; }
+
+  .feature-card:nth-child(1),
+  .persona-card:nth-child(1),
+  .principle-card:nth-child(1),
+  .explore-card:nth-child(1) { animation-delay: 0.05s; }
+
+  .feature-card:nth-child(2),
+  .persona-card:nth-child(2),
+  .principle-card:nth-child(2),
+  .explore-card:nth-child(2) { animation-delay: 0.1s; }
+
+  .feature-card:nth-child(3),
+  .persona-card:nth-child(3),
+  .principle-card:nth-child(3),
+  .explore-card:nth-child(3) { animation-delay: 0.15s; }
+
+  .feature-card:nth-child(4),
+  .persona-card:nth-child(4),
+  .principle-card:nth-child(4),
+  .explore-card:nth-child(4) { animation-delay: 0.2s; }
+}
+
+@keyframes card-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bento-card,
+  .feature-card,
+  .persona-card,
+  .principle-card,
+  .explore-card {
+    opacity: 1;
+    transform: none;
+  }
+
+  .hero::before {
+    animation: none !important;
+  }
+
+  .hero-accent-line {
+    animation: none !important;
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+
+  .gradient-text {
+    animation: none !important;
+  }
+
+  .section-divider {
+    animation: none !important;
+    opacity: 0.8;
+  }
+}
+
+/* ================================================================
+   23. PRINT STYLES
+   ================================================================ */
+
+@media print {
+  .hero::before,
+  .hero::after,
+  .hero-accent-line {
+    display: none;
+  }
+
+  .bento-card,
+  .feature-card,
+  .persona-card,
+  .principle-card,
+  .explore-card {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid #ccc;
+    box-shadow: none;
+    transform: none;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .gradient-text {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+    color: #333;
+  }
+
+  .stat-number {
+    -webkit-text-fill-color: currentColor;
+    color: #333;
+  }
+
+  .lang-badge {
+    border: 1px solid #999;
+    background: transparent;
+    color: #333;
+  }
+
+  .section-divider,
+  .sl-markdown-content hr {
+    background: #ccc;
+  }
+}
+
+/* ================================================================
+   24. QUICK START TAB SECTION — Better spacing
+   ================================================================ */
+
+.quick-start-section {
+  margin: 2rem 0;
+}
+
+.quick-start-section h2 {
+  text-align: center;
+}
+
+/* ================================================================
+   25. SECTION WRAPPERS
+   ================================================================ */
+
+.section-heading {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.section-heading h2 {
+  font-size: clamp(1.4rem, 3.5vw, 2rem);
+  font-weight: 800;
+}
+
+.section-subheading {
+  text-align: center;
+  max-width: 40rem;
+  margin: 0 auto 2rem;
+  font-size: 1rem;
+  opacity: 0.75;
+  line-height: 1.7;
+}
+
+/* ================================================================
+   26. AMBIENT SECOND ORB (for longer pages)
+   ================================================================ */
+
+.ambient-orb {
+  position: relative;
+}
+
+.ambient-orb::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle,
+    rgba(139, 92, 246, 0.06) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: -1;
 }
