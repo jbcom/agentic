@@ -44,7 +44,7 @@ export function buildServer(options?: { cwd?: string }) {
           --scalar-background-1: #0b0b12;
           --scalar-background-2: #12121c;
           --scalar-background-3: #171726;
-          font-family: "Space Grotesk", "Inter", system-ui, -apple-system, sans-serif;
+          font-family: "Instrument Sans", "Inter", system-ui, -apple-system, sans-serif;
         }
       `,
     },
@@ -172,7 +172,7 @@ export function buildServer(options?: { cwd?: string }) {
         height: 100%;
         background: var(--bg);
         color: var(--text);
-        font-family: "Space Grotesk", "Inter", system-ui, -apple-system, sans-serif;
+        font-family: "Instrument Sans", "Inter", system-ui, -apple-system, sans-serif;
       }
       .frame {
         display: grid;

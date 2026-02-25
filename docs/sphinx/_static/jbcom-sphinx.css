@@ -1,67 +1,67 @@
 /* =============================================================================
-   jbcom Design System - Sphinx Theme Customization
+   Agentic Design System (Signal Amber) - Sphinx Theme Customization
    =============================================================================
-   
+
    This CSS customizes Sphinx documentation themes (RTD, Furo, Book) to match
-   the jbcom brand identity. Include this file in your docs/_static/ directory
-   and reference it in conf.py.
-   
+   the Signal Amber brand identity. Include this file in your docs/_static/
+   directory and reference it in conf.py.
+
    Usage in conf.py:
-   
+
    html_static_path = ['_static']
    html_css_files = ['jbcom-sphinx.css']
-   
+
    ============================================================================= */
 
 /* Import Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =============================================================================
-   CSS Custom Properties (Design Tokens)
+   CSS Custom Properties (Signal Amber Design Tokens)
    ============================================================================= */
 
 :root {
-  /* Backgrounds */
-  --jb-bg-default: #0a0f1a;
-  --jb-bg-paper: #111827;
-  --jb-bg-elevated: #1e293b;
-  
-  /* Primary - Cyan */
-  --jb-primary: #06b6d4;
-  --jb-primary-light: #22d3ee;
-  --jb-primary-dark: #0891b2;
-  
-  /* Secondary - Blue */
-  --jb-secondary: #3b82f6;
-  --jb-secondary-light: #60a5fa;
-  --jb-secondary-dark: #2563eb;
-  
+  /* Backgrounds - Warm Stone */
+  --jb-bg-default: #0C0A09;
+  --jb-bg-paper: #1C1917;
+  --jb-bg-elevated: #292524;
+
+  /* Primary - Amber */
+  --jb-primary: #F59E0B;
+  --jb-primary-light: #FCD34D;
+  --jb-primary-dark: #D97706;
+
+  /* Secondary */
+  --jb-secondary: #F59E0B;
+  --jb-secondary-light: #FCD34D;
+  --jb-secondary-dark: #D97706;
+
   /* Text */
-  --jb-text-primary: #f1f5f9;
-  --jb-text-secondary: #94a3b8;
-  --jb-text-disabled: #475569;
-  
+  --jb-text-primary: #FAFAF9;
+  --jb-text-secondary: #A8A29E;
+  --jb-text-disabled: #78716C;
+
   /* Borders */
-  --jb-border: #1e293b;
-  
+  --jb-border: #292524;
+
   /* Semantic */
   --jb-success: #10b981;
   --jb-warning: #f59e0b;
   --jb-error: #ef4444;
-  --jb-info: #06b6d4;
-  
+  --jb-info: #F59E0B;
+
   /* Typography */
-  --jb-font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --jb-font-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --jb-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --jb-font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  
+
   /* Spacing */
   --jb-space-xs: 4px;
   --jb-space-sm: 8px;
   --jb-space-md: 16px;
   --jb-space-lg: 24px;
   --jb-space-xl: 32px;
-  
+
   /* Radius */
   --jb-radius-sm: 4px;
   --jb-radius-md: 8px;
@@ -148,7 +148,7 @@ code, pre, .highlight {
 
 /* Sidebar */
 .wy-side-nav-search {
-  background: linear-gradient(135deg, var(--jb-primary), var(--jb-secondary));
+  background: linear-gradient(135deg, var(--jb-primary-dark), var(--jb-primary));
 }
 
 .wy-side-nav-search input[type="text"] {
@@ -183,7 +183,7 @@ code, pre, .highlight {
 .wy-menu-vertical li.current > a,
 .wy-menu-vertical li.current a:hover {
   color: var(--jb-primary);
-  background: rgba(6, 182, 212, 0.1);
+  background: rgba(245, 158, 11, 0.1);
   border-right: 3px solid var(--jb-primary);
 }
 
@@ -265,7 +265,7 @@ table.docutils th {
 }
 
 table.docutils tr:hover td {
-  background: rgba(6, 182, 212, 0.05);
+  background: rgba(245, 158, 11, 0.05);
 }
 
 /* Admonitions */
@@ -334,51 +334,51 @@ body[data-theme="dark"] {
   --color-background-secondary: var(--jb-bg-paper);
   --color-background-hover: var(--jb-bg-elevated);
   --color-background-border: var(--jb-border);
-  
+
   --color-foreground-primary: var(--jb-text-primary);
   --color-foreground-secondary: var(--jb-text-secondary);
   --color-foreground-muted: var(--jb-text-disabled);
-  
+
   --color-brand-primary: var(--jb-primary);
   --color-brand-content: var(--jb-primary);
-  
+
   --color-link: var(--jb-primary);
   --color-link-underline: transparent;
   --color-link-hover: var(--jb-primary-light);
   --color-link-underline-hover: var(--jb-primary-light);
-  
+
   --color-sidebar-background: var(--jb-bg-paper);
   --color-sidebar-background-border: var(--jb-border);
   --color-sidebar-brand-text: var(--jb-text-primary);
   --color-sidebar-link-text: var(--jb-text-secondary);
   --color-sidebar-link-text-hover: var(--jb-text-primary);
-  
+
   --color-code-background: var(--jb-bg-paper);
   --color-code-foreground: var(--jb-text-primary);
   --color-inline-code-background: var(--jb-bg-paper);
 }
 
-/* Force dark mode for jbcom brand consistency */
+/* Force dark mode for Signal Amber brand consistency */
 html:not([data-theme]) {
   --color-background-primary: var(--jb-bg-default);
   --color-background-secondary: var(--jb-bg-paper);
   --color-background-hover: var(--jb-bg-elevated);
   --color-background-border: var(--jb-border);
-  
+
   --color-foreground-primary: var(--jb-text-primary);
   --color-foreground-secondary: var(--jb-text-secondary);
   --color-foreground-muted: var(--jb-text-disabled);
-  
+
   --color-brand-primary: var(--jb-primary);
   --color-brand-content: var(--jb-primary);
-  
+
   --color-link: var(--jb-primary);
   --color-link-underline: transparent;
   --color-link-hover: var(--jb-primary-light);
-  
+
   --color-sidebar-background: var(--jb-bg-paper);
   --color-sidebar-background-border: var(--jb-border);
-  
+
   --color-code-background: var(--jb-bg-paper);
 }
 
@@ -453,15 +453,15 @@ html[data-theme="dark"] .navbar {
   h1 {
     font-size: 2rem;
   }
-  
+
   h2 {
     font-size: 1.75rem;
   }
-  
+
   h3 {
     font-size: 1.25rem;
   }
-  
+
   .wy-nav-content {
     padding: var(--jb-space-md);
   }
@@ -471,7 +471,7 @@ html[data-theme="dark"] .navbar {
   h1 {
     font-size: 1.75rem;
   }
-  
+
   h2 {
     font-size: 1.5rem;
   }

@@ -62,10 +62,10 @@ Use [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## Documentation Branding
 
-All documentation must follow the **jbcom dark theme** design system.
-- Primary Cyan: `#06b6d4`
-- Background: `#0a0f1a`
-- Fonts: Space Grotesk (Headings), Inter (Body), JetBrains Mono (Code)
+All documentation must follow the **Signal Amber** design system.
+- Primary Amber: `#F59E0B`
+- Background: `#0C0A09` (warm stone)
+- Fonts: Instrument Sans (Headings), Inter (Body), JetBrains Mono (Code)
 
 ## Memory Bank Protocol
 

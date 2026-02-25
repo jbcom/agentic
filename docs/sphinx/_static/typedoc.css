@@ -1,36 +1,36 @@
 /**
  * TypeDoc custom styles for agentic-control
- * Following jbcom design system:
- * - Primary: #06b6d4 (cyan)
- * - Background: #0a0f1a
- * - Headings: Space Grotesk
+ * Signal Amber design system:
+ * - Primary: #F59E0B (amber)
+ * - Background: #0C0A09 (warm stone)
+ * - Headings: Instrument Sans
  * - Body: Inter
  */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  /* jbcom color palette */
-  --color-primary: #06b6d4;
-  --color-primary-dark: #0891b2;
-  --color-primary-light: #22d3ee;
-  --color-background: #0a0f1a;
-  --color-background-secondary: #111827;
-  --color-text: #f9fafb;
-  --color-text-muted: #9ca3af;
-  --color-border: #1f2937;
-  --color-accent: #8b5cf6;
+  /* Signal Amber color palette */
+  --color-primary: #F59E0B;
+  --color-primary-dark: #D97706;
+  --color-primary-light: #FCD34D;
+  --color-background: #0C0A09;
+  --color-background-secondary: #1C1917;
+  --color-text: #FAFAF9;
+  --color-text-muted: #A8A29E;
+  --color-border: #292524;
+  --color-accent: #F59E0B;
 
   /* Typography */
-  --font-heading: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
 }
 
 /* Dark theme overrides */
 :root[data-theme="dark"] {
-  --color-background: #0a0f1a;
-  --color-background-secondary: #111827;
+  --color-background: #0C0A09;
+  --color-background-secondary: #1C1917;
 }
 
 /* Base typography */

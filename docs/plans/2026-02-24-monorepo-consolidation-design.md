@@ -81,7 +81,7 @@ agentic-control/
 │   │   │   ├── guides/
 │   │   │   ├── integrations/
 │   │   │   └── examples/
-│   │   ├── styles/custom.css        # jbcom dark theme
+│   │   ├── styles/custom.css        # Signal Amber theme
 │   │   └── assets/
 │   └── sphinx/                      # Python API doc source
 │       └── conf.py                  # myst-parser + autodoc config
@@ -221,7 +221,7 @@ TypeScript source → TypeDoc → .md output ───────────�
                                                                         │
                                                                         ▼
                                                               Astro Starlight
-                                                              (jbcom dark theme)
+                                                              (Signal Amber theme)
                                                                         │
                                                                         ▼
                                                               Static site → GitHub Pages
@@ -234,11 +234,11 @@ TypeScript source → TypeDoc → .md output ───────────�
 - Outputs Markdown (not HTML) via `sphinx-build -b markdown`
 - Starlight consumes the Markdown output in `docs/src/content/docs/api/`
 
-### jbcom Dark Theme
+### Signal Amber Theme
 
-- Primary Cyan: `#06b6d4`
-- Background: `#0a0f1a`
-- Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code)
+- Primary Amber: `#F59E0B`
+- Background: `#0C0A09` (warm stone)
+- Fonts: Instrument Sans (headings), Inter (body), JetBrains Mono (code)
 
 ## Cross-Language Dependencies
 

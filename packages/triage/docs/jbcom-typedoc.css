@@ -1,14 +1,14 @@
-/* jbcom TypeDoc Branding - Dark Theme */
+/* Agentic TypeDoc Branding - Signal Amber Theme */
 /* Applied to @jbcom/agentic-triage documentation */
 
 :root {
-    /* jbcom Color Palette */
-    --jbcom-background: #0a0f1a;
-    --jbcom-surface: #111827;
-    --jbcom-primary: #06b6d4;
-    --jbcom-secondary: #3b82f6;
-    --jbcom-text-primary: #f1f5f9;
-    --jbcom-text-secondary: #94a3b8;
+    /* Signal Amber Color Palette */
+    --jbcom-background: #0C0A09;
+    --jbcom-surface: #1C1917;
+    --jbcom-primary: #F59E0B;
+    --jbcom-secondary: #FCD34D;
+    --jbcom-text-primary: #FAFAF9;
+    --jbcom-text-secondary: #A8A29E;
     --jbcom-success: #10b981;
     --jbcom-warning: #f59e0b;
     --jbcom-error: #ef4444;
@@ -23,7 +23,7 @@
     --color-ts-interface: var(--jbcom-success);
 }
 
-/* Typography - jbcom Standards */
+/* Typography - Signal Amber Standards */
 body {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: var(--jbcom-background);
@@ -36,7 +36,7 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: "Space Grotesk", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-weight: 600;
     color: var(--jbcom-text-primary);
 }
@@ -60,7 +60,7 @@ a:hover {
 /* Code blocks */
 pre {
     background-color: var(--jbcom-surface);
-    border: 1px solid rgba(6, 182, 212, 0.2);
+    border: 1px solid rgba(245, 158, 11, 0.2);
     border-radius: 8px;
     padding: 1rem;
 }
@@ -95,7 +95,7 @@ code {
 /* Member items */
 .tsd-panel {
     background-color: var(--jbcom-surface);
-    border: 1px solid rgba(6, 182, 212, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.1);
     border-radius: 8px;
     margin-bottom: 1rem;
 }
@@ -105,10 +105,4 @@ a:focus,
 button:focus {
     outline: 2px solid var(--jbcom-primary);
     outline-offset: 2px;
-}
-
-/* Brand header */
-.tsd-page-title h1::before {
-    content: "⚡ ";
-    color: var(--jbcom-primary);
 }

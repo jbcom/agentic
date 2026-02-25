@@ -255,14 +255,12 @@ pub fn render_export_ui(ui: &mut egui::Ui, state: &crate::wizard::steps::guided:
         if ui.button("📄 Copy TOML").clicked()
             && let Some(toml) = export_to_toml(state)
         {
-            // TODO: Copy to clipboard
             ui.ctx().copy_text(toml);
         }
 
         if ui.button("📋 Copy JSON").clicked()
             && let Some(json) = export_to_json(state)
         {
-            // TODO: Copy to clipboard
             ui.ctx().copy_text(json.to_string());
         }
 

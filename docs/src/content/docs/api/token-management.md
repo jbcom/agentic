@@ -1,6 +1,6 @@
 ---
 title: "Token Management API"
-description: "Complete API reference for multi-organization GitHub token management in @jbcom/agentic-control."
+description: "Complete API reference for multi-organization GitHub token management in @jbcom/agentic."
 ---
 
 # Token Management API Reference
@@ -42,7 +42,7 @@ import {
 
   // Debugging
   getTokenSummary,
-} from '@jbcom/agentic-control';
+} from '@jbcom/agentic';
 ```
 
 ## Configuration
@@ -90,7 +90,7 @@ setTokenConfig(config: Partial<TokenConfig>): void
 ```
 
 ```typescript
-import { setTokenConfig } from '@jbcom/agentic-control';
+import { setTokenConfig } from '@jbcom/agentic';
 
 setTokenConfig({
   organizations: {
@@ -140,7 +140,7 @@ addOrganization(org: OrganizationConfig): void
 ```
 
 ```typescript
-import { addOrganization } from '@jbcom/agentic-control';
+import { addOrganization } from '@jbcom/agentic';
 
 addOrganization({
   name: 'my-company',
@@ -181,7 +181,7 @@ getTokenForRepo(repoUrl: string): string | undefined
 4. If not found, return `process.env[config.defaultTokenEnvVar]`
 
 ```typescript
-import { getTokenForRepo, addOrganization } from '@jbcom/agentic-control';
+import { getTokenForRepo, addOrganization } from '@jbcom/agentic';
 
 addOrganization({
   name: 'my-company',
@@ -329,7 +329,7 @@ Validates:
 - The default token
 
 ```typescript
-import { validateTokens } from '@jbcom/agentic-control';
+import { validateTokens } from '@jbcom/agentic';
 
 const result = validateTokens();
 if (!result.success) {
@@ -373,7 +373,7 @@ getEnvForRepo(repoUrl: string): Record<string, string>
 
 ```typescript
 import { spawnSync } from 'node:child_process';
-import { getEnvForRepo } from '@jbcom/agentic-control';
+import { getEnvForRepo } from '@jbcom/agentic';
 
 const proc = spawnSync('gh', ['pr', 'list'], {
   env: { ...process.env, ...getEnvForRepo('my-company/my-repo') },
@@ -413,7 +413,7 @@ getTokenSummary(): Record<string, {
 ```
 
 ```typescript
-import { getTokenSummary } from '@jbcom/agentic-control';
+import { getTokenSummary } from '@jbcom/agentic';
 
 const summary = getTokenSummary();
 for (const [name, info] of Object.entries(summary)) {
@@ -515,7 +515,7 @@ Repository: "https://github.com/my-company/my-repo"
 The Fleet class automatically uses token management for all GitHub operations:
 
 ```typescript
-import { Fleet, addOrganization } from '@jbcom/agentic-control';
+import { Fleet, addOrganization } from '@jbcom/agentic';
 
 // Configure organizations
 addOrganization({
@@ -584,7 +584,7 @@ Configure a dedicated bot identity so all automated PR reviews appear consistent
 Check token availability early to fail fast:
 
 ```typescript
-import { validateTokens } from '@jbcom/agentic-control';
+import { validateTokens } from '@jbcom/agentic';
 
 const result = validateTokens();
 if (!result.success) {

@@ -1,6 +1,6 @@
 ---
 title: "Fleet API Reference"
-description: "Complete API reference for the Fleet class and Cursor Background Agent management from @jbcom/agentic-control."
+description: "Complete API reference for the Fleet class and Cursor Background Agent management from @jbcom/agentic."
 ---
 
 # Fleet API Reference
@@ -10,19 +10,19 @@ The `Fleet` class is the primary interface for managing Cursor Background Agents
 ## Installation
 
 ```bash
-npm install @jbcom/agentic-control
+npm install @jbcom/agentic
 ```
 
 ## Import
 
 ```typescript
-import { Fleet, CursorAPI } from '@jbcom/agentic-control';
+import { Fleet, CursorAPI } from '@jbcom/agentic';
 import type {
   FleetConfig,
   CoordinationConfig,
   SpawnContext,
   CursorAPIOptions,
-} from '@jbcom/agentic-control';
+} from '@jbcom/agentic';
 ```
 
 ## Constructor
@@ -47,7 +47,7 @@ const fleet = new Fleet(config?: FleetConfig);
 **Example:**
 
 ```typescript
-import { Fleet } from '@jbcom/agentic-control';
+import { Fleet } from '@jbcom/agentic';
 
 const fleet = new Fleet({
   apiKey: process.env.CURSOR_API_KEY,
@@ -732,7 +732,7 @@ if (!result.success) {
 For direct API access without Fleet's high-level features, use `CursorAPI`:
 
 ```typescript
-import { CursorAPI } from '@jbcom/agentic-control';
+import { CursorAPI } from '@jbcom/agentic';
 
 const api = new CursorAPI({
   apiKey: process.env.CURSOR_API_KEY,

@@ -1,6 +1,6 @@
 ---
 title: "Configuration API"
-description: "Complete API reference for the configuration system in @jbcom/agentic-control, including cosmiconfig loading, schema validation, and environment variable overrides."
+description: "Complete API reference for the configuration system in @jbcom/agentic, including cosmiconfig loading, schema validation, and environment variable overrides."
 ---
 
 # Configuration API Reference
@@ -36,7 +36,7 @@ import {
 
   // Logging
   log,
-} from '@jbcom/agentic-control';
+} from '@jbcom/agentic';
 ```
 
 ---
@@ -180,7 +180,7 @@ initConfig(overrides?: Partial<AgenticConfig>): AgenticConfig
 6. Apply token configuration to the token module
 
 ```typescript
-import { initConfig } from '@jbcom/agentic-control';
+import { initConfig } from '@jbcom/agentic';
 
 // Basic initialization
 const config = initConfig();
@@ -201,7 +201,7 @@ loadConfigFromPath(filepath: string): AgenticConfig
 ```
 
 ```typescript
-import { loadConfigFromPath } from '@jbcom/agentic-control';
+import { loadConfigFromPath } from '@jbcom/agentic';
 
 const config = loadConfigFromPath('/path/to/agentic.config.json');
 ```
@@ -358,7 +358,7 @@ setConfig(updates: Partial<AgenticConfig>): void
 ```
 
 ```typescript
-import { setConfig } from '@jbcom/agentic-control';
+import { setConfig } from '@jbcom/agentic';
 
 setConfig({
   logLevel: 'debug',
@@ -383,7 +383,7 @@ resetConfig(): void
 The `log` object provides level-aware logging that respects `config.logLevel`:
 
 ```typescript
-import { log } from '@jbcom/agentic-control';
+import { log } from '@jbcom/agentic';
 
 log.debug('Detailed debugging information');
 log.info('Normal operational messages');
@@ -425,8 +425,8 @@ export AGENTIC_VERBOSE=true
 Configuration is validated at load time using Zod schemas. The `AgenticConfigSchema` is exported for custom validation:
 
 ```typescript
-import { AgenticConfigSchema } from '@jbcom/agentic-control';
-import { validateConfig } from '@jbcom/agentic-control';
+import { AgenticConfigSchema } from '@jbcom/agentic';
+import { validateConfig } from '@jbcom/agentic';
 
 // Validate an arbitrary object
 try {
@@ -448,7 +448,7 @@ import {
   validateRepository,
   validateGitRef,
   validatePositiveInt,
-} from '@jbcom/agentic-control';
+} from '@jbcom/agentic';
 
 // Validate required environment variable
 const apiKey = validateEnvVar('ANTHROPIC_API_KEY', 'Anthropic API key');

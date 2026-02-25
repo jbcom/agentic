@@ -219,17 +219,42 @@ server.tool(
     }
 );
 
-// Sprints (stubs for now, will implement if possible)
+// Sprints - uses TriageConnectors ProjectAPI
 server.tool('list_sprints', {}, async () => {
-    return {
-        content: [{ type: 'text', text: 'Sprint tools not yet implemented' }],
-    };
+    try {
+        const { TriageConnectors } = await import('./triage/connectors.js');
+        const connectors = new TriageConnectors();
+        const sprints = await connectors.projects.getSprints();
+        return {
+            content: [{ type: 'text', text: JSON.stringify(sprints, null, 2) }],
+        };
+    } catch (error: any) {
+        return {
+            content: [{ type: 'text', text: `Error listing sprints: ${error.message}` }],
+            isError: true,
+        };
+    }
 });
 
 server.tool('get_current_sprint', {}, async () => {
-    return {
-        content: [{ type: 'text', text: 'Sprint tools not yet implemented' }],
-    };
+    try {
+        const { TriageConnectors } = await import('./triage/connectors.js');
+        const connectors = new TriageConnectors();
+        const sprint = await connectors.projects.getCurrentSprint();
+        if (!sprint) {
+            return {
+                content: [{ type: 'text', text: 'No active sprint found' }],
+            };
+        }
+        return {
+            content: [{ type: 'text', text: JSON.stringify(sprint, null, 2) }],
+        };
+    } catch (error: any) {
+        return {
+            content: [{ type: 'text', text: `Error getting current sprint: ${error.message}` }],
+            isError: true,
+        };
+    }
 });
 
 /**

@@ -13,6 +13,10 @@
     "typecheck": {
       "command": "tsc --noEmit",
       "options": { "cwd": "{projectRoot}" }
+    },
+    "test": {
+      "command": "vitest run",
+      "options": { "cwd": "{projectRoot}" }
     }
   }
 }

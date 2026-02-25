@@ -872,7 +872,7 @@ git commit -m "feat(monorepo): merge docs site into docs/ as pnpm workspace memb
 
 ---
 
-### Task 5.2: Create jbcom dark theme CSS
+### Task 5.2: Create Signal Amber theme CSS
 
 **Files:**
 - Create: `docs/src/styles/custom.css`
@@ -880,22 +880,22 @@ git commit -m "feat(monorepo): merge docs site into docs/ as pnpm workspace memb
 **Step 1: Create the custom CSS theme**
 
 ```css
-/* jbcom Dark Theme for Astro Starlight */
+/* Signal Amber Theme for Astro Starlight */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
-  --sl-color-accent-low: #083344;
-  --sl-color-accent: #06b6d4;
-  --sl-color-accent-high: #67e8f9;
-  --sl-color-white: #e2e8f0;
-  --sl-color-gray-1: #cbd5e1;
-  --sl-color-gray-2: #94a3b8;
-  --sl-color-gray-3: #64748b;
-  --sl-color-gray-4: #334155;
-  --sl-color-gray-5: #1e293b;
-  --sl-color-gray-6: #0f172a;
-  --sl-color-black: #0a0f1a;
+  --sl-color-accent-low: #451A03;
+  --sl-color-accent: #F59E0B;
+  --sl-color-accent-high: #FCD34D;
+  --sl-color-white: #FAFAF9;
+  --sl-color-gray-1: #D6D3D1;
+  --sl-color-gray-2: #A8A29E;
+  --sl-color-gray-3: #78716C;
+  --sl-color-gray-4: #44403C;
+  --sl-color-gray-5: #292524;
+  --sl-color-gray-6: #1C1917;
+  --sl-color-black: #0C0A09;
 
   --sl-font: 'Inter', sans-serif;
   --sl-font-mono: 'JetBrains Mono', monospace;
@@ -905,7 +905,7 @@ git commit -m "feat(monorepo): merge docs site into docs/ as pnpm workspace memb
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Instrument Sans', sans-serif;
 }
 
 .sl-markdown-content code:not(pre code) {
@@ -933,7 +933,7 @@ The existing `astro.config.mjs` already has `customCss: ['./src/styles/custom.cs
 
 ```bash
 git add docs/src/styles/custom.css
-git commit -m "feat(docs): add jbcom dark theme CSS for Starlight"
+git commit -m "feat(docs): add Signal Amber theme CSS for Starlight"
 ```
 
 ---

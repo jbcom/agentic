@@ -1,6 +1,3 @@
-.. PACKAGE_NAME documentation master file
-   Synced from jbcom-control-center - customize for your project
-
 =======================================
 agentic-control Documentation
 =======================================
@@ -17,9 +14,9 @@ Fleet management for AI agents. Spawn, monitor, triage, and orchestrate agents a
 
 .. toctree::
    :maxdepth: 2
-   :caption: API Reference
+   :caption: Python API Reference
 
-   api/index
+   apidocs/index
 
 .. toctree::
    :maxdepth: 2
