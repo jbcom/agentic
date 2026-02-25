@@ -2,7 +2,7 @@
  * Tests for GitHubClient - token management, validation, feedback inference
  */
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import {
   GitHubClient,
   isValidGitRef,
@@ -53,10 +53,10 @@ describe('GitHubClient', () => {
   });
 
   describe('Feedback Severity Inference', () => {
-    let client: GitHubClient;
+    let _client: GitHubClient;
 
     beforeEach(() => {
-      client = new GitHubClient({
+      _client = new GitHubClient({
         token: 'ghp_test',
         owner: 'test',
         repo: 'repo',

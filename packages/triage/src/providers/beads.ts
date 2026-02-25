@@ -274,7 +274,12 @@ export class BeadsProvider implements TriageProvider {
         };
 
         for (const issue of issues) {
-            stats[issue.status === 'in_progress' ? 'inProgress' : issue.status]++;
+            switch (issue.status) {
+                case 'open': stats.open++; break;
+                case 'in_progress': stats.inProgress++; break;
+                case 'blocked': stats.blocked++; break;
+                case 'closed': stats.closed++; break;
+            }
             stats.byPriority[issue.priority]++;
             stats.byType[issue.type]++;
         }

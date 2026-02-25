@@ -31,7 +31,7 @@ describe('Token Sanitization', () => {
 
     it('should redact Anthropic API keys (sk-ant-)', () => {
       const key =
-        'sk-ant-api03-' + 'x'.repeat(95);
+        `sk-ant-api03-${'x'.repeat(95)}`;
       const message = `API call failed: ${key}`;
       const sanitized = sanitizeError(message);
       expect(sanitized).not.toContain('sk-ant-');
@@ -39,7 +39,7 @@ describe('Token Sanitization', () => {
     });
 
     it('should redact OpenAI API keys (sk-)', () => {
-      const key = 'sk-' + 'x'.repeat(48);
+      const key = `sk-${'x'.repeat(48)}`;
       const message = `OpenAI error: ${key}`;
       const sanitized = sanitizeError(message);
       expect(sanitized).not.toContain(key);
@@ -170,7 +170,7 @@ describe('Token Sanitization', () => {
 
   describe('safeConsole', () => {
     it('should sanitize log messages', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { /* noop */ });
       safeConsole.log(
         'Token: ghp_1234567890abcdef1234567890abcdef12345678'
       );
@@ -181,7 +181,7 @@ describe('Token Sanitization', () => {
     });
 
     it('should sanitize error messages', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { /* noop */ });
       safeConsole.error(
         'Error with ghp_1234567890abcdef1234567890abcdef12345678'
       );
@@ -191,7 +191,7 @@ describe('Token Sanitization', () => {
     });
 
     it('should sanitize warn messages', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { /* noop */ });
       safeConsole.warn(
         'Warning with ghp_1234567890abcdef1234567890abcdef12345678'
       );
@@ -201,7 +201,7 @@ describe('Token Sanitization', () => {
     });
 
     it('should sanitize string args but pass through non-strings', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => { /* noop */ });
       const objectArg = { key: 'value' };
       safeConsole.log('message', 'ghp_1234567890abcdef1234567890abcdef12345678', objectArg);
       const secondArg = consoleSpy.mock.calls[0][1];

@@ -64,7 +64,7 @@ jobs:
 
       # Generate Python API docs via sphinx-autodoc2 (static analysis → markdown)
       - name: Generate Python API docs
-        run: uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated 2>/dev/null || true
+        run: uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated || true
 
       # Add Starlight frontmatter to generated markdown files
       - name: Add Starlight frontmatter

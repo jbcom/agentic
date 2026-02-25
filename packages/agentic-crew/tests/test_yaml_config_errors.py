@@ -125,12 +125,7 @@ class TestGetCrewConfigErrors:
 
         manifest_file = tmp_path / "manifest.yaml"
         manifest_file.write_text(
-            "crews:\n"
-            "  test_crew:\n"
-            "    agents: agents.yaml\n"
-            "    tasks: tasks.yaml\n"
-            "    knowledge:\n"
-            "      - knowledge\n"
+            "crews:\n  test_crew:\n    agents: agents.yaml\n    tasks: tasks.yaml\n    knowledge:\n      - knowledge\n"
         )
         config = get_crew_config(tmp_path, "test_crew")
         assert len(config["knowledge_paths"]) == 1

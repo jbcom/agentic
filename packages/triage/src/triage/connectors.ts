@@ -31,7 +31,10 @@
  * ```
  */
 
-import { execFileSync } from 'node:child_process';
+import { execFile as execFileCb } from 'node:child_process';
+import { promisify } from 'node:util';
+
+const execFile = promisify(execFileCb);
 import { createBestProvider, createProvider, type ProviderConfig } from '../providers/index.js';
 import type {
     CreateIssueOptions,
@@ -442,7 +445,8 @@ class ProjectAPI {
             const env = { ...process.env };
             if (token) env.GH_TOKEN = token;
 
-            const result = execFileSync('gh', args, { encoding: 'utf-8', env }).trim();
+            const { stdout } = await execFile('gh', args, { encoding: 'utf-8', env });
+            const result = stdout.trim();
             if (!result) return [];
 
             // Parse JSONL output (one object per line)
@@ -555,17 +559,19 @@ class ReviewAPI {
             const repo = this.connectors['config'].repo;
 
             // Get review comments (inline code comments)
-            const reviewCommentsJson = this.gh([
+            const reviewPath = await this.getRepoApiPath(repo, `pulls/${prNumber}/comments`);
+            const reviewCommentsJson = await this.gh([
                 'api',
-                ...this.getRepoApiPath(repo, `pulls/${prNumber}/comments`),
+                ...reviewPath,
                 '--jq',
                 '.[] | {id: .id, body: .body, author: .user.login, path: .path, line: (.line // .original_line)}',
             ]);
 
             // Get issue comments (general PR thread comments)
-            const issueCommentsJson = this.gh([
+            const issueCommentsPath = await this.getRepoApiPath(repo, `issues/${prNumber}/comments`);
+            const issueCommentsJson = await this.gh([
                 'api',
-                ...this.getRepoApiPath(repo, `issues/${prNumber}/comments`),
+                ...issueCommentsPath,
                 '--jq',
                 '.[] | {id: .id, body: .body, author: .user.login}',
             ]);
@@ -627,9 +633,10 @@ class ReviewAPI {
             const repo = this.connectors['config'].repo;
 
             // Get PR reviews
-            const reviewsJson = this.gh([
+            const reviewsPath = await this.getRepoApiPath(repo, `pulls/${prNumber}/reviews`);
+            const reviewsJson = await this.gh([
                 'api',
-                ...this.getRepoApiPath(repo, `pulls/${prNumber}/reviews`),
+                ...reviewsPath,
                 '--jq',
                 '.[] | {id: .id, body: .body, author: .user.login, state: .state}',
             ]);
@@ -690,10 +697,10 @@ class ReviewAPI {
         const repo = this.connectors['config'].repo;
 
         // Use the gh api command to create a reply
-        // First, try to reply as a review comment reply
-        this.gh([
+        const replyPath = await this.getRepoApiPath(repo, `pulls/comments/${commentId}/replies`);
+        await this.gh([
             'api',
-            ...this.getRepoApiPath(repo, `pulls/comments/${commentId}/replies`),
+            ...replyPath,
             '-f',
             `body=${body}`,
         ]);
@@ -702,7 +709,7 @@ class ReviewAPI {
     /**
      * Build the API path for a repo resource
      */
-    private getRepoApiPath(repo: string | undefined, resource: string): string[] {
+    private async getRepoApiPath(repo: string | undefined, resource: string): Promise<string[]> {
         if (repo) {
             return [`repos/${repo}/${resource}`];
         }
@@ -713,9 +720,10 @@ class ReviewAPI {
         }
         // Last resort: try to detect from git
         try {
-            const remote = execFileSync('git', ['remote', 'get-url', 'origin'], {
+            const { stdout } = await execFile('git', ['remote', 'get-url', 'origin'], {
                 encoding: 'utf-8',
-            }).trim();
+            });
+            const remote = stdout.trim();
             const match = remote.match(/github\.com[/:]([^/]+\/[^/.]+)/);
             if (match) {
                 const detectedRepo = match[1].replace(/\.git$/, '');
@@ -724,17 +732,18 @@ class ReviewAPI {
         } catch {
             // Not a git repo
         }
-        return [`repos/unknown/unknown/${resource}`];
+        throw new Error(`Cannot determine GitHub repository for ${resource}. Set GITHUB_REPOSITORY or pass repo in config.`);
     }
 
     /**
-     * Execute a gh CLI command
+     * Execute a gh CLI command (async, non-blocking)
      */
-    private gh(args: string[]): string {
+    private async gh(args: string[]): Promise<string> {
         const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
         const env = { ...process.env };
         if (token) env.GH_TOKEN = token;
-        return execFileSync('gh', args, { encoding: 'utf-8', env }).trim();
+        const { stdout } = await execFile('gh', args, { encoding: 'utf-8', env });
+        return stdout.trim();
     }
 }
 

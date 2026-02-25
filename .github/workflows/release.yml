@@ -69,7 +69,15 @@ jobs:
         working-directory: ${{ matrix.dir }}
 
       - name: Publish to npm
-        run: npm publish --access public --provenance --no-git-checks || echo "Already published"
+        run: |
+          npm publish --access public --provenance --no-git-checks 2>&1 | tee /tmp/npm-publish.log; rc=${PIPESTATUS[0]}
+          if [ $rc -ne 0 ]; then
+            if grep -qiE 'EPUBLISHCONFLICT|already exists|Cannot publish over|previously published' /tmp/npm-publish.log; then
+              echo "Package version already published — skipping."
+            else
+              exit $rc
+            fi
+          fi
         working-directory: ${{ matrix.dir }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
@@ -116,7 +124,15 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
 
       - name: Publish to crates.io
-        run: cargo publish || echo "Already published"
+        run: |
+          cargo publish 2>&1 | tee /tmp/cargo-publish.log; rc=${PIPESTATUS[0]}
+          if [ $rc -ne 0 ]; then
+            if grep -qiE 'already uploaded|already exists' /tmp/cargo-publish.log; then
+              echo "Crate version already published — skipping."
+            else
+              exit $rc
+            fi
+          fi
         working-directory: packages/game-generator
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
