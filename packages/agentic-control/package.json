@@ -72,20 +72,20 @@
     "prepublishOnly": "npm run build && npm run test"
   },
   "dependencies": {
-    "@ai-sdk/mcp": "^1.0.1",
-    "@inquirer/prompts": "8.1.0",
-    "@modelcontextprotocol/sdk": "^1.26.0",
+    "@ai-sdk/mcp": "^1.0.21",
+    "@inquirer/prompts": "8.3.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@octokit/rest": "^22.0.1",
     "@jbcom/agentic-triage": "workspace:*",
-    "ai": "^6.0.3",
-    "commander": "^14.0.2",
+    "ai": "^6.0.103",
+    "commander": "^14.0.3",
     "cosmiconfig": "9.0.0",
     "env-var": "^7.5.0",
-    "simple-git": "^3.30.0",
-    "zod": "^4.2.1"
+    "simple-git": "^3.32.3",
+    "zod": "^4.3.6"
   },
   "peerDependencies": {
-    "@ai-sdk/anthropic": "^3.0.1",
+    "@ai-sdk/anthropic": "^3.0.48",
     "@ai-sdk/azure": "^2.0.78",
     "@ai-sdk/google": "^2.0.44",
     "@ai-sdk/mistral": "^2.0.25",
@@ -113,11 +113,11 @@
     }
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^3.0.1",
-    "@types/node": "^22.15.0",
+    "@ai-sdk/anthropic": "^3.0.48",
+    "@types/node": "^25.3.2",
     "tsx": "4.21.0",
     "typescript": "^5.7.0",
-    "vitest": "^4.0.14",
+    "vitest": "^4.0.18",
     "@jbcom/vitest-agentic": "workspace:*"
   },
   "engines": {
