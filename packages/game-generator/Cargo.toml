@@ -20,10 +20,10 @@ path = "src/lib.rs"
 
 [dependencies]
 # Core UI Framework
-bevy = { version = "0.16.1", features = ["dynamic_linking"] }
-bevy_egui = "0.35"
-bevy-inspector-egui = "0.32"
-egui_dock = "0.16"
+bevy = { version = "0.18.0", features = ["dynamic_linking"] }
+bevy_egui = "0.39"
+bevy-inspector-egui = "0.36"
+egui_dock = "0.18"
 catppuccin-egui = { version = "5.7", default-features = false, features = ["egui31"] }
 
 # CLI and Configuration
@@ -32,10 +32,10 @@ dirs = "6.0"
 uuid = { version = "1.19", features = ["v4", "serde"] }
 
 # Graph algorithms (for blending)
-petgraph = "0.7"
+petgraph = "0.8"
 
 # AI providers
-async-openai = { version = "0.32", features = ["full"] }
+async-openai = { version = "0.33", features = ["full"] }
 
 # Async runtime
 tokio = { version = "1.48", features = ["full"] }
@@ -50,17 +50,17 @@ minijinja = { version = "2.14", features = ["loader", "preserve_order"] }
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-toml = "0.9"
-ron = "0.9"
-bincode = "1.3"
+toml = "1.0"
+ron = "0.12"
+bincode = "3.0"
 
 # Error Handling
 anyhow = "1.0"
 thiserror = "2.0"
 
 # HTTP client
-reqwest = { version = "0.12", features = ["json", "stream", "blocking"] }
-reqwest-middleware = "0.4"
+reqwest = { version = "0.13", features = ["json", "stream", "blocking"] }
+reqwest-middleware = "0.5"
 
 # Caching
 sled = "0.34"
@@ -78,16 +78,16 @@ sha2 = "0.10"
 zstd = "0.13"
 image = "0.25"
 regex = "1.11"
-tiktoken-rs = "0.7"
+tiktoken-rs = "0.9"
 fs_extra = "1.3"
 rayon = "1.10"
 dotenv = "0.15"
 
 # Combat system
-rand = "0.8"
+rand = "0.10"
 
 # Optional dependencies for advanced features
-nalgebra = { version = "0.33", optional = true }
+nalgebra = { version = "0.34", optional = true }
 
 [features]
 default = []
