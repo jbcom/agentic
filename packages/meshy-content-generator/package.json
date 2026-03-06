@@ -65,7 +65,7 @@
     "@scalar/fastify-api-reference": "^1.43.17",
     "commander": "^14.0.2",
     "dotenv": "^17.2.3",
-    "fastify": "^5.7.2",
+    "fastify": "^5.8.1",
     "seedrandom": "^3.0.5",
     "three": "^0.172.0",
     "zod": "^4.3.6"
