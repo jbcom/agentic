@@ -1,0 +1,104 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "game-asset-mcp"
+version = "0.1.0"
+description = "MCP server and catalog library for local 3D game asset libraries — search, browse, and manage GLB/GLTF assets"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+readme = "README.md"
+authors = [{ name = "Jon Bogaty", email = "jon@jonbogaty.com" }]
+keywords = [
+    "mcp", "model-context-protocol", "3d-assets", "game-development",
+    "glb", "gltf", "polyhaven", "asset-management", "claude", "cursor",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Graphics :: 3D Modeling",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+# Core dependencies
+dependencies = [
+    "fastmcp>=3.0",
+    "tomli>=2.0; python_version < \"3.11\"",  # tomllib backport
+    "pygltflib>=1.16.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "pydantic-cli>=4.0",
+]
+
+[project.optional-dependencies]
+# PolyHaven integration (download free CC0 assets)
+polyhaven = [
+    "httpx>=0.27",
+]
+# Semantic search (vector embeddings)
+semantic = [
+    "sqlite-vec>=0.1",
+    "sentence-transformers>=3.0",
+    "langchain-community>=0.3",
+    "langchain>=0.3",
+]
+# Everything
+all = [
+    "fastmcp>=3.0",
+    "httpx>=0.27",
+    "sqlite-vec>=0.1",
+    "sentence-transformers>=3.0",
+    "langchain-community>=0.3",
+    "langchain>=0.3",
+]
+tests = [
+    "pytest>=8.0",
+    "pytest-mock>=3.14",
+]
+
+[project.scripts]
+game-asset-mcp = "game_asset_mcp.server:main"
+game-asset-ingest = "game_asset_mcp.ingest:main"
+game-asset-init = "game_asset_mcp.wizard:main"
+
+[project.urls]
+Homepage = "https://github.com/jbcom/agentic"
+Repository = "https://github.com/jbcom/agentic"
+Documentation = "https://github.com/jbcom/agentic/tree/main/packages/game-asset-mcp#readme"
+Issues = "https://github.com/jbcom/agentic/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/game_asset_mcp"]
+
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+build_command = "uv build"
+commit_parser = "angular"
+commit_author = "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+tag_format = "game-asset-mcp-v{version}"
+changelog_file = "CHANGELOG.md"
+upload_to_vcs_release = true
+
+[tool.semantic_release.commit_parser_options]
+allowed_tags = ["feat", "fix", "docs", "style", "refactor", "perf", "test", "chore", "ci", "build"]
+minor_tags = ["feat"]
+patch_tags = ["fix", "perf"]
+
+[tool.semantic_release.branches.main]
+match = "main"
+prerelease = false
+
+[tool.semantic_release.remote]
+type = "github"
+token = { env = "GH_TOKEN" }
+
+[tool.semantic_release.publish]
+dist_glob_patterns = ["dist/*"]
+upload_to_vcs_release = true
