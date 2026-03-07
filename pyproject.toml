@@ -11,7 +11,7 @@ authors = [{ name = "Jon Bogaty" }]
 package = false
 
 [tool.uv.workspace]
-members = ["packages/agentic-crew", "packages/pytest-agentic-crew"]
+members = ["packages/agentic-crew", "packages/pytest-agentic-crew", "packages/game-asset-mcp"]
 
 [dependency-groups]
 dev = [
@@ -39,7 +39,7 @@ line-length = 120
 select = ["E", "F", "I", "UP", "B", "C4", "SIM"]
 
 [tool.pytest.ini_options]
-testpaths = ["packages/agentic-crew", "packages/pytest-agentic-crew"]
+testpaths = ["packages/agentic-crew", "packages/pytest-agentic-crew", "packages/game-asset-mcp"]
 markers = [
     "e2e: end-to-end tests (may require external services)",
     "slow: slow-running tests",

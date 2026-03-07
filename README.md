@@ -28,6 +28,7 @@
 | [`@jbcom/agentic-meshy`](packages/meshy-content-generator) | TypeScript | Declarative Meshy 3D asset generation pipelines | [Docs](https://agentic.coach/packages/meshy-content-generator/) |
 | [`@jbcom/agentic-providers`](packages/providers) | TypeScript | LLM provider implementations (Ollama, Jules, Cursor) | [Docs](https://agentic.coach/packages/control/) |
 | [`game-generator`](packages/game-generator) | Rust | Visual-first vintage game generator with AI assistance | [Docs](https://agentic.coach/packages/game-generator/) |
+| [`game-asset-mcp`](packages/game-asset-mcp) | Python | MCP server for local 3D game asset libraries — search, browse, PolyHaven integration | [README](packages/game-asset-mcp/README.md) |
 
 ### Testing Plugins
 
@@ -123,7 +124,8 @@ agentic/
 │   ├── providers/                # @jbcom/agentic-providers (TypeScript)
 │   ├── game-generator/           # game-generator (Rust)
 │   ├── vitest-agentic-control/   # @jbcom/vitest-agentic (TypeScript)
-│   └── pytest-agentic-crew/      # pytest-agentic-crew (Python)
+│   ├── pytest-agentic-crew/      # pytest-agentic-crew (Python)
+│   └── game-asset-mcp/           # game-asset-mcp (Python)
 ├── actions/                      # GitHub Marketplace actions
 ├── docs/                         # Documentation site (Astro + Starlight)
 └── scripts/                      # Ecosystem automation
