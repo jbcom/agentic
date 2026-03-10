@@ -81,7 +81,7 @@
     "commander": "^14.0.2",
     "cosmiconfig": "9.0.0",
     "env-var": "^7.5.0",
-    "simple-git": "^3.30.0",
+    "simple-git": "^3.32.3",
     "zod": "^4.2.1"
   },
   "peerDependencies": {
