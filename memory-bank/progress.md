@@ -21,4 +21,6 @@
 - updated agentic release-property tests and public docs references to the new `docs/src/content/docs` structure and `packages/agentic` naming
 - verified the retained monorepo end to end across TypeScript, Python, docs unit tests, and docs Playwright e2e
 - confirmed the docs duplicate-id warning was cache churn; a clean docs build now runs without that warning after clearing stale `.astro` state
-- narrowed the next cleanup target to the remaining `@jbcom/agentic-triage` lint warnings and complexity debt
+- cleared the remaining Biome warning set in `@jbcom/agentic-triage` by refactoring escalation/connectors helpers and tightening tests
+- re-ran the full TypeScript workspace gate after the triage cleanup and kept it green
+- narrowed the next cleanup target to build-time `tsup` unused-import noise in `@jbcom/agentic-triage`

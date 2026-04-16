@@ -80,5 +80,5 @@ Cleanup completed:
 
 Remaining work should focus on:
 
-- driving down remaining `@jbcom/agentic-triage` lint warnings and complexity hotspots
+- driving down remaining build-time `tsup` unused-import noise in `@jbcom/agentic-triage`
 - continuing production-readiness work in triage and crew
