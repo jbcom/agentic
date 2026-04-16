@@ -553,20 +553,37 @@ export class GitHubClient {
     const pr = await this.getPR(prNumber);
     const ref = pr.head.sha;
 
-    const { data: checkRuns } = await octokit.checks.listForRef({
-      owner,
-      repo,
-      ref,
-    });
+    const [{ data: checkRuns }, { data: combinedStatus }] = await Promise.all([
+      octokit.checks.listForRef({
+        owner,
+        repo,
+        ref,
+      }),
+      octokit.repos.getCombinedStatusForRef({
+        owner,
+        repo,
+        ref,
+      }),
+    ]);
 
-    const checks: CICheck[] = checkRuns.check_runs.map((run) => ({
-      name: run.name,
-      status: this.mapCheckStatus(run.status, run.conclusion),
-      conclusion: run.conclusion,
-      url: run.html_url ?? '',
-      startedAt: run.started_at,
-      completedAt: run.completed_at,
-    }));
+    const checks: CICheck[] = [
+      ...checkRuns.check_runs.map((run) => ({
+        name: run.name,
+        status: this.mapCheckStatus(run.status, run.conclusion),
+        conclusion: run.conclusion,
+        url: run.html_url ?? '',
+        startedAt: run.started_at,
+        completedAt: run.completed_at,
+      })),
+      ...combinedStatus.statuses.map((status) => ({
+        name: status.context ?? 'commit-status',
+        status: this.mapCommitStatusState(status.state),
+        conclusion: status.state,
+        url: status.target_url ?? '',
+        startedAt: status.created_at,
+        completedAt: status.updated_at,
+      })),
+    ];
 
     const failures = checks.filter((c) => c.status === 'failure');
     const pending = checks.filter((c) => c.status === 'pending' || c.status === 'in_progress');
@@ -585,6 +602,12 @@ export class GitHubClient {
     if (conclusion === 'success') return 'success';
     if (conclusion === 'failure' || conclusion === 'timed_out') return 'failure';
     if (conclusion === 'skipped' || conclusion === 'cancelled') return 'skipped';
+    return 'pending';
+  }
+
+  private mapCommitStatusState(state: string): CICheck['status'] {
+    if (state === 'success') return 'success';
+    if (state === 'failure' || state === 'error') return 'failure';
     return 'pending';
   }
 
