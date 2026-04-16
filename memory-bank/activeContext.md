@@ -174,6 +174,14 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts`:
 - added direct handoff coverage for non-`main` default branches and for failure-before-merge when branch resolution cannot succeed
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff changes, again keeping coverage runs sequential to avoid V8 artifact collisions
 
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` and `packages/agentic/src/cli.ts`:
+
+- removed the `handoff initiate --ref` CLI default of `main` so the manager's repository-default-branch resolution is no longer bypassed by the command layer
+- added `handoff takeover --repo <repository>` support and now construct `HandoffManager` with that explicit repository override from the CLI
+- updated generated successor prompts so the takeover command includes `--repo <owner/repo>`, making the prompt self-contained instead of relying on implicit local config
+- extended focused handoff protocol coverage to assert the generated takeover command includes the repository argument alongside the successor branch name
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the CLI/prompt contract fix; when coverage artifact collisions appeared during overlapping runs, cleared `packages/agentic/coverage` and reran sequentially to restore a clean green state
+
 Additional runtime work completed in `packages/agentic/src/github/client.ts`:
 
 - fixed `getCIStatus()` so it now merges classic combined commit-status contexts with check runs instead of treating repos without GitHub Checks as implicitly green

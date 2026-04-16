@@ -104,3 +104,8 @@
 - fixed `packages/agentic/src/handoff/manager.ts` health polling so successors that confirm health and then reach `COMPLETED` or `FINISHED` are still marked healthy, while `CANCELLED` now fails fast instead of timing out
 - extended `packages/agentic/tests/handoff-protocol.test.ts` with coverage for completed-after-confirmation and cancelled-before-confirmation successor states
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-check fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- removed the `packages/agentic/src/cli.ts` `handoff initiate --ref` default of `main` so the manager-level default-branch resolution now actually applies when callers omit `--ref`
+- added `packages/agentic/src/cli.ts` support for `handoff takeover --repo <repository>` and now pass that override into `HandoffManager`
+- updated `packages/agentic/src/handoff/manager.ts` successor prompts so the generated takeover command includes `--repo <owner/repo>` and does not depend on implicit local default-repository config
+- extended `packages/agentic/tests/handoff-protocol.test.ts` to assert the generated takeover command includes the repository argument
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the CLI/prompt contract fix; when coverage artifact collisions appeared during overlapping runs, cleared `packages/agentic/coverage` and reran sequentially to restore a clean green state
