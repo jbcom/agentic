@@ -108,8 +108,16 @@ describe('Handoff Protocol', () => {
       success: true,
       data: {
         agentId,
-        messages: agentId === 'bc-succ' ? [{ type: 'assistant_message', text: 'HANDOFF CONFIRMED' }] : [],
-        totalMessages: agentId === 'bc-succ' ? 1 : 0,
+        messages:
+          agentId === 'bc-pred'
+            ? [
+                {
+                  type: 'assistant_message',
+                  text: '🤝 HANDOFF CONFIRMED\n\nSuccessor agent bc-succ is healthy.\n\n@cursor 🤝 HANDOFF: bc-succ confirmed healthy',
+                },
+              ]
+            : [],
+        totalMessages: agentId === 'bc-pred' ? 1 : 0,
       },
     }));
     cursorApiLaunchAgentMock.mockReset();
@@ -123,6 +131,7 @@ describe('Handoff Protocol', () => {
       data: { status: 'RUNNING' },
     });
     cursorApiAddFollowupMock.mockReset();
+    cursorApiAddFollowupMock.mockResolvedValue({ success: true });
   });
 
   describe('Branch Name Validation', () => {
@@ -494,7 +503,7 @@ describe('Handoff Protocol', () => {
         successorId: 'bc-succ',
         successorHealthy: true,
       });
-      expect(cursorApiGetAgentConversationMock).toHaveBeenCalledWith('bc-succ');
+      expect(cursorApiGetAgentConversationMock).toHaveBeenCalledWith('bc-pred');
     });
 
     it('marks the successor unhealthy immediately when it is cancelled before confirming health', async () => {
@@ -538,6 +547,20 @@ describe('Handoff Protocol', () => {
       await expect(
         manager.confirmHealthAndBegin('bc-succ', 'bc-pred')
       ).rejects.toThrow('Cursor API not available');
+    });
+
+    it('should throw when posting the health confirmation followup fails', async () => {
+      cursorApiAddFollowupMock.mockResolvedValue({
+        success: false,
+        error: 'followup rejected',
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      await expect(
+        manager.confirmHealthAndBegin('bc-succ', 'bc-pred')
+      ).rejects.toThrow('Failed to post health confirmation: followup rejected');
     });
   });
 

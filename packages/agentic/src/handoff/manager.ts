@@ -36,6 +36,19 @@ export interface TakeoverOptions {
   deleteBranch?: boolean;
 }
 
+function conversationHasHealthConfirmation(
+  messages: Array<{ text?: string }>,
+  successorId: string
+): boolean {
+  return messages.some((msg) => {
+    const text = msg.text ?? '';
+    return (
+      text.includes(`HANDOFF: ${successorId} confirmed healthy`) ||
+      (text.includes('HANDOFF CONFIRMED') && text.includes(successorId))
+    );
+  });
+}
+
 // ============================================
 // Validation Helpers
 // ============================================
@@ -267,6 +280,7 @@ export class HandoffManager {
     log.info('⏳ Waiting for successor health confirmation...');
     const healthCheckResult = await this.waitForHealthCheck(
       successorId,
+      predecessorId,
       options.healthCheckTimeout ?? 300000
     );
 
@@ -285,7 +299,7 @@ export class HandoffManager {
       throw new Error('Cursor API not available');
     }
 
-    await this.api.addFollowup(predecessorId, {
+    const followupResult = await this.api.addFollowup(predecessorId, {
       text: `🤝 HANDOFF CONFIRMED
 
 Successor agent ${successorId} is healthy and beginning work.
@@ -300,6 +314,10 @@ You can safely conclude your session.
 
 @cursor 🤝 HANDOFF: ${successorId} confirmed healthy`,
     });
+
+    if (!followupResult.success) {
+      throw new Error(`Failed to post health confirmation: ${followupResult.error}`);
+    }
   }
 
   /**
@@ -498,6 +516,7 @@ BEGIN by sending health confirmation NOW.
    */
   private async waitForHealthCheck(
     successorId: string,
+    predecessorId: string,
     timeout: number
   ): Promise<{ healthy: boolean }> {
     if (!this.api) {
@@ -514,14 +533,22 @@ BEGIN by sending health confirmation NOW.
 
       if (status.success && status.data) {
         if (confirmableStatuses.has(status.data.status)) {
-          const conv = await this.api.getAgentConversation(successorId);
-          if (conv.success && conv.data) {
-            const messages = conv.data.messages || [];
-            for (const msg of messages) {
-              if (msg.text?.includes('HANDOFF CONFIRMED')) {
-                return { healthy: true };
-              }
-            }
+          const predecessorConv = await this.api.getAgentConversation(predecessorId);
+          if (
+            predecessorConv.success &&
+            predecessorConv.data &&
+            conversationHasHealthConfirmation(predecessorConv.data.messages || [], successorId)
+          ) {
+            return { healthy: true };
+          }
+
+          const successorConv = await this.api.getAgentConversation(successorId);
+          if (
+            successorConv.success &&
+            successorConv.data &&
+            conversationHasHealthConfirmation(successorConv.data.messages || [], successorId)
+          ) {
+            return { healthy: true };
           }
         }
 
