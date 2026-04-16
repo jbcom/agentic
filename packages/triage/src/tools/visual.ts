@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 import { z } from 'zod';
-import { createTool, resolveModel } from '../ai.js';
+import { resolveModel } from '../ai/model.js';
+import { createTool } from '../ai/tool.js';
 
 export const visualReviewTool = createTool({
     description: 'Perform a visual review of a web page using Playwright and AI analysis.',

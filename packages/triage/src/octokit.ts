@@ -11,7 +11,7 @@
  */
 
 import { execFileSync, execSync } from 'node:child_process';
-import { createGitHubClient, createGraphQLClient, type MCPClient } from './mcp.js';
+import { createGitHubClient, createGraphQLClient, type MCPClient } from './mcp/clients.js';
 
 // Singleton MCP clients
 let _githubClient: MCPClient | null = null;

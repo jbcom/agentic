@@ -1,5 +1,6 @@
 import { z } from 'zod';
-import { createTool, resolveModel } from '../ai.js';
+import { resolveModel } from '../ai/model.js';
+import { createTool } from '../ai/tool.js';
 import { sage } from '../handlers/sage.js';
 
 export const sageTool = createTool({
