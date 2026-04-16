@@ -657,7 +657,7 @@ export class GitHubClient {
         path: null,
         line: null,
         severity,
-        status: 'addressed', // Review summaries are informational
+        status: this.inferReviewStatus(review.state),
         createdAt: review.submitted_at ?? new Date().toISOString(),
         url: review.html_url,
         isAutoResolvable: false,
@@ -699,6 +699,12 @@ export class GitHubClient {
     if (comment.in_reply_to_id) {
       return 'addressed';
     }
+    return 'unaddressed';
+  }
+
+  private inferReviewStatus(state: string): FeedbackStatus {
+    if (state === 'APPROVED') return 'addressed';
+    if (state === 'DISMISSED') return 'dismissed';
     return 'unaddressed';
   }
 

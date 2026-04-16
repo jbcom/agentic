@@ -3,15 +3,21 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const {
   checksListForRefMock,
   getCombinedStatusForRefMock,
+  listReviewCommentsMock,
+  listReviewsMock,
   octokitConstructorMock,
   pullsGetMock,
 } = vi.hoisted(() => {
   const pullsGet = vi.fn();
+  const listReviews = vi.fn();
+  const listReviewComments = vi.fn();
   const checksListForRef = vi.fn();
   const getCombinedStatusForRef = vi.fn();
   const octokitInstance = {
     pulls: {
       get: pullsGet,
+      listReviewComments,
+      listReviews,
     },
     checks: {
       listForRef: checksListForRef,
@@ -24,6 +30,8 @@ const {
   return {
     checksListForRefMock: checksListForRef,
     getCombinedStatusForRefMock: getCombinedStatusForRef,
+    listReviewCommentsMock: listReviewComments,
+    listReviewsMock: listReviews,
     octokitConstructorMock: vi.fn(function MockOctokit() {
       return octokitInstance;
     }),
@@ -42,6 +50,8 @@ describe('GitHubClient runtime behavior', () => {
     pullsGetMock.mockReset();
     checksListForRefMock.mockReset();
     getCombinedStatusForRefMock.mockReset();
+    listReviewsMock.mockReset();
+    listReviewCommentsMock.mockReset();
 
     pullsGetMock.mockResolvedValue({
       data: {
@@ -60,6 +70,12 @@ describe('GitHubClient runtime behavior', () => {
         state: 'success',
         statuses: [],
       },
+    });
+    listReviewsMock.mockResolvedValue({
+      data: [],
+    });
+    listReviewCommentsMock.mockResolvedValue({
+      data: [],
     });
   });
 
@@ -136,6 +152,88 @@ describe('GitHubClient runtime behavior', () => {
         url: 'https://ci.example.test/build/2',
         startedAt: '2026-04-15T12:10:00Z',
         completedAt: '2026-04-15T12:20:00Z',
+      },
+    ]);
+  });
+
+  it('treats changes-requested review summaries as unaddressed feedback', async () => {
+    listReviewsMock.mockResolvedValue({
+      data: [
+        {
+          id: 17,
+          state: 'CHANGES_REQUESTED',
+          body: 'Critical: please fix the failing migration path.',
+          submitted_at: '2026-04-15T13:00:00Z',
+          html_url: 'https://github.com/owner/repo/pull/42#pullrequestreview-17',
+          user: { login: 'reviewer-1' },
+        },
+      ],
+    });
+
+    const client = new GitHubClient({
+      token: 'ghp_test_review_feedback',
+      owner: 'owner',
+      repo: 'repo',
+    });
+
+    const feedback = await client.collectFeedback(42);
+
+    expect(feedback).toEqual([
+      {
+        id: 'review-17',
+        author: 'reviewer-1',
+        body: 'Critical: please fix the failing migration path.',
+        path: null,
+        line: null,
+        severity: 'critical',
+        status: 'unaddressed',
+        createdAt: '2026-04-15T13:00:00Z',
+        url: 'https://github.com/owner/repo/pull/42#pullrequestreview-17',
+        isAutoResolvable: false,
+        suggestedAction: null,
+        resolution: null,
+      },
+    ]);
+  });
+
+  it('treats approved and dismissed review summaries as non-blocking feedback states', async () => {
+    listReviewsMock.mockResolvedValue({
+      data: [
+        {
+          id: 21,
+          state: 'APPROVED',
+          body: 'Looks good to me.',
+          submitted_at: '2026-04-15T13:10:00Z',
+          html_url: 'https://github.com/owner/repo/pull/42#pullrequestreview-21',
+          user: { login: 'reviewer-2' },
+        },
+        {
+          id: 22,
+          state: 'DISMISSED',
+          body: 'Superseded by a newer review.',
+          submitted_at: '2026-04-15T13:12:00Z',
+          html_url: 'https://github.com/owner/repo/pull/42#pullrequestreview-22',
+          user: { login: 'reviewer-3' },
+        },
+      ],
+    });
+
+    const client = new GitHubClient({
+      token: 'ghp_test_review_states',
+      owner: 'owner',
+      repo: 'repo',
+    });
+
+    const feedback = await client.collectFeedback(42);
+
+    expect(feedback.map((item) => ({ id: item.id, status: item.status }))).toEqual([
+      {
+        id: 'review-21',
+        status: 'addressed',
+      },
+      {
+        id: 'review-22',
+        status: 'dismissed',
       },
     ]);
   });
