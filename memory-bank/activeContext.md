@@ -194,3 +194,10 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts` top
 - analyzer-driven triage can now see blocking maintainer comments left on the PR conversation timeline rather than only review summaries and inline review comments
 - added direct runtime coverage for top-level PR comment ingestion in `packages/agentic/tests/github-client-runtime.test.ts`
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR conversation feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/github/client.ts` clone-path handling:
+
+- fixed `cloneRepo()` so authenticated GitHub SSH clone targets like `git@github.com:owner/repo.git` and `ssh://git@github.com/owner/repo.git` are rewritten to tokenized HTTPS URLs instead of being passed through unchanged
+- kept bare `owner/repo` and `https://github.com/...` clone targets on the same tokenized path and preserved stderr redaction for embedded tokens on clone failures
+- added direct clone helper coverage in `packages/agentic/tests/github-client-clone.test.ts` for bare repo names, HTTPS URLs, SSH URLs, token-redacted failures, and no-token early exits
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the clone-path fix, again keeping coverage runs sequential to avoid V8 artifact collisions

@@ -82,3 +82,6 @@
 - fixed `packages/agentic/src/github/client.ts` `collectFeedback()` so it now includes top-level PR conversation comments from `issues.listComments(...)` instead of only inline review comments and review summaries
 - added `packages/agentic/tests/github-client-runtime.test.ts` coverage for top-level PR comment ingestion
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR conversation feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `cloneRepo()` so GitHub SSH clone targets are rewritten onto the tokenized HTTPS path instead of bypassing token injection
+- added `packages/agentic/tests/github-client-clone.test.ts` coverage for bare repo names, HTTPS URLs, SSH URLs, token-redacted failures, and no-token early exits
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the clone-path fix, again keeping coverage runs sequential to avoid V8 artifact collisions
