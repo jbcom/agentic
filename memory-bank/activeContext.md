@@ -126,3 +126,12 @@ Remaining work should now focus on:
 
 - deeper `@jbcom/agentic` triage runtime behavior, especially `resolver.ts`, `analyzer.ts`, and the MCP-backed triage agent layer
 - turning the current comment-only or placeholder resolution paths into more trustworthy runtime behavior before calling the `agentic` triage surface production-stable
+
+Additional runtime work completed in `@jbcom/agentic` triage resolution and analysis:
+
+- hardened `resolver.ts` so review suggestions now apply line-scoped local edits instead of overwriting entire files with the suggestion body
+- added fenced-code extraction for AI-generated fixes, allowing safe local edits when the model returns an actual replacement snippet and falling back to PR comments when the response is not safe to apply
+- added direct resolver coverage for safe suggestion application, unsafe-suggestion refusal, local fenced-fix application, comment fallback, and inline-comment justification replies
+- fixed `analyzer.ts` review blocker classification so mixed critical/high feedback is only considered auto-resolvable when every blocking item can be automated
+- added direct analyzer coverage for blocked vs. needs-work review feedback mixes and clean ready-to-merge PR classification
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the resolver and analyzer changes and kept everything green

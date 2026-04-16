@@ -50,3 +50,8 @@
 - fixed `packages/agentic/src/triage/triage.ts` plan generation so CI-only remediation no longer creates self-referential re-review dependencies and merged or closed PRs now return empty plans
 - added `packages/agentic/tests/triage-orchestration.test.ts` to cover direct orchestration behavior for planning, resolution aggregation, review requests, ready-to-merge polling, and report formatting
 - re-ran `agentic` lint, build, typecheck, and coverage plus the full TypeScript workspace gate after the orchestration work and kept everything green
+- hardened `packages/agentic/src/triage/resolver.ts` so GitHub suggestions and fenced AI fixes now apply targeted local line replacements instead of whole-file overwrites or comment-only placeholders when safe
+- added `packages/agentic/tests/triage-resolver.test.ts` to cover safe suggestion application, unsafe-suggestion refusal, local fenced-fix application, comment fallback, and inline-comment justification replies
+- fixed `packages/agentic/src/triage/analyzer.ts` review blocker classification so mixed high-severity feedback is only auto-resolvable when every blocking item can be automated
+- added `packages/agentic/tests/triage-analyzer.test.ts` to cover blocked vs. needs-work review feedback mixes and clean ready-to-merge PR classification
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the resolver/analyzer work and kept everything green
