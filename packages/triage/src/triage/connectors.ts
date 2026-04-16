@@ -39,6 +39,7 @@ import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
 
 const execFile = promisify(execFileCb);
+import { getPRReviewComments, getPRReviews, getPRReviewThreads } from '../octokit.js';
 import { createBestProvider, createProvider, type ProviderConfig } from '../providers/index.js';
 import type {
     CreateIssueOptions,
@@ -487,94 +488,6 @@ class ProjectAPI {
 class ReviewAPI {
     constructor(private connectors: TriageConnectors) {}
 
-    private async fetchGitHubJsonLines(repo: string | undefined, resource: string, jq: string): Promise<string> {
-        const path = await this.getRepoApiPath(repo, resource);
-        return this.gh(['api', ...path, '--jq', jq]);
-    }
-
-    private parseJsonLines<T>(jsonl: string, mapper: (data: Record<string, unknown>) => T | undefined): T[] {
-        if (!jsonl) {
-            return [];
-        }
-
-        const items: T[] = [];
-        for (const line of jsonl.split('\n')) {
-            if (!line.trim()) {
-                continue;
-            }
-
-            try {
-                const parsed = mapper(JSON.parse(line) as Record<string, unknown>);
-                if (parsed) {
-                    items.push(parsed);
-                }
-            } catch {
-                // Skip malformed lines
-            }
-        }
-
-        return items;
-    }
-
-    private mapGitHubReviewComment(data: Record<string, unknown>): {
-        id: string;
-        body: string;
-        author: string;
-        path?: string;
-        line?: number;
-    } {
-        return {
-            id: String(data.id),
-            body: typeof data.body === 'string' ? data.body : '',
-            author: typeof data.author === 'string' ? data.author : 'unknown',
-            path: typeof data.path === 'string' ? data.path : undefined,
-            line: typeof data.line === 'number' ? data.line : undefined,
-        };
-    }
-
-    private mapGitHubIssueComment(data: Record<string, unknown>): {
-        id: string;
-        body: string;
-        author: string;
-    } {
-        return {
-            id: String(data.id),
-            body: typeof data.body === 'string' ? data.body : '',
-            author: typeof data.author === 'string' ? data.author : 'unknown',
-        };
-    }
-
-    private mapGitHubReviewFeedback(data: Record<string, unknown>): {
-        id: string;
-        body: string;
-        author: string;
-        type: 'comment' | 'change_request';
-    } | undefined {
-        const state = typeof data.state === 'string' ? data.state : '';
-        const body = typeof data.body === 'string' ? data.body : '';
-        const author = typeof data.author === 'string' ? data.author : 'unknown';
-
-        if (state === 'CHANGES_REQUESTED') {
-            return {
-                id: String(data.id),
-                body: body || 'Changes requested',
-                author,
-                type: 'change_request',
-            };
-        }
-
-        if (state === 'COMMENTED' && body) {
-            return {
-                id: String(data.id),
-                body,
-                author,
-                type: 'comment',
-            };
-        }
-
-        return undefined;
-    }
-
     /**
      * Get PR review comments.
      *
@@ -652,21 +565,23 @@ class ReviewAPI {
         }[]
     > {
         try {
-            const repo = this.connectors.getRepo();
-            const reviewCommentsJson = await this.fetchGitHubJsonLines(
-                repo,
-                `pulls/${prNumber}/comments`,
-                '.[] | {id: .id, body: .body, author: .user.login, path: .path, line: (.line // .original_line)}'
-            );
-            const issueCommentsJson = await this.fetchGitHubJsonLines(
-                repo,
-                `issues/${prNumber}/comments`,
-                '.[] | {id: .id, body: .body, author: .user.login}'
-            );
+            const [reviews, reviewComments] = await Promise.all([getPRReviews(prNumber), getPRReviewComments(prNumber)]);
 
             return [
-                ...this.parseJsonLines(reviewCommentsJson, (data) => this.mapGitHubReviewComment(data)),
-                ...this.parseJsonLines(issueCommentsJson, (data) => this.mapGitHubIssueComment(data)),
+                ...reviews
+                    .filter((review) => review.state === 'COMMENTED' && review.body)
+                    .map((review) => ({
+                        id: String(review.id),
+                        body: review.body,
+                        author: review.user,
+                    })),
+                ...reviewComments.map((comment) => ({
+                    id: String(comment.id),
+                    body: comment.body,
+                    author: comment.user,
+                    path: comment.path,
+                    line: comment.line,
+                })),
             ];
         } catch {
             return [];
@@ -685,26 +600,53 @@ class ReviewAPI {
         }[]
     > {
         try {
-            const repo = this.connectors.getRepo();
-            const reviewsJson = await this.fetchGitHubJsonLines(
-                repo,
-                `pulls/${prNumber}/reviews`,
-                '.[] | {id: .id, body: .body, author: .user.login, state: .state}'
-            );
-            const feedback = this.parseJsonLines(reviewsJson, (data) => this.mapGitHubReviewFeedback(data));
+            const [reviews, threads] = await Promise.all([getPRReviews(prNumber), getPRReviewThreads(prNumber)]);
+            const feedback: Array<{
+                id: string;
+                body: string;
+                author: string;
+                type: 'comment' | 'change_request';
+            }> = [];
 
-            // Also get unresolved review comments (inline)
-            const comments = await this.getGitHubPRComments(prNumber);
-            const inlineFeedback = comments
-                .filter((comment) => comment.path)
-                .map((comment) => ({
-                    id: comment.id,
-                    body: comment.body,
-                    author: comment.author,
-                    type: 'comment' as const,
-                }));
+            for (const review of reviews) {
+                if (review.state === 'CHANGES_REQUESTED') {
+                    feedback.push({
+                        id: String(review.id),
+                        body: review.body || 'Changes requested',
+                        author: review.user,
+                        type: 'change_request',
+                    });
+                    continue;
+                }
 
-            return [...feedback, ...inlineFeedback];
+                if (review.state === 'COMMENTED' && review.body) {
+                    feedback.push({
+                        id: String(review.id),
+                        body: review.body,
+                        author: review.user,
+                        type: 'comment',
+                    });
+                }
+            }
+
+            const unresolvedThreadFeedback: Array<{
+                id: string;
+                body: string;
+                author: string;
+                type: 'comment' | 'change_request';
+            }> = threads
+                .filter((thread) => !thread.isResolved && !thread.isOutdated && thread.comments.length > 0)
+                .map((thread) => {
+                    const latestComment = thread.comments[thread.comments.length - 1];
+                    return {
+                        id: latestComment.id,
+                        body: latestComment.body,
+                        author: latestComment.author,
+                        type: 'comment' as const,
+                    };
+                });
+
+            return [...feedback, ...unresolvedThreadFeedback];
         } catch {
             return [];
         }
