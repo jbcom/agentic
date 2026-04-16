@@ -150,3 +150,11 @@ Additional runtime work completed in `mcp-clients.ts`:
 - fixed a bug where custom tokenless stdio MCP servers were silently skipped unless they were on a hardcoded optional-server list
 - added direct MCP client coverage for override-based disabling, custom tokenless server initialization, override token injection, tool namespacing/error isolation, and close-time error isolation
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the MCP client changes and kept everything green
+
+Additional runtime work completed in `packages/agentic/src/triage/agent.ts` tool execution:
+
+- fixed an approval-policy gap so dangerous bash commands now always consult `onApprovalRequest` even when `bash` is not explicitly listed in `requireApproval`
+- fixed delete-file approval handling so `delete_file` always requests approval before removing a file, matching the documented safety expectation
+- replaced shell-string git invocations in `git_status` and `git_diff` with `execFileSync('git', [...])`, removing argument interpolation risk and making validated filenames with spaces or shell metacharacters safe to pass through
+- added direct tool-layer coverage for dangerous bash rejection, mandatory delete approval, safe `git diff` argument handling, and editor path-traversal security failures
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the tool-security changes, keeping the coverage runs sequential so generated V8 artifacts do not collide

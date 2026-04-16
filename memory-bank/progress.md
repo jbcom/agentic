@@ -62,3 +62,7 @@
 - fixed `packages/agentic/src/triage/mcp-clients.ts` so per-call `enabled: false` overrides actually disable default servers and custom tokenless stdio servers can initialize without being on a hardcoded allowlist
 - added `packages/agentic/tests/triage-mcp-clients.test.ts` to cover override-based disabling, custom tokenless server initialization, override token injection, namespaced tool collection, and close-time error isolation
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the MCP client work, keeping the coverage runs sequential so generated V8 artifacts do not collide
+- fixed `packages/agentic/src/triage/agent.ts` so dangerous bash commands and `delete_file` operations always consult the approval callback instead of bypassing it when the tool name is not listed in `requireApproval`
+- switched `packages/agentic/src/triage/agent.ts` git helper tools from shell-string `execSync(...)` calls to `execFileSync('git', [...])`, removing argument interpolation risk for validated filenames with spaces or shell metacharacters
+- added `packages/agentic/tests/triage-agent-tools.test.ts` to cover dangerous bash rejection, mandatory delete approval, safe `git diff` argument handling, and editor path-traversal failures
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the tool-approval and git-execution hardening, keeping the coverage runs sequential so generated V8 artifacts do not collide
