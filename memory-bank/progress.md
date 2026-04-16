@@ -59,3 +59,6 @@
 - added `packages/agentic/tests/triage-agent-runtime.test.ts` to cover `Agent` post-close reinitialization and concurrent initialization lock behavior
 - added `packages/agentic/tests/triage-pr-agent.test.ts` to cover MCP-backed PR analysis, ready-workflow execution, blocked-workflow exit, post-close reinitialization, concurrent initialization locking, and `triagePR()` cleanup on failure
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent-layer work; when a concurrent coverage run corrupted `packages/agentic/coverage/.tmp`, cleaned the generated coverage directory and re-ran verification sequentially to restore a green state
+- fixed `packages/agentic/src/triage/mcp-clients.ts` so per-call `enabled: false` overrides actually disable default servers and custom tokenless stdio servers can initialize without being on a hardcoded allowlist
+- added `packages/agentic/tests/triage-mcp-clients.test.ts` to cover override-based disabling, custom tokenless server initialization, override token injection, namespaced tool collection, and close-time error isolation
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the MCP client work, keeping the coverage runs sequential so generated V8 artifacts do not collide

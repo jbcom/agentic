@@ -143,3 +143,10 @@ Additional runtime work completed in the MCP-backed triage agent layer:
 - added direct `PRTriageAgent` coverage for MCP-backed analysis, ready-to-merge workflow execution, blocked workflow exit, post-close reinitialization, concurrent initialization locking, and `triagePR()` cleanup on failure
 - verified that `PRTriageAgent` now formats and returns stable reports while exercising the real workflow methods instead of only lower-level helpers
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent-layer changes and kept everything green
+
+Additional runtime work completed in `mcp-clients.ts`:
+
+- fixed a bug where per-call overrides like `{ github: { enabled: false } }` did not actually disable a default MCP server because the enabled check ran before overrides were merged
+- fixed a bug where custom tokenless stdio MCP servers were silently skipped unless they were on a hardcoded optional-server list
+- added direct MCP client coverage for override-based disabling, custom tokenless server initialization, override token injection, tool namespacing/error isolation, and close-time error isolation
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the MCP client changes and kept everything green
