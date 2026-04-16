@@ -66,3 +66,6 @@
 - switched `packages/agentic/src/triage/agent.ts` git helper tools from shell-string `execSync(...)` calls to `execFileSync('git', [...])`, removing argument interpolation risk for validated filenames with spaces or shell metacharacters
 - added `packages/agentic/tests/triage-agent-tools.test.ts` to cover dangerous bash rejection, mandatory delete approval, safe `git diff` argument handling, and editor path-traversal failures
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the tool-approval and git-execution hardening, keeping the coverage runs sequential so generated V8 artifacts do not collide
+- hardened `packages/agentic/src/triage/agent.ts` `fixFile()` helper to validate its target path up front and use `git diff -- <path>` when collecting post-fix diffs, so traversal attempts fail fast and filenames beginning with `-` are treated as pathspecs instead of git options
+- extended `packages/agentic/tests/triage-agent-tools.test.ts` with direct `fixFile()` coverage for traversal rejection and option-like filenames such as `--stat.ts`
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the `fixFile()` hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions

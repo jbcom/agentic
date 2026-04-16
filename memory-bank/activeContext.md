@@ -158,3 +158,10 @@ Additional runtime work completed in `packages/agentic/src/triage/agent.ts` tool
 - replaced shell-string git invocations in `git_status` and `git_diff` with `execFileSync('git', [...])`, removing argument interpolation risk and making validated filenames with spaces or shell metacharacters safe to pass through
 - added direct tool-layer coverage for dangerous bash rejection, mandatory delete approval, safe `git diff` argument handling, and editor path-traversal security failures
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the tool-security changes, keeping the coverage runs sequential so generated V8 artifacts do not collide
+
+Additional runtime work completed in `packages/agentic/src/triage/agent.ts` convenience helpers:
+
+- hardened `fixFile()` so it now validates target paths before execution instead of accepting traversal attempts into the convenience API
+- normalized `fixFile()` diff collection onto `git diff -- <path>` so filenames beginning with `-` are treated as pathspecs rather than git options
+- added direct coverage for traversal rejection in `fixFile()` and for option-like filenames such as `--stat.ts`
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the `fixFile()` hardening, again keeping coverage runs sequential to avoid V8 artifact collisions
