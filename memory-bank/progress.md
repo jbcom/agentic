@@ -47,3 +47,6 @@
 - made unresolved PR feedback filter to non-resolved, non-outdated review threads and surface the latest comment from each active thread
 - added GitHub-specific connector tests for review comment mapping and unresolved feedback filtering with mocked `octokit` helpers
 - re-ran `triage` lint, build, typecheck, and coverage plus the full TypeScript workspace gate and kept everything green
+- fixed `packages/agentic/src/triage/triage.ts` plan generation so CI-only remediation no longer creates self-referential re-review dependencies and merged or closed PRs now return empty plans
+- added `packages/agentic/tests/triage-orchestration.test.ts` to cover direct orchestration behavior for planning, resolution aggregation, review requests, ready-to-merge polling, and report formatting
+- re-ran `agentic` lint, build, typecheck, and coverage plus the full TypeScript workspace gate after the orchestration work and kept everything green

@@ -113,3 +113,16 @@ Additional runtime work completed in `@jbcom/agentic-triage`:
 - general GitHub review summaries are still surfaced, but unresolved thread feedback now uses the latest comment from each still-open thread
 - added connector tests that stub GitHub review comments, reviews, and review threads to verify mapping and unresolved filtering behavior
 - verified `triage` with lint, build, typecheck, coverage tests, and the full TypeScript workspace gate
+
+Additional runtime work completed in `@jbcom/agentic` triage orchestration:
+
+- fixed `Triage.plan()` so CI-only remediation plans no longer create a self-referential "Request re-review" dependency
+- made plan generation status-aware for merged and closed PRs, returning no-op plans instead of suggesting follow-up work on already-finished pull requests
+- tightened "wait for CI" and merge-step dependency wiring so the returned sequence reflects the actual preceding remediation steps
+- added direct orchestration coverage for `plan()`, `resolve()`, `runUntilReady()`, `requestReviews()`, and report formatting via mocked `Analyzer`, `Resolver`, and `GitHubClient` collaborators
+- re-ran `agentic` lint, build, typecheck, coverage tests, and the full TypeScript workspace gate after the orchestration changes and kept everything green
+
+Remaining work should now focus on:
+
+- deeper `@jbcom/agentic` triage runtime behavior, especially `resolver.ts`, `analyzer.ts`, and the MCP-backed triage agent layer
+- turning the current comment-only or placeholder resolution paths into more trustworthy runtime behavior before calling the `agentic` triage surface production-stable
