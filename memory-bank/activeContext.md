@@ -201,3 +201,10 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts` clo
 - kept bare `owner/repo` and `https://github.com/...` clone targets on the same tokenized path and preserved stderr redaction for embedded tokens on clone failures
 - added direct clone helper coverage in `packages/agentic/tests/github-client-clone.test.ts` for bare repo names, HTTPS URLs, SSH URLs, token-redacted failures, and no-token early exits
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the clone-path fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/github/client.ts` static PR comment pagination:
+
+- fixed `listPRComments()` so it now paginates through all PR issue-comment pages instead of returning only the first 100 comments
+- this closes a fleet coordination failure mode where new `@cursor` instructions on long-lived coordination PRs could disappear once the PR exceeded 100 comments
+- added direct static-client coverage in `packages/agentic/tests/github-client-static.test.ts` for multi-page PR comment retrieval across page 1 and page 2
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
