@@ -141,6 +141,7 @@ export class PRTriageAgent {
 
     try {
       await this.initializationPromise;
+      this.initializationPromise = null;
     } catch (error) {
       // Reset on failure so retry is possible
       this.initializationPromise = null;
@@ -164,6 +165,7 @@ export class PRTriageAgent {
       this.mcpClients = null;
     }
     this.initialized = false;
+    this.initializationPromise = null;
   }
 
   /**

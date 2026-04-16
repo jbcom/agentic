@@ -159,6 +159,7 @@ export class Agent {
 
     try {
       await this.initializationPromise;
+      this.initializationPromise = null;
     } catch (error) {
       // Reset on failure so retry is possible
       this.initializationPromise = null;
@@ -189,6 +190,7 @@ export class Agent {
       this.mcpClients = null;
     }
     this.initialized = false;
+    this.initializationPromise = null;
   }
 
   // ─────────────────────────────────────────────────────────────────
