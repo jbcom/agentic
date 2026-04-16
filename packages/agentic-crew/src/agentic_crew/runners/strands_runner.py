@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentic_crew.runners.base import BaseRunner
+from agentic_crew.tools.adapters import resolve_strands_tools
 
 
 class StrandsRunner(BaseRunner):
@@ -183,14 +184,8 @@ class StrandsRunner(BaseRunner):
         return "\n".join(parts)
 
     def _collect_tools(self, crew_config: dict[str, Any]) -> list:
-        """Collect tools from crew configuration.
-
-        Args:
-            crew_config: Crew configuration.
-
-        Returns:
-            List of tool functions.
-        """
-        # For now, return empty - tools should be provided separately
-        # Could be enhanced to auto-discover tools from task definitions
-        return []
+        """Collect tools declared by agents in crew configuration."""
+        tool_names: list[str] = []
+        for agent_cfg in crew_config.get("agents", {}).values():
+            tool_names.extend(agent_cfg.get("tools", []))
+        return resolve_strands_tools(tool_names)

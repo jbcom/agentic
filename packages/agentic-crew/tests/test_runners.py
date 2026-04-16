@@ -440,6 +440,33 @@ class TestLangGraphRunner:
         # Verify create_react_agent was called twice
         assert mock_create.call_count == 2
 
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Configured agent tools should be adapted for LangGraph crews."""
+        crew_mocker.mock_langgraph()
+
+        from agentic_crew.runners.langgraph_runner import LangGraphRunner
+
+        mock_create = crew_mocker.patch_create_react_agent()
+        crew_mocker.patch_chat_anthropic()
+        resolved_tool = crew_mocker.MagicMock()
+        crew_mocker.patch("agentic_crew.runners.langgraph_runner.resolve_langgraph_tools", return_value=[resolved_tool])
+
+        runner = LangGraphRunner()
+        crew_config = {
+            "llm": {"model": "claude-sonnet-4-20250514"},
+            "agents": {
+                "researcher": {
+                    "tools": ["ScrapeWebsiteTool"],
+                }
+            },
+            "tasks": {},
+        }
+
+        runner.build_crew(crew_config)
+
+        mock_create.assert_called_once()
+        assert mock_create.call_args[0][1] == [resolved_tool]
+
 
 class TestStrandsRunner:
     """Tests for Strands runner implementation."""
@@ -691,6 +718,31 @@ class TestStrandsRunner:
         assert "Writer" in system_prompt
         assert "Research topics" in system_prompt
         assert "Write content" in system_prompt
+
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Configured agent tools should be adapted for Strands crews."""
+        crew_mocker.mock_strands()
+
+        from agentic_crew.runners.strands_runner import StrandsRunner
+
+        MockAgent = crew_mocker.patch_strands_agent()
+        resolved_tool = crew_mocker.MagicMock()
+        crew_mocker.patch("agentic_crew.runners.strands_runner.resolve_strands_tools", return_value=[resolved_tool])
+
+        runner = StrandsRunner()
+        crew_config = {
+            "description": "Test crew",
+            "agents": {
+                "writer": {
+                    "tools": ["FileWriteTool"],
+                }
+            },
+            "tasks": {},
+        }
+
+        runner.build_crew(crew_config)
+
+        assert MockAgent.call_args[1]["tools"] == [resolved_tool]
 
 
 class TestBaseRunner:
