@@ -566,35 +566,47 @@ export class Fleet {
   ): Promise<void> {
     while (true) {
       try {
-        // Use GitHubClient for safe API calls (no shell injection)
-        const commentsResult = await GitHubClient.listPRComments(
-          owner,
-          repo,
-          config.coordinationPr
-        );
-
-        if (!commentsResult.success || !commentsResult.data) {
-          log.warn('[INBOUND] Failed to fetch comments:', commentsResult.error);
-          await new Promise((r) => setTimeout(r, interval));
-          continue;
-        }
-
-        for (const comment of commentsResult.data) {
-          if (processedIds.has(comment.id)) continue;
-
-          if (comment.body.includes('@cursor')) {
-            log.info(`[INBOUND] New @cursor mention from ${comment.author}`);
-            await this.processCoordinationComment(owner, repo, config, agentIds, comment);
-          }
-
-          processedIds.add(comment.id);
-        }
+        await this.pollCoordinationComments(owner, repo, config, agentIds, processedIds);
       } catch (err) {
         log.error('[INBOUND ERROR]', err);
       }
 
       await new Promise((r) => setTimeout(r, interval));
     }
+  }
+
+  private async pollCoordinationComments(
+    owner: string,
+    repo: string,
+    config: CoordinationConfig,
+    agentIds: Set<string>,
+    processedIds: Set<number>
+  ): Promise<void> {
+    const commentsResult = await GitHubClient.listPRComments(owner, repo, config.coordinationPr);
+
+    if (!commentsResult.success || !commentsResult.data) {
+      log.warn('[INBOUND] Failed to fetch comments:', commentsResult.error);
+      return;
+    }
+
+    for (const comment of commentsResult.data) {
+      if (processedIds.has(comment.id)) continue;
+
+      if (this.isCoordinationComment(comment.body)) {
+        if (comment.body.includes('@cursor')) {
+          log.info(`[INBOUND] New @cursor mention from ${comment.author}`);
+        }
+        await this.processCoordinationComment(owner, repo, config, agentIds, comment);
+      }
+
+      processedIds.add(comment.id);
+    }
+  }
+
+  private isCoordinationComment(body: string): boolean {
+    return (
+      body.includes('@cursor') || body.includes('✅ DONE:') || body.includes('⚠️ BLOCKED:')
+    );
   }
 
   private async processCoordinationComment(

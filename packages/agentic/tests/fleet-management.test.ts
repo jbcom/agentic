@@ -4,6 +4,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from 'vitest';
 import { Fleet } from '../src/fleet/fleet.js';
+import { GitHubClient } from '../src/github/client.js';
+
+type TestableFleet = Fleet & {
+  pollCoordinationComments(
+    owner: string,
+    repo: string,
+    config: { repo: string; coordinationPr: number },
+    agentIds: Set<string>,
+    processedIds: Set<number>
+  ): Promise<void>;
+};
 
 describe('Fleet Management', () => {
   let fleet: Fleet;
@@ -298,6 +309,120 @@ describe('Fleet Management', () => {
       expect(result.success).toBe(true);
       expect(result.data?.total).toBe(0);
       expect(result.data?.running).toBe(0);
+    });
+  });
+
+  describe('GitHub Coordination', () => {
+    it('processes DONE coordination comments even without an @cursor mention', async () => {
+      const listPRCommentsSpy = vi
+        .spyOn(GitHubClient, 'listPRComments')
+        .mockResolvedValue({
+          success: true,
+          data: [
+            {
+              id: 101,
+              body: '✅ DONE: bc-123456789abc shipped the fix',
+              author: 'agent-1',
+              createdAt: '2026-04-15T23:00:00Z',
+              updatedAt: '2026-04-15T23:00:10Z',
+            },
+          ],
+        });
+      const postPRCommentSpy = vi
+        .spyOn(GitHubClient, 'postPRComment')
+        .mockResolvedValue({ success: true });
+
+      const agentIds = new Set(['bc-123456789abc']);
+      const processedIds = new Set<number>();
+
+      await (fleet as TestableFleet).pollCoordinationComments(
+        'owner',
+        'repo',
+        { repo: 'owner/repo', coordinationPr: 42 },
+        agentIds,
+        processedIds
+      );
+
+      expect(listPRCommentsSpy).toHaveBeenCalledWith('owner', 'repo', 42);
+      expect(agentIds.has('bc-123456789abc')).toBe(false);
+      expect(processedIds.has(101)).toBe(true);
+      expect(postPRCommentSpy).toHaveBeenCalledWith(
+        'owner',
+        'repo',
+        42,
+        '✅ Acknowledged completion from bc-123456789. Summary: shipped the fix'
+      );
+    });
+
+    it('processes BLOCKED coordination comments even without an @cursor mention', async () => {
+      vi.spyOn(GitHubClient, 'listPRComments').mockResolvedValue({
+        success: true,
+        data: [
+          {
+            id: 102,
+            body: '⚠️ BLOCKED: bc-blocked01 waiting on maintainer review',
+            author: 'agent-2',
+            createdAt: '2026-04-15T23:10:00Z',
+            updatedAt: '2026-04-15T23:10:10Z',
+          },
+        ],
+      });
+      const postPRCommentSpy = vi
+        .spyOn(GitHubClient, 'postPRComment')
+        .mockResolvedValue({ success: true });
+
+      const agentIds = new Set(['bc-blocked01']);
+      const processedIds = new Set<number>();
+
+      await (fleet as TestableFleet).pollCoordinationComments(
+        'owner',
+        'repo',
+        { repo: 'owner/repo', coordinationPr: 42 },
+        agentIds,
+        processedIds
+      );
+
+      expect(agentIds.has('bc-blocked01')).toBe(true);
+      expect(processedIds.has(102)).toBe(true);
+      expect(postPRCommentSpy).toHaveBeenCalledWith(
+        'owner',
+        'repo',
+        42,
+        '⚠️ Agent bc-blocked01 blocked: waiting on maintainer review\n\nManual intervention may be required.'
+      );
+    });
+
+    it('ignores unrelated comments while still marking them as processed', async () => {
+      vi.spyOn(GitHubClient, 'listPRComments').mockResolvedValue({
+        success: true,
+        data: [
+          {
+            id: 103,
+            body: 'Regular coordination chatter with no control signal.',
+            author: 'maintainer-1',
+            createdAt: '2026-04-15T23:20:00Z',
+            updatedAt: '2026-04-15T23:20:10Z',
+          },
+        ],
+      });
+      const postPRCommentSpy = vi
+        .spyOn(GitHubClient, 'postPRComment')
+        .mockResolvedValue({ success: true });
+
+      const agentIds = new Set(['bc-unchanged']);
+      const processedIds = new Set<number>();
+
+      await (fleet as TestableFleet).pollCoordinationComments(
+        'owner',
+        'repo',
+        { repo: 'owner/repo', coordinationPr: 42 },
+        agentIds,
+        processedIds
+      );
+
+      expect(agentIds.has('bc-unchanged')).toBe(true);
+      expect(processedIds.has(103)).toBe(true);
+      expect(postPRCommentSpy).not.toHaveBeenCalled();
     });
   });
 });
