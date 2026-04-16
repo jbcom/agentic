@@ -98,3 +98,6 @@
 - added takeover preflight safety in `packages/agentic/src/handoff/manager.ts` so dirty worktrees and pre-existing successor branches fail before any predecessor PR merge happens
 - added `packages/agentic/tests/handoff-protocol.test.ts` coverage for dirty-worktree and existing-branch fail-before-merge scenarios and updated the non-`main` default-branch test for the new git preflight calls
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover safety hardening, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` `initiateHandoff()` so spawned successors now default to the repository's actual default branch instead of hardcoding `main` when `options.ref` is omitted
+- extended `packages/agentic/tests/handoff-protocol.test.ts` with API-backed coverage for default-branch successor spawn, explicit-ref passthrough, and fail-before-write behavior when default-branch resolution fails
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the successor-ref fix, again keeping coverage runs sequential to avoid V8 artifact collisions

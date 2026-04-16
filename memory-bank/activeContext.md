@@ -230,3 +230,11 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` t
 - this closes a partial-handoff failure mode where the predecessor PR could be merged successfully but the successor would fail immediately on local git state and never establish its own continuation branch
 - added direct handoff coverage in `packages/agentic/tests/handoff-protocol.test.ts` for dirty-worktree and existing-branch fail-before-merge paths, and updated the non-`main` default-branch takeover test to account for the new preflight call order
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover-state hardening, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` successor spawn ref handling:
+
+- fixed `initiateHandoff()` so a spawned successor now defaults to the repository's actual default branch instead of hardcoding `main` when no explicit `ref` is provided
+- refactored default-branch resolution so handoff initiation can resolve against `options.repository` without relying on `this.repo` being preconfigured on the manager instance
+- made handoff initiation fail before writing `.cursor/handoff/.../context.json` or spawning the successor when the repository default branch cannot be resolved
+- added API-backed handoff coverage in `packages/agentic/tests/handoff-protocol.test.ts` for default-branch-based successor spawn, explicit-ref passthrough, and fail-before-write behavior when default-branch resolution fails
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the successor-ref fix, again keeping coverage runs sequential to avoid V8 artifact collisions
