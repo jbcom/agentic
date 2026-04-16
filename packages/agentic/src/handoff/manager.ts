@@ -466,7 +466,7 @@ You are a SUCCESSOR AGENT taking over from predecessor ${context.predecessorId}.
 
 3. **TAKEOVER** from predecessor:
    \`\`\`
-   agentic handoff takeover ${context.predecessorId} ${context.predecessorPr} successor/continue-work-$(date +%Y%m%d)
+   agentic handoff takeover ${context.predecessorId} ${context.predecessorPr} successor/continue-work-$(date +%Y%m%d) --repo ${options.repository}
    \`\`\`
 
 4. **CREATE YOUR OWN HOLD-OPEN PR** and continue work.

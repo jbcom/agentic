@@ -949,7 +949,7 @@ handoffCmd
   )
   .requiredOption('--branch <name>', 'Your current branch name')
   .requiredOption('--repo <url>', 'Repository URL for successor')
-  .option('--ref <ref>', 'Git ref for successor', 'main')
+  .option('--ref <ref>', 'Git ref for successor')
   .option('--tasks <tasks>', 'Comma-separated tasks for successor', '')
   .action(async (predecessorId, opts) => {
     try {
@@ -1008,6 +1008,7 @@ handoffCmd
   .argument('<predecessor-id>', 'Predecessor agent ID')
   .argument('<pr-number>', 'Predecessor PR number', (v) => parsePositiveInt(v, 'pr-number'))
   .argument('<new-branch>', 'Your new branch name', validateBranchName)
+  .option('--repo <repository>', 'Repository to take over')
   .option('--admin', 'Use admin privileges')
   .option('--auto', 'Enable auto-merge')
   .addOption(
@@ -1017,7 +1018,7 @@ handoffCmd
   )
   .action(async (predecessorId, prNumber, newBranch, opts) => {
     try {
-      const manager = new HandoffManager();
+      const manager = new HandoffManager({ repo: opts.repo });
 
       console.log('🔄 Taking over from predecessor...\n');
 

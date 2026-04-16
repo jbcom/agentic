@@ -413,6 +413,15 @@ describe('Handoff Protocol', () => {
           },
         })
       );
+      expect(cursorApiLaunchAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          prompt: expect.objectContaining({
+            text: expect.stringContaining(
+              'agentic handoff takeover bc-pred 1 successor/continue-work-$(date +%Y%m%d) --repo owner/repo'
+            ),
+          }),
+        })
+      );
       expect(writeFileSyncMock).toHaveBeenCalled();
     });
 
