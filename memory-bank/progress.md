@@ -76,3 +76,6 @@
 - fixed `packages/agentic/src/github/client.ts` `getCIStatus()` so it combines classic commit statuses with check runs instead of reporting status-context-only repos as green when `check_runs` is empty
 - added `packages/agentic/tests/github-client-runtime.test.ts` to cover pending and failing combined-status contexts with no GitHub Check Runs present
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the GitHub CI-status hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` review-summary feedback mapping so `CHANGES_REQUESTED` and other non-terminal review states are no longer marked addressed by default
+- added `packages/agentic/tests/github-client-runtime.test.ts` coverage for changes-requested, approved, and dismissed review-summary states
+- re-ran `agentic` tests, `agentic` coverage, and the full TypeScript workspace gate after the GitHub review-feedback fix, again keeping the coverage runs sequential to avoid V8 artifact collisions

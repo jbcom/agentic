@@ -180,3 +180,10 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts`:
 - classic commit statuses in `pending`, `error`, and `failure` states now flow into the returned `checks`, `failures`, `anyPending`, and `allPassing` fields correctly
 - added direct runtime coverage for legacy commit-status-only repos, including pending and failing status contexts with no check runs present
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the GitHub client changes, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/github/client.ts` review feedback mapping:
+
+- fixed `collectFeedback()` so review-summary feedback now derives its status from the underlying GitHub review state instead of hardcoding every summary item as already addressed
+- `CHANGES_REQUESTED`, `COMMENTED`, and other non-terminal review states now remain `unaddressed`, while `APPROVED` maps to `addressed` and `DISMISSED` maps to `dismissed`
+- added direct runtime coverage for changes-requested review summaries and for approved versus dismissed review-summary handling in `packages/agentic/tests/github-client-runtime.test.ts`
+- re-ran `agentic` tests, `agentic` coverage, and the full TypeScript workspace gate after the review-feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
