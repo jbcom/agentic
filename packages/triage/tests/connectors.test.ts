@@ -1,5 +1,11 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { TriageConnectors } from '../src/triage/connectors.js';
+import type { TriageIssue } from '../src/providers/types.js';
+
+function requireIssue(issue: TriageIssue | null): TriageIssue {
+    expect(issue).not.toBeNull();
+    return issue as TriageIssue;
+}
 
 /**
  * Tests for TriageConnectors ProjectAPI and ReviewAPI implementations.
@@ -39,9 +45,8 @@ describe('TriageConnectors', () => {
             expect(created.title).toBe('Test issue');
             expect(created.type).toBe('bug');
 
-            const retrieved = await connectors.issues.get(created.id);
-            expect(retrieved).not.toBeNull();
-            expect(retrieved!.title).toBe('Test issue');
+            const retrieved = requireIssue(await connectors.issues.get(created.id));
+            expect(retrieved.title).toBe('Test issue');
         });
 
         it('should list issues', async () => {
@@ -95,13 +100,13 @@ describe('TriageConnectors', () => {
             const issue = await connectors.issues.create({ title: 'Labels test' });
             await connectors.issues.addLabels(issue.id, ['bug', 'urgent']);
 
-            let updated = await connectors.issues.get(issue.id);
-            expect(updated!.labels).toContain('bug');
-            expect(updated!.labels).toContain('urgent');
+            let updated = requireIssue(await connectors.issues.get(issue.id));
+            expect(updated.labels).toContain('bug');
+            expect(updated.labels).toContain('urgent');
 
             await connectors.issues.removeLabels(issue.id, ['urgent']);
-            updated = await connectors.issues.get(issue.id);
-            expect(updated!.labels).toEqual(['bug']);
+            updated = requireIssue(await connectors.issues.get(issue.id));
+            expect(updated.labels).toEqual(['bug']);
         });
 
         it('should get blocked issues', async () => {

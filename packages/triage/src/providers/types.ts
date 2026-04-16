@@ -314,25 +314,37 @@ export type ProviderConfig = GitHubProviderConfig | BeadsProviderConfig | JiraPr
 // Utility Functions
 // =============================================================================
 
+const STRING_PRIORITY_MAP: Record<string, IssuePriority> = {
+    critical: 'critical',
+    highest: 'critical',
+    p0: 'critical',
+    high: 'high',
+    p1: 'high',
+    medium: 'medium',
+    p2: 'medium',
+    low: 'low',
+    p3: 'low',
+    lowest: 'backlog',
+    backlog: 'backlog',
+    p4: 'backlog',
+};
+
+const NUMBER_PRIORITY_MAP: Record<number, IssuePriority> = {
+    0: 'critical',
+    1: 'high',
+    2: 'medium',
+    3: 'low',
+};
+
 /**
  * Map provider priority values to normalized priority
  */
 export function normalizePriority(value: number | string): IssuePriority {
     if (typeof value === 'string') {
-        const lower = value.toLowerCase();
-        if (lower === 'critical' || lower === 'highest' || lower === 'p0') return 'critical';
-        if (lower === 'high' || lower === 'p1') return 'high';
-        if (lower === 'medium' || lower === 'medium' || lower === 'p2') return 'medium';
-        if (lower === 'low' || lower === 'p3') return 'low';
-        if (lower === 'lowest' || lower === 'backlog' || lower === 'p4') return 'backlog';
-        return 'medium';
+        return STRING_PRIORITY_MAP[value.toLowerCase()] ?? 'medium';
     }
-    // Numeric: 0=critical, 1=high, 2=medium, 3=low, 4+=backlog
-    if (value === 0) return 'critical';
-    if (value === 1) return 'high';
-    if (value === 2) return 'medium';
-    if (value === 3) return 'low';
-    return 'backlog';
+
+    return NUMBER_PRIORITY_MAP[value] ?? 'backlog';
 }
 
 /**

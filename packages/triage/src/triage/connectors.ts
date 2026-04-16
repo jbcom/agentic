@@ -149,6 +149,10 @@ export class TriageConnectors {
         await this.getProvider();
     }
 
+    getRepo(): string | undefined {
+        return this.config.repo;
+    }
+
     private async initializeProvider(): Promise<void> {
         if (this.config.provider) {
             this._provider = createProvider(this.config.provider);
@@ -435,7 +439,7 @@ class ProjectAPI {
      */
     private async getGitHubMilestones(state: 'open' | 'closed' | 'all'): Promise<{ id: string; name: string; status: string }[]> {
         try {
-            const repo = this.connectors['config'].repo;
+            const repo = this.connectors.getRepo();
             const args = ['api', `repos/${repo}/milestones`, '--jq', '.[] | {number, title, state}'];
             if (state !== 'all') {
                 args.splice(2, 0, '-f', `state=${state}`);
@@ -478,6 +482,94 @@ class ProjectAPI {
  */
 class ReviewAPI {
     constructor(private connectors: TriageConnectors) {}
+
+    private async fetchGitHubJsonLines(repo: string | undefined, resource: string, jq: string): Promise<string> {
+        const path = await this.getRepoApiPath(repo, resource);
+        return this.gh(['api', ...path, '--jq', jq]);
+    }
+
+    private parseJsonLines<T>(jsonl: string, mapper: (data: Record<string, unknown>) => T | undefined): T[] {
+        if (!jsonl) {
+            return [];
+        }
+
+        const items: T[] = [];
+        for (const line of jsonl.split('\n')) {
+            if (!line.trim()) {
+                continue;
+            }
+
+            try {
+                const parsed = mapper(JSON.parse(line) as Record<string, unknown>);
+                if (parsed) {
+                    items.push(parsed);
+                }
+            } catch {
+                // Skip malformed lines
+            }
+        }
+
+        return items;
+    }
+
+    private mapGitHubReviewComment(data: Record<string, unknown>): {
+        id: string;
+        body: string;
+        author: string;
+        path?: string;
+        line?: number;
+    } {
+        return {
+            id: String(data.id),
+            body: typeof data.body === 'string' ? data.body : '',
+            author: typeof data.author === 'string' ? data.author : 'unknown',
+            path: typeof data.path === 'string' ? data.path : undefined,
+            line: typeof data.line === 'number' ? data.line : undefined,
+        };
+    }
+
+    private mapGitHubIssueComment(data: Record<string, unknown>): {
+        id: string;
+        body: string;
+        author: string;
+    } {
+        return {
+            id: String(data.id),
+            body: typeof data.body === 'string' ? data.body : '',
+            author: typeof data.author === 'string' ? data.author : 'unknown',
+        };
+    }
+
+    private mapGitHubReviewFeedback(data: Record<string, unknown>): {
+        id: string;
+        body: string;
+        author: string;
+        type: 'comment' | 'change_request';
+    } | undefined {
+        const state = typeof data.state === 'string' ? data.state : '';
+        const body = typeof data.body === 'string' ? data.body : '';
+        const author = typeof data.author === 'string' ? data.author : 'unknown';
+
+        if (state === 'CHANGES_REQUESTED') {
+            return {
+                id: String(data.id),
+                body: body || 'Changes requested',
+                author,
+                type: 'change_request',
+            };
+        }
+
+        if (state === 'COMMENTED' && body) {
+            return {
+                id: String(data.id),
+                body,
+                author,
+                type: 'comment',
+            };
+        }
+
+        return undefined;
+    }
 
     /**
      * Get PR review comments.
@@ -556,63 +648,22 @@ class ReviewAPI {
         }[]
     > {
         try {
-            const repo = this.connectors['config'].repo;
+            const repo = this.connectors.getRepo();
+            const reviewCommentsJson = await this.fetchGitHubJsonLines(
+                repo,
+                `pulls/${prNumber}/comments`,
+                '.[] | {id: .id, body: .body, author: .user.login, path: .path, line: (.line // .original_line)}'
+            );
+            const issueCommentsJson = await this.fetchGitHubJsonLines(
+                repo,
+                `issues/${prNumber}/comments`,
+                '.[] | {id: .id, body: .body, author: .user.login}'
+            );
 
-            // Get review comments (inline code comments)
-            const reviewPath = await this.getRepoApiPath(repo, `pulls/${prNumber}/comments`);
-            const reviewCommentsJson = await this.gh([
-                'api',
-                ...reviewPath,
-                '--jq',
-                '.[] | {id: .id, body: .body, author: .user.login, path: .path, line: (.line // .original_line)}',
-            ]);
-
-            // Get issue comments (general PR thread comments)
-            const issueCommentsPath = await this.getRepoApiPath(repo, `issues/${prNumber}/comments`);
-            const issueCommentsJson = await this.gh([
-                'api',
-                ...issueCommentsPath,
-                '--jq',
-                '.[] | {id: .id, body: .body, author: .user.login}',
-            ]);
-
-            const comments: { id: string; body: string; author: string; path?: string; line?: number }[] = [];
-
-            // Parse review comments (JSONL)
-            if (reviewCommentsJson) {
-                for (const line of reviewCommentsJson.split('\n').filter((l) => l.trim())) {
-                    try {
-                        const data = JSON.parse(line);
-                        comments.push({
-                            id: String(data.id),
-                            body: data.body,
-                            author: data.author || 'unknown',
-                            path: data.path || undefined,
-                            line: data.line || undefined,
-                        });
-                    } catch {
-                        // Skip malformed lines
-                    }
-                }
-            }
-
-            // Parse issue comments (JSONL)
-            if (issueCommentsJson) {
-                for (const line of issueCommentsJson.split('\n').filter((l) => l.trim())) {
-                    try {
-                        const data = JSON.parse(line);
-                        comments.push({
-                            id: String(data.id),
-                            body: data.body,
-                            author: data.author || 'unknown',
-                        });
-                    } catch {
-                        // Skip malformed lines
-                    }
-                }
-            }
-
-            return comments;
+            return [
+                ...this.parseJsonLines(reviewCommentsJson, (data) => this.mapGitHubReviewComment(data)),
+                ...this.parseJsonLines(issueCommentsJson, (data) => this.mapGitHubIssueComment(data)),
+            ];
         } catch {
             return [];
         }
@@ -630,61 +681,26 @@ class ReviewAPI {
         }[]
     > {
         try {
-            const repo = this.connectors['config'].repo;
-
-            // Get PR reviews
-            const reviewsPath = await this.getRepoApiPath(repo, `pulls/${prNumber}/reviews`);
-            const reviewsJson = await this.gh([
-                'api',
-                ...reviewsPath,
-                '--jq',
-                '.[] | {id: .id, body: .body, author: .user.login, state: .state}',
-            ]);
-
-            const feedback: { id: string; body: string; author: string; type: 'comment' | 'change_request' }[] = [];
-
-            if (reviewsJson) {
-                for (const line of reviewsJson.split('\n').filter((l) => l.trim())) {
-                    try {
-                        const data = JSON.parse(line);
-                        // Only include reviews that are not approved/dismissed
-                        if (data.state === 'CHANGES_REQUESTED') {
-                            feedback.push({
-                                id: String(data.id),
-                                body: data.body || 'Changes requested',
-                                author: data.author || 'unknown',
-                                type: 'change_request',
-                            });
-                        } else if (data.state === 'COMMENTED' && data.body) {
-                            feedback.push({
-                                id: String(data.id),
-                                body: data.body,
-                                author: data.author || 'unknown',
-                                type: 'comment',
-                            });
-                        }
-                    } catch {
-                        // Skip malformed lines
-                    }
-                }
-            }
+            const repo = this.connectors.getRepo();
+            const reviewsJson = await this.fetchGitHubJsonLines(
+                repo,
+                `pulls/${prNumber}/reviews`,
+                '.[] | {id: .id, body: .body, author: .user.login, state: .state}'
+            );
+            const feedback = this.parseJsonLines(reviewsJson, (data) => this.mapGitHubReviewFeedback(data));
 
             // Also get unresolved review comments (inline)
             const comments = await this.getGitHubPRComments(prNumber);
-            for (const comment of comments) {
-                if (comment.path) {
-                    // Inline comments are always considered unresolved feedback
-                    // (GitHub doesn't expose resolution status via REST easily)
-                    feedback.push({
-                        id: comment.id,
-                        body: comment.body,
-                        author: comment.author,
-                        type: 'comment',
-                    });
-                }
-            }
+            const inlineFeedback = comments
+                .filter((comment) => comment.path)
+                .map((comment) => ({
+                    id: comment.id,
+                    body: comment.body,
+                    author: comment.author,
+                    type: 'comment' as const,
+                }));
 
-            return feedback;
+            return [...feedback, ...inlineFeedback];
         } catch {
             return [];
         }
@@ -694,7 +710,7 @@ class ReviewAPI {
      * Reply to a GitHub PR comment
      */
     private async replyToGitHubComment(commentId: string, body: string): Promise<void> {
-        const repo = this.connectors['config'].repo;
+        const repo = this.connectors.getRepo();
 
         // Use the gh api command to create a reply
         const replyPath = await this.getRepoApiPath(repo, `pulls/comments/${commentId}/replies`);

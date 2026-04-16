@@ -1,5 +1,11 @@
 import { describe, expect, it, beforeEach } from 'vitest';
 import { BeadsProvider } from '../src/providers/beads.js';
+import type { TriageIssue } from '../src/providers/types.js';
+
+function requireIssue(issue: TriageIssue | null): TriageIssue {
+    expect(issue).not.toBeNull();
+    return issue as TriageIssue;
+}
 
 describe('BeadsProvider', () => {
     let provider: BeadsProvider;
@@ -58,11 +64,10 @@ describe('BeadsProvider', () => {
     describe('getIssue', () => {
         it('should return an existing issue', async () => {
             const created = await provider.createIssue({ title: 'Find me' });
-            const found = await provider.getIssue(created.id);
+            const found = requireIssue(await provider.getIssue(created.id));
 
-            expect(found).not.toBeNull();
-            expect(found!.title).toBe('Find me');
-            expect(found!.id).toBe(created.id);
+            expect(found.title).toBe('Find me');
+            expect(found.id).toBe(created.id);
         });
 
         it('should return null for non-existent issue', async () => {
@@ -72,11 +77,11 @@ describe('BeadsProvider', () => {
 
         it('should return a copy (not a reference)', async () => {
             const created = await provider.createIssue({ title: 'Original' });
-            const found = await provider.getIssue(created.id);
-            found!.title = 'Modified';
+            const found = requireIssue(await provider.getIssue(created.id));
+            found.title = 'Modified';
 
-            const refetch = await provider.getIssue(created.id);
-            expect(refetch!.title).toBe('Original');
+            const refetch = requireIssue(await provider.getIssue(created.id));
+            expect(refetch.title).toBe('Original');
         });
     });
 
@@ -338,17 +343,17 @@ describe('BeadsProvider', () => {
             const created = await provider.createIssue({ title: 'Test' });
             await provider.addLabels(created.id, ['bug', 'urgent']);
 
-            const issue = await provider.getIssue(created.id);
-            expect(issue!.labels).toContain('bug');
-            expect(issue!.labels).toContain('urgent');
+            const issue = requireIssue(await provider.getIssue(created.id));
+            expect(issue.labels).toContain('bug');
+            expect(issue.labels).toContain('urgent');
         });
 
         it('should not duplicate existing labels', async () => {
             const created = await provider.createIssue({ title: 'Test', labels: ['bug'] });
             await provider.addLabels(created.id, ['bug', 'urgent']);
 
-            const issue = await provider.getIssue(created.id);
-            expect(issue!.labels.filter((l) => l === 'bug')).toHaveLength(1);
+            const issue = requireIssue(await provider.getIssue(created.id));
+            expect(issue.labels.filter((l) => l === 'bug')).toHaveLength(1);
         });
 
         it('should throw for non-existent issue', async () => {
@@ -364,8 +369,8 @@ describe('BeadsProvider', () => {
             });
             await provider.removeLabels(created.id, ['urgent']);
 
-            const issue = await provider.getIssue(created.id);
-            expect(issue!.labels).toEqual(['bug', 'production']);
+            const issue = requireIssue(await provider.getIssue(created.id));
+            expect(issue.labels).toEqual(['bug', 'production']);
         });
 
         it('should throw for non-existent issue', async () => {

@@ -1093,64 +1093,103 @@ function callGhApi<T>(
     return JSON.parse(stdout) as T;
 }
 
+function toRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function toStringValue(value: unknown, fallback = ''): string {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    return value == null ? fallback : String(value);
+}
+
+function toOptionalString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+}
+
+function toOptionalNumber(value: unknown): number | undefined {
+    return typeof value === 'number' ? value : undefined;
+}
+
+function mapCodeScanningLocation(location: Record<string, unknown>): CodeScanningAlert['location'] {
+    const path = toOptionalString(location.path);
+    const startLine = toOptionalNumber(location.start_line);
+
+    if (!path || startLine === undefined) {
+        return undefined;
+    }
+
+    return {
+        path,
+        startLine,
+        endLine: toOptionalNumber(location.end_line) ?? startLine,
+    };
+}
+
+function mapCodeScanningRule(rule: Record<string, unknown>): CodeScanningAlert['rule'] {
+    return {
+        id: toStringValue(rule.id, 'unknown'),
+        name: toOptionalString(rule.name),
+        severity: toStringValue(rule.severity, 'unknown'),
+        description: toStringValue(rule.description),
+    };
+}
+
+function mapDependabotDependency(dependency: Record<string, unknown>): DependabotAlert['dependency'] {
+    return {
+        package: toStringValue(dependency.package),
+        ecosystem: toStringValue(dependency.ecosystem),
+        manifestPath: toStringValue(dependency.manifest_path),
+    };
+}
+
+function mapSecurityAdvisory(securityAdvisory: Record<string, unknown>): DependabotAlert['securityAdvisory'] {
+    return {
+        ghsaId: toStringValue(securityAdvisory.ghsa_id),
+        severity: toStringValue(securityAdvisory.severity),
+        summary: toStringValue(securityAdvisory.summary),
+    };
+}
+
+function mapSecurityVulnerability(
+    securityVulnerability: Record<string, unknown>
+): DependabotAlert['securityVulnerability'] {
+    const firstPatchedVersion = toRecord(securityVulnerability.first_patched_version);
+
+    return {
+        severity: toStringValue(securityVulnerability.severity),
+        vulnerableVersionRange: toStringValue(securityVulnerability.vulnerable_version_range),
+        firstPatchedVersion: toOptionalString(firstPatchedVersion.identifier),
+    };
+}
+
 function mapCodeScanningAlert(alert: Record<string, unknown>): CodeScanningAlert {
-    const rule = (alert.rule as Record<string, unknown> | undefined) ?? {};
-    const mostRecent = (alert.most_recent_instance as Record<string, unknown> | undefined) ?? {};
-    const location = (mostRecent.location as Record<string, unknown> | undefined) ?? {};
-    const tool = (mostRecent.analysis_tool as Record<string, unknown> | undefined) ?? {};
+    const mostRecent = toRecord(alert.most_recent_instance);
+    const location = toRecord(mostRecent.location);
+    const tool = toRecord(mostRecent.analysis_tool);
 
     return {
         number: Number(alert.number ?? 0),
-        rule: {
-            id: String(rule.id ?? 'unknown'),
-            name: typeof rule.name === 'string' ? rule.name : undefined,
-            severity: String(rule.severity ?? 'unknown'),
-            description: String(rule.description ?? ''),
-        },
-        state: String(alert.state ?? 'open'),
-        tool: String(tool.name ?? 'github'),
-        createdAt: String(alert.created_at ?? ''),
-        url: String(alert.html_url ?? ''),
-        location:
-            typeof location.path === 'string' && typeof location.start_line === 'number'
-                ? {
-                      path: location.path,
-                      startLine: location.start_line,
-                      endLine:
-                          typeof location.end_line === 'number' ? location.end_line : location.start_line,
-                  }
-                : undefined,
+        rule: mapCodeScanningRule(toRecord(alert.rule)),
+        state: toStringValue(alert.state, 'open'),
+        tool: toStringValue(tool.name, 'github'),
+        createdAt: toStringValue(alert.created_at),
+        url: toStringValue(alert.html_url),
+        location: mapCodeScanningLocation(location),
     };
 }
 
 function mapDependabotAlert(alert: Record<string, unknown>): DependabotAlert {
-    const dependency = (alert.dependency as Record<string, unknown> | undefined) ?? {};
-    const securityAdvisory = (alert.security_advisory as Record<string, unknown> | undefined) ?? {};
-    const securityVulnerability = (alert.security_vulnerability as Record<string, unknown> | undefined) ?? {};
-    const firstPatchedVersion =
-        (securityVulnerability.first_patched_version as Record<string, unknown> | undefined) ?? {};
-
     return {
         number: Number(alert.number ?? 0),
-        state: String(alert.state ?? 'open'),
-        dependency: {
-            package: String(dependency.package?.toString?.() ?? dependency.package ?? ''),
-            ecosystem: String(dependency.ecosystem ?? ''),
-            manifestPath: String(dependency.manifest_path ?? ''),
-        },
-        securityAdvisory: {
-            ghsaId: String(securityAdvisory.ghsa_id ?? ''),
-            severity: String(securityAdvisory.severity ?? ''),
-            summary: String(securityAdvisory.summary ?? ''),
-        },
-        securityVulnerability: {
-            severity: String(securityVulnerability.severity ?? ''),
-            vulnerableVersionRange: String(securityVulnerability.vulnerable_version_range ?? ''),
-            firstPatchedVersion:
-                typeof firstPatchedVersion.identifier === 'string' ? firstPatchedVersion.identifier : undefined,
-        },
-        createdAt: String(alert.created_at ?? ''),
-        url: String(alert.html_url ?? ''),
+        state: toStringValue(alert.state, 'open'),
+        dependency: mapDependabotDependency(toRecord(alert.dependency)),
+        securityAdvisory: mapSecurityAdvisory(toRecord(alert.security_advisory)),
+        securityVulnerability: mapSecurityVulnerability(toRecord(alert.security_vulnerability)),
+        createdAt: toStringValue(alert.created_at),
+        url: toStringValue(alert.html_url),
     };
 }
 

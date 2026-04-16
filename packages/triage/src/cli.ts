@@ -3,8 +3,6 @@ import { Command } from 'commander';
 import { resolveModel } from './ai.js';
 import {
     type AgentRouting,
-    answerQuestion,
-    classifyQuery,
     decomposeTask,
     routeToAgent,
     type SageResponse,
