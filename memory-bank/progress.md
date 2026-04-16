@@ -79,3 +79,6 @@
 - fixed `packages/agentic/src/github/client.ts` review-summary feedback mapping so `CHANGES_REQUESTED` and other non-terminal review states are no longer marked addressed by default
 - added `packages/agentic/tests/github-client-runtime.test.ts` coverage for changes-requested, approved, and dismissed review-summary states
 - re-ran `agentic` tests, `agentic` coverage, and the full TypeScript workspace gate after the GitHub review-feedback fix, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `collectFeedback()` so it now includes top-level PR conversation comments from `issues.listComments(...)` instead of only inline review comments and review summaries
+- added `packages/agentic/tests/github-client-runtime.test.ts` coverage for top-level PR comment ingestion
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR conversation feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions

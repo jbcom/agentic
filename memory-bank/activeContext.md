@@ -187,3 +187,10 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts` rev
 - `CHANGES_REQUESTED`, `COMMENTED`, and other non-terminal review states now remain `unaddressed`, while `APPROVED` maps to `addressed` and `DISMISSED` maps to `dismissed`
 - added direct runtime coverage for changes-requested review summaries and for approved versus dismissed review-summary handling in `packages/agentic/tests/github-client-runtime.test.ts`
 - re-ran `agentic` tests, `agentic` coverage, and the full TypeScript workspace gate after the review-feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/github/client.ts` top-level PR feedback collection:
+
+- fixed `collectFeedback()` so it now includes top-level PR conversation comments from `issues.listComments(...)` instead of silently ignoring non-inline review feedback
+- analyzer-driven triage can now see blocking maintainer comments left on the PR conversation timeline rather than only review summaries and inline review comments
+- added direct runtime coverage for top-level PR comment ingestion in `packages/agentic/tests/github-client-runtime.test.ts`
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR conversation feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
