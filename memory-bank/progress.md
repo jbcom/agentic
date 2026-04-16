@@ -101,3 +101,6 @@
 - fixed `packages/agentic/src/handoff/manager.ts` `initiateHandoff()` so spawned successors now default to the repository's actual default branch instead of hardcoding `main` when `options.ref` is omitted
 - extended `packages/agentic/tests/handoff-protocol.test.ts` with API-backed coverage for default-branch successor spawn, explicit-ref passthrough, and fail-before-write behavior when default-branch resolution fails
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the successor-ref fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` health polling so successors that confirm health and then reach `COMPLETED` or `FINISHED` are still marked healthy, while `CANCELLED` now fails fast instead of timing out
+- extended `packages/agentic/tests/handoff-protocol.test.ts` with coverage for completed-after-confirmation and cancelled-before-confirmation successor states
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-check fix, again keeping coverage runs sequential to avoid V8 artifact collisions

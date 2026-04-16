@@ -238,3 +238,11 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` s
 - made handoff initiation fail before writing `.cursor/handoff/.../context.json` or spawning the successor when the repository default branch cannot be resolved
 - added API-backed handoff coverage in `packages/agentic/tests/handoff-protocol.test.ts` for default-branch-based successor spawn, explicit-ref passthrough, and fail-before-write behavior when default-branch resolution fails
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the successor-ref fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` successor health confirmation:
+
+- fixed `waitForHealthCheck()` so successors that confirm health and then finish quickly in `COMPLETED` or `FINISHED` state are still recognized as healthy
+- added terminal unhealthy handling for `CANCELLED` alongside `FAILED`, so cancelled successors fail fast instead of timing out through the full polling window
+- this closes a false-negative handoff path where a fast successor could post `HANDOFF CONFIRMED`, finish its startup work, and still be reported unhealthy just because it was no longer `RUNNING` when polled
+- added handoff coverage in `packages/agentic/tests/handoff-protocol.test.ts` for completed-after-confirmation and cancelled-before-confirmation successor states
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-check fix, again keeping coverage runs sequential to avoid V8 artifact collisions
