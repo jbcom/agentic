@@ -222,3 +222,11 @@ Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` agent
 - fixed `waitFor()` so it now treats both `PENDING` and `RUNNING` as non-terminal states, instead of returning early while a newly launched agent is still pending
 - extracted the single-pass outbound work into `pollAgentStatuses()` and added direct fleet coverage for pending-agent retention and `waitFor()` progression from `PENDING` to `RUNNING` to `COMPLETED`
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` takeover safety:
+
+- added a local preflight before `gh pr merge` so takeover now inspects `git status --porcelain` and rejects dirty worktrees before merging the predecessor PR
+- added a local branch-existence check with `git rev-parse --verify --quiet refs/heads/<branch>` so takeover fails fast when the intended successor branch already exists locally
+- this closes a partial-handoff failure mode where the predecessor PR could be merged successfully but the successor would fail immediately on local git state and never establish its own continuation branch
+- added direct handoff coverage in `packages/agentic/tests/handoff-protocol.test.ts` for dirty-worktree and existing-branch fail-before-merge paths, and updated the non-`main` default-branch takeover test to account for the new preflight call order
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover-state hardening, again keeping coverage runs sequential to avoid V8 artifact collisions

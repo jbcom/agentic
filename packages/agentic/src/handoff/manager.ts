@@ -116,6 +116,51 @@ export class HandoffManager {
     };
   }
 
+  private validateLocalTakeoverState(newBranchName: string): Result<void> {
+    const statusProc = spawnSync('git', ['status', '--porcelain'], { encoding: 'utf-8' });
+    if (statusProc.error || statusProc.status !== 0) {
+      return {
+        success: false,
+        error: `Failed to inspect local git status: ${statusProc.stderr || statusProc.error}`,
+      };
+    }
+
+    if (statusProc.stdout.trim() !== '') {
+      return {
+        success: false,
+        error: 'Working tree must be clean before takeover',
+      };
+    }
+
+    const branchCheckProc = spawnSync(
+      'git',
+      ['rev-parse', '--verify', '--quiet', `refs/heads/${newBranchName}`],
+      { encoding: 'utf-8' }
+    );
+    if (branchCheckProc.error) {
+      return {
+        success: false,
+        error: `Failed to inspect local branches: ${branchCheckProc.stderr || branchCheckProc.error}`,
+      };
+    }
+
+    if (branchCheckProc.status === 0) {
+      return {
+        success: false,
+        error: `Branch already exists locally: ${newBranchName}`,
+      };
+    }
+
+    if (branchCheckProc.status !== 1) {
+      return {
+        success: false,
+        error: `Failed to inspect local branches: ${branchCheckProc.stderr || branchCheckProc.stdout}`,
+      };
+    }
+
+    return { success: true };
+  }
+
   /**
    * Initiate handoff to successor agent
    */
@@ -278,6 +323,11 @@ You can safely conclude your session.
       };
     }
     const defaultBranch = branchResult.data;
+
+    const localStateResult = this.validateLocalTakeoverState(newBranchName);
+    if (!localStateResult.success) {
+      return localStateResult;
+    }
 
     // Use appropriate token for the repo
     const env = { ...process.env, ...getEnvForRepo(this.repo) };

@@ -95,3 +95,6 @@
 - fixed `packages/agentic/src/fleet/fleet.ts` `waitFor()` so it waits through `PENDING` and `RUNNING` states until a terminal result is reached
 - added `packages/agentic/tests/fleet-management.test.ts` coverage for pending-agent retention in outbound polling and `waitFor()` progression from `PENDING` to `COMPLETED`
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- added takeover preflight safety in `packages/agentic/src/handoff/manager.ts` so dirty worktrees and pre-existing successor branches fail before any predecessor PR merge happens
+- added `packages/agentic/tests/handoff-protocol.test.ts` coverage for dirty-worktree and existing-branch fail-before-merge scenarios and updated the non-`main` default-branch test for the new git preflight calls
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover safety hardening, again keeping coverage runs sequential to avoid V8 artifact collisions

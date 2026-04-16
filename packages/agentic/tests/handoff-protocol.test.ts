@@ -41,7 +41,17 @@ vi.mock('../src/github/client.js', () => ({
 describe('Handoff Protocol', () => {
   beforeEach(() => {
     spawnSyncMock.mockReset();
-    spawnSyncMock.mockReturnValue({ status: 0, stdout: '', stderr: '' });
+    spawnSyncMock.mockImplementation((command: string, args: string[]) => {
+      if (command === 'git' && args[0] === 'status') {
+        return { status: 0, stdout: '', stderr: '' };
+      }
+
+      if (command === 'git' && args[0] === 'rev-parse') {
+        return { status: 1, stdout: '', stderr: '' };
+      }
+
+      return { status: 0, stdout: '', stderr: '' };
+    });
     getRepoMock.mockReset();
     getRepoMock.mockResolvedValue({
       success: true,
@@ -162,24 +172,36 @@ describe('Handoff Protocol', () => {
       expect(getRepoMock).toHaveBeenCalledWith('owner', 'repo');
       expect(spawnSyncMock).toHaveBeenNthCalledWith(
         1,
-        'gh',
-        ['pr', 'merge', '42', '--squash', '--repo', 'owner/repo', '--delete-branch'],
+        'git',
+        ['status', '--porcelain'],
         expect.objectContaining({ encoding: 'utf-8' })
       );
       expect(spawnSyncMock).toHaveBeenNthCalledWith(
         2,
         'git',
-        ['checkout', 'master'],
+        ['rev-parse', '--verify', '--quiet', 'refs/heads/successor/continue-work'],
         expect.objectContaining({ encoding: 'utf-8' })
       );
       expect(spawnSyncMock).toHaveBeenNthCalledWith(
         3,
+        'gh',
+        ['pr', 'merge', '42', '--squash', '--repo', 'owner/repo', '--delete-branch'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        4,
+        'git',
+        ['checkout', 'master'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        5,
         'git',
         ['pull', '--ff-only', 'origin', 'master'],
         expect.objectContaining({ encoding: 'utf-8' })
       );
       expect(spawnSyncMock).toHaveBeenNthCalledWith(
-        4,
+        6,
         'git',
         ['checkout', '-b', 'successor/continue-work'],
         expect.objectContaining({ encoding: 'utf-8' })
@@ -200,6 +222,66 @@ describe('Handoff Protocol', () => {
       expect(result.success).toBe(false);
       expect(result.error).toContain('Failed to resolve default branch');
       expect(spawnSyncMock).not.toHaveBeenCalled();
+    });
+
+    it('fails before merging when the working tree is dirty', async () => {
+      spawnSyncMock.mockImplementation((command: string, args: string[]) => {
+        if (command === 'git' && args[0] === 'status') {
+          return { status: 0, stdout: ' M packages/agentic/src/handoff/manager.ts\n', stderr: '' };
+        }
+
+        return { status: 0, stdout: '', stderr: '' };
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ repo: 'owner/repo' });
+
+      const result = await manager.takeover('bc-pred', 42, 'successor/continue-work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Working tree must be clean');
+      expect(getRepoMock).toHaveBeenCalledWith('owner', 'repo');
+      expect(spawnSyncMock).toHaveBeenCalledTimes(1);
+      expect(spawnSyncMock).toHaveBeenCalledWith(
+        'git',
+        ['status', '--porcelain'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+    });
+
+    it('fails before merging when the successor branch already exists locally', async () => {
+      spawnSyncMock.mockImplementation((command: string, args: string[]) => {
+        if (command === 'git' && args[0] === 'status') {
+          return { status: 0, stdout: '', stderr: '' };
+        }
+
+        if (command === 'git' && args[0] === 'rev-parse') {
+          return { status: 0, stdout: 'refs/heads/successor/continue-work\n', stderr: '' };
+        }
+
+        return { status: 0, stdout: '', stderr: '' };
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ repo: 'owner/repo' });
+
+      const result = await manager.takeover('bc-pred', 42, 'successor/continue-work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Branch already exists locally');
+      expect(spawnSyncMock).toHaveBeenCalledTimes(2);
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        1,
+        'git',
+        ['status', '--porcelain'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        2,
+        'git',
+        ['rev-parse', '--verify', '--quiet', 'refs/heads/successor/continue-work'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
     });
 
     it('should reject branch names with shell injection characters', async () => {
