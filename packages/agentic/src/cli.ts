@@ -22,6 +22,7 @@ import {
 } from './core/tokens.js';
 import type { Agent, Result } from './core/types.js';
 import { Fleet } from './fleet/index.js';
+import { resolveSuccessorAgentId } from './handoff/cli.js';
 import { HandoffManager } from './handoff/index.js';
 import { VERSION } from './index.js';
 import { AIAnalyzer } from './triage/index.js';
@@ -988,10 +989,17 @@ handoffCmd
   .command('confirm')
   .description('Confirm health as successor agent')
   .argument('<predecessor-id>', 'Predecessor agent ID')
-  .action(async (predecessorId) => {
+  .option('--successor-id <id>', 'Explicit successor agent ID')
+  .action(async (predecessorId, opts) => {
     try {
       const manager = new HandoffManager();
-      const successorId = process.env.CURSOR_AGENT_ID || 'successor-agent';
+      const successorIdResult = resolveSuccessorAgentId(opts.successorId);
+
+      if (!successorIdResult.success || !successorIdResult.data) {
+        console.error(`❌ ${successorIdResult.error}`);
+        process.exit(1);
+      }
+      const successorId = successorIdResult.data;
 
       console.log(`🤝 Confirming health to predecessor ${predecessorId}...`);
       await manager.confirmHealthAndBegin(successorId, predecessorId);
