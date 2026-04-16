@@ -43,3 +43,7 @@
 - re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the cross-framework tool work and kept everything green
 - added direct adapter tests that exercise LangGraph and Strands wrapper behavior with mocked framework imports, covering invocation, schema forwarding, metadata naming, and passthrough behavior
 - re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the adapter execution coverage work and kept everything green
+- rewired `TriageConnectors.reviews` for GitHub to use `octokit` review comment, review summary, and review thread helpers instead of the old gh-cli approximation
+- made unresolved PR feedback filter to non-resolved, non-outdated review threads and surface the latest comment from each active thread
+- added GitHub-specific connector tests for review comment mapping and unresolved feedback filtering with mocked `octokit` helpers
+- re-ran `triage` lint, build, typecheck, and coverage plus the full TypeScript workspace gate and kept everything green

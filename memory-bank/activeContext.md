@@ -105,3 +105,11 @@ Additional runtime work completed in `agentic-crew`:
 - added regression coverage for LangGraph and Strands crew builds that resolve configured tools from agent config
 - added direct adapter execution coverage so LangGraph and Strands wrappers are now tested for real invocation, schema forwarding, metadata naming, and passthrough behavior for already-native tool objects
 - verified `agentic-crew` and `pytest-agentic-crew` end to end with lint, typecheck, tests, and the repo-level Python workspace gate
+
+Additional runtime work completed in `@jbcom/agentic-triage`:
+
+- switched GitHub review comment and unresolved-feedback reads in `TriageConnectors` away from the gh-cli approximation and onto the existing `octokit` review helpers
+- unresolved PR feedback now uses actual unresolved, non-outdated review threads instead of treating every inline comment as unresolved forever
+- general GitHub review summaries are still surfaced, but unresolved thread feedback now uses the latest comment from each still-open thread
+- added connector tests that stub GitHub review comments, reviews, and review threads to verify mapping and unresolved filtering behavior
+- verified `triage` with lint, build, typecheck, coverage tests, and the full TypeScript workspace gate
