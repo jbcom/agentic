@@ -435,7 +435,7 @@ export class Fleet {
       const result = await this.status(agentId);
       if (!result.success) return result;
 
-      if (result.data?.status !== 'RUNNING') {
+      if (result.data && !this.isActiveAgentStatus(result.data.status)) {
         return result;
       }
 
@@ -523,36 +523,45 @@ export class Fleet {
   ): Promise<void> {
     while (true) {
       try {
-        log.debug(`[OUTBOUND] Checking ${agentIds.size} agents...`);
-
-        for (const agentId of [...agentIds]) {
-          const result = await this.status(agentId);
-
-          if (!result.success || !result.data) {
-            log.warn(`${agentId.slice(0, 12)}: Unable to fetch status`);
-            continue;
-          }
-
-          const agent = result.data;
-
-          if (agent.status === 'RUNNING') {
-            const message = [
-              '📊 STATUS CHECK from Fleet Coordinator',
-              '',
-              'Report progress by commenting on the coordination PR:',
-              `https://github.com/${config.repo}/pull/${config.coordinationPr}`,
-            ].join('\n');
-
-            await this.followup(agentId, message);
-          } else {
-            agentIds.delete(agentId);
-          }
-        }
+        await this.pollAgentStatuses(config, agentIds);
       } catch (err) {
         log.error('[OUTBOUND ERROR]', err);
       }
 
       await new Promise((r) => setTimeout(r, interval));
+    }
+  }
+
+  private async pollAgentStatuses(
+    config: CoordinationConfig,
+    agentIds: Set<string>
+  ): Promise<void> {
+    log.debug(`[OUTBOUND] Checking ${agentIds.size} agents...`);
+
+    for (const agentId of [...agentIds]) {
+      const result = await this.status(agentId);
+
+      if (!result.success || !result.data) {
+        log.warn(`${agentId.slice(0, 12)}: Unable to fetch status`);
+        continue;
+      }
+
+      const agent = result.data;
+
+      if (agent.status === 'RUNNING') {
+        const message = [
+          '📊 STATUS CHECK from Fleet Coordinator',
+          '',
+          'Report progress by commenting on the coordination PR:',
+          `https://github.com/${config.repo}/pull/${config.coordinationPr}`,
+        ].join('\n');
+
+        await this.followup(agentId, message);
+      }
+
+      if (!this.isActiveAgentStatus(agent.status)) {
+        agentIds.delete(agentId);
+      }
     }
   }
 
@@ -649,5 +658,9 @@ export class Fleet {
         );
       }
     }
+  }
+
+  private isActiveAgentStatus(status: AgentStatus): boolean {
+    return status === 'RUNNING' || status === 'PENDING';
   }
 }

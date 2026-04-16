@@ -14,6 +14,10 @@ type TestableFleet = Fleet & {
     agentIds: Set<string>,
     processedIds: Set<number>
   ): Promise<void>;
+  pollAgentStatuses(
+    config: { repo: string; coordinationPr: number },
+    agentIds: Set<string>
+  ): Promise<void>;
 };
 
 describe('Fleet Management', () => {
@@ -313,6 +317,46 @@ describe('Fleet Management', () => {
   });
 
   describe('GitHub Coordination', () => {
+    it('keeps pending agents under coordination instead of dropping them as completed', async () => {
+      vi.spyOn(fleet, 'status').mockImplementation(async (agentId: string) => {
+        if (agentId === 'bc-pending') {
+          return {
+            success: true,
+            data: { id: agentId, status: 'PENDING', source: { repository: 'owner/repo' } },
+          };
+        }
+        if (agentId === 'bc-running') {
+          return {
+            success: true,
+            data: { id: agentId, status: 'RUNNING', source: { repository: 'owner/repo' } },
+          };
+        }
+        return {
+          success: true,
+          data: { id: agentId, status: 'COMPLETED', source: { repository: 'owner/repo' } },
+        };
+      });
+      const followupSpy = vi
+        .spyOn(fleet, 'followup')
+        .mockResolvedValue({ success: true });
+
+      const agentIds = new Set(['bc-pending', 'bc-running', 'bc-completed']);
+
+      await (fleet as TestableFleet).pollAgentStatuses(
+        { repo: 'owner/repo', coordinationPr: 42 },
+        agentIds
+      );
+
+      expect(agentIds.has('bc-pending')).toBe(true);
+      expect(agentIds.has('bc-running')).toBe(true);
+      expect(agentIds.has('bc-completed')).toBe(false);
+      expect(followupSpy).toHaveBeenCalledTimes(1);
+      expect(followupSpy).toHaveBeenCalledWith(
+        'bc-running',
+        expect.stringContaining('https://github.com/owner/repo/pull/42')
+      );
+    });
+
     it('processes DONE coordination comments even without an @cursor mention', async () => {
       const listPRCommentsSpy = vi
         .spyOn(GitHubClient, 'listPRComments')
@@ -423,6 +467,34 @@ describe('Fleet Management', () => {
       expect(agentIds.has('bc-unchanged')).toBe(true);
       expect(processedIds.has(103)).toBe(true);
       expect(postPRCommentSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Waiting', () => {
+    it('waits through pending and running states until an agent reaches a terminal status', async () => {
+      const statusSpy = vi
+        .spyOn(fleet, 'status')
+        .mockResolvedValueOnce({
+          success: true,
+          data: { id: 'bc-1', status: 'PENDING', source: { repository: 'owner/repo' } },
+        })
+        .mockResolvedValueOnce({
+          success: true,
+          data: { id: 'bc-1', status: 'RUNNING', source: { repository: 'owner/repo' } },
+        })
+        .mockResolvedValueOnce({
+          success: true,
+          data: { id: 'bc-1', status: 'COMPLETED', source: { repository: 'owner/repo' } },
+        });
+
+      const result = await fleet.waitFor('bc-1', {
+        pollInterval: 1,
+        timeout: 100,
+      });
+
+      expect(result.success).toBe(true);
+      expect(result.data?.status).toBe('COMPLETED');
+      expect(statusSpy).toHaveBeenCalledTimes(3);
     });
   });
 });
