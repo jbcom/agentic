@@ -50,10 +50,6 @@ Defined in: [packages/triage/src/triage/connectors.ts:97](https://github.com/jbc
 
 Project operations API (boards, sprints, epics)
 
-#### Remarks
-
-Coming soon - currently returns stubs
-
 ***
 
 ### reviews
@@ -63,10 +59,6 @@ Coming soon - currently returns stubs
 Defined in: [packages/triage/src/triage/connectors.ts:103](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/triage/src/triage/connectors.ts#L103)
 
 Review operations API (PR feedback, comments)
-
-#### Remarks
-
-Coming soon - currently returns stubs
 
 ## Methods
 

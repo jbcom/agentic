@@ -7,7 +7,7 @@
  *
  * @example Direct API
  * ```typescript
- * import { TriageConnectors } from '@strata/triage';
+ * import { TriageConnectors } from '@jbcom/agentic-triage';
  *
  * const triage = new TriageConnectors();
  *
@@ -16,16 +16,16 @@
  * const issue = await triage.issues.create({ title: 'Fix bug', type: 'bug' });
  * await triage.issues.close('123', 'Fixed in PR #456');
  *
- * // Project operations (coming soon)
+ * // Project operations
  * const sprints = await triage.projects.getSprints();
  *
  * // Review operations
- * const feedback = await triage.reviews.getPRFeedback(144);
+ * const feedback = await triage.reviews.getUnresolvedFeedback(144);
  * ```
  *
  * @example Vercel AI SDK Tools
  * ```typescript
- * import { getTriageTools } from '@strata/triage';
+ * import { getTriageTools } from '@jbcom/agentic-triage';
  * import { generateText } from 'ai';
  * import { anthropic } from '@ai-sdk/anthropic';
  *

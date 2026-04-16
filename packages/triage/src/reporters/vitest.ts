@@ -1,11 +1,11 @@
 /**
- * Vitest Reporter for Strata Triage
+ * Vitest reporter for Agentic Triage
  *
- * Generates test reports in Strata's custom format for AI analysis.
+ * Generates structured test reports for AI analysis.
  *
  * Usage in vitest.config.ts:
  * ```ts
- * import { StrataReporter } from '@strata/triage/reporters/vitest';
+ * import { StrataReporter } from '@jbcom/agentic-triage/reporters/vitest';
  *
  * export default defineConfig({
  *   test: {
@@ -58,7 +58,7 @@ export class StrataReporter implements Reporter {
         mkdirSync(dirname(outputPath), { recursive: true });
         writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
-        console.log(`\n📊 Strata test report: ${outputPath}`);
+        console.log(`\n📊 Agentic triage test report: ${outputPath}`);
     }
 
     private buildReport(files: File[]): TestReport {

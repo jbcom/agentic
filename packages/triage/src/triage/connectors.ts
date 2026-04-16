@@ -12,7 +12,7 @@
  *
  * @example
  * ```typescript
- * import { TriageConnectors } from '@strata/triage';
+ * import { TriageConnectors } from '@jbcom/agentic-triage';
  *
  * // Initialize once - reads credentials from environment
  * const triage = new TriageConnectors();
@@ -25,6 +25,10 @@
  *
  * // Get ready work (no blockers)
  * const ready = await triage.issues.getReadyWork({ limit: 5 });
+ *
+ * // Sprint and review operations
+ * const currentSprint = await triage.projects.getCurrentSprint();
+ * const reviewComments = await triage.reviews.getPRComments(144);
  *
  * // Statistics
  * const stats = await triage.issues.getStats();

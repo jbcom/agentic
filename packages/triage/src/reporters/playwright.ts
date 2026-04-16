@@ -1,7 +1,7 @@
 /**
- * Playwright Reporter for Strata Triage
+ * Playwright reporter for Agentic Triage
  *
- * Generates test reports in Strata's custom format for AI analysis.
+ * Generates structured test reports for AI analysis.
  *
  * Usage in playwright.config.ts:
  * ```ts
@@ -10,7 +10,7 @@
  * export default defineConfig({
  *   reporter: [
  *     ['html'],
- *     ['@strata/triage/reporters/playwright', { outputFile: './test-results/e2e-report.json' }],
+ *     ['@jbcom/agentic-triage/reporters/playwright', { outputFile: './test-results/e2e-report.json' }],
  *   ],
  * });
  * ```
@@ -82,7 +82,7 @@ class StrataPlaywrightReporter implements Reporter {
         mkdirSync(dirname(outputPath), { recursive: true });
         writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
-        console.log(`\n📊 Strata E2E report: ${outputPath}`);
+        console.log(`\n📊 Agentic triage E2E report: ${outputPath}`);
     }
 
     private buildReport(result: FullResult): TestReport {
