@@ -86,19 +86,21 @@ export class HandoffManager {
     this.repo = repo;
   }
 
-  private async resolveDefaultBranch(): Promise<Result<string>> {
-    if (!this.repo) {
+  private async resolveDefaultBranch(repoOverride?: string): Promise<Result<string>> {
+    const repository = repoOverride ?? this.repo;
+
+    if (!repository) {
       return {
         success: false,
         error: 'Repository is required. Set via constructor options or setRepo()',
       };
     }
 
-    const [owner, repo] = this.repo.split('/');
+    const [owner, repo] = repository.split('/');
     if (!owner || !repo) {
       return {
         success: false,
-        error: `Repository must be in owner/repo format: ${this.repo}`,
+        error: `Repository must be in owner/repo format: ${repository}`,
       };
     }
 
@@ -106,7 +108,7 @@ export class HandoffManager {
     if (!repoResult.success || !repoResult.data?.defaultBranch) {
       return {
         success: false,
-        error: `Failed to resolve default branch for ${this.repo}: ${repoResult.error ?? 'unknown error'}`,
+        error: `Failed to resolve default branch for ${repository}: ${repoResult.error ?? 'unknown error'}`,
       };
     }
 
@@ -197,6 +199,18 @@ export class HandoffManager {
       }
     }
 
+    let successorRef = options.ref;
+    if (!successorRef) {
+      const branchResult = await this.resolveDefaultBranch(options.repository);
+      if (!branchResult.success || !branchResult.data) {
+        return {
+          success: false,
+          error: branchResult.error ?? 'Failed to resolve repository default branch',
+        };
+      }
+      successorRef = branchResult.data;
+    }
+
     // 2. Build handoff context - use crypto.randomUUID() for unique IDs
     const handoffContext: HandoffContext = {
       predecessorId,
@@ -238,7 +252,7 @@ export class HandoffManager {
       prompt: { text: successorPrompt },
       source: {
         repository: options.repository,
-        ref: options.ref ?? 'main',
+        ref: successorRef,
       },
     });
 

@@ -7,10 +7,28 @@
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-const { spawnSyncMock, getRepoMock, getEnvForRepoMock } = vi.hoisted(() => ({
+const {
+  spawnSyncMock,
+  getRepoMock,
+  getEnvForRepoMock,
+  existsSyncMock,
+  mkdirSyncMock,
+  writeFileSyncMock,
+  cursorApiGetAgentConversationMock,
+  cursorApiLaunchAgentMock,
+  cursorApiGetAgentStatusMock,
+  cursorApiAddFollowupMock,
+} = vi.hoisted(() => ({
   spawnSyncMock: vi.fn(),
   getRepoMock: vi.fn(),
   getEnvForRepoMock: vi.fn(() => ({})),
+  existsSyncMock: vi.fn(),
+  mkdirSyncMock: vi.fn(),
+  writeFileSyncMock: vi.fn(),
+  cursorApiGetAgentConversationMock: vi.fn(),
+  cursorApiLaunchAgentMock: vi.fn(),
+  cursorApiGetAgentStatusMock: vi.fn(),
+  cursorApiAddFollowupMock: vi.fn(),
 }));
 
 // Mock config first (before any imports that use it)
@@ -28,6 +46,12 @@ vi.mock('node:child_process', () => ({
   spawnSync: spawnSyncMock,
 }));
 
+vi.mock('node:fs', () => ({
+  existsSync: existsSyncMock,
+  mkdirSync: mkdirSyncMock,
+  writeFileSync: writeFileSyncMock,
+}));
+
 vi.mock('../src/core/tokens.js', () => ({
   getEnvForRepo: getEnvForRepoMock,
 }));
@@ -35,6 +59,21 @@ vi.mock('../src/core/tokens.js', () => ({
 vi.mock('../src/github/client.js', () => ({
   GitHubClient: {
     getRepo: getRepoMock,
+  },
+}));
+
+vi.mock('../src/fleet/cursor-api.js', () => ({
+  CursorAPI: class MockCursorAPI {
+    constructor(options: { apiKey?: string } = {}) {
+      if (!(options.apiKey ?? process.env.CURSOR_API_KEY)) {
+        throw new Error('CURSOR_API_KEY is required');
+      }
+    }
+
+    getAgentConversation = cursorApiGetAgentConversationMock;
+    launchAgent = cursorApiLaunchAgentMock;
+    getAgentStatus = cursorApiGetAgentStatusMock;
+    addFollowup = cursorApiAddFollowupMock;
   },
 }));
 
@@ -60,6 +99,30 @@ describe('Handoff Protocol', () => {
       },
     });
     getEnvForRepoMock.mockClear();
+    existsSyncMock.mockReset();
+    existsSyncMock.mockReturnValue(false);
+    mkdirSyncMock.mockReset();
+    writeFileSyncMock.mockReset();
+    cursorApiGetAgentConversationMock.mockReset();
+    cursorApiGetAgentConversationMock.mockImplementation(async (agentId: string) => ({
+      success: true,
+      data: {
+        agentId,
+        messages: agentId === 'bc-succ' ? [{ type: 'assistant_message', text: 'HANDOFF CONFIRMED' }] : [],
+        totalMessages: agentId === 'bc-succ' ? 1 : 0,
+      },
+    }));
+    cursorApiLaunchAgentMock.mockReset();
+    cursorApiLaunchAgentMock.mockResolvedValue({
+      success: true,
+      data: { id: 'bc-succ' },
+    });
+    cursorApiGetAgentStatusMock.mockReset();
+    cursorApiGetAgentStatusMock.mockResolvedValue({
+      success: true,
+      data: { status: 'RUNNING' },
+    });
+    cursorApiAddFollowupMock.mockReset();
   });
 
   describe('Branch Name Validation', () => {
@@ -317,6 +380,88 @@ describe('Handoff Protocol', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Cursor API not available');
+    });
+
+    it('uses the repository default branch for successor spawn when ref is omitted', async () => {
+      getRepoMock.mockResolvedValue({
+        success: true,
+        data: {
+          defaultBranch: 'master',
+        },
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      const result = await manager.initiateHandoff('bc-pred', {
+        repository: 'owner/repo',
+        currentPr: 1,
+        currentBranch: 'feature/current-work',
+      });
+
+      expect(result).toEqual({
+        success: true,
+        successorId: 'bc-succ',
+        successorHealthy: true,
+      });
+      expect(getRepoMock).toHaveBeenCalledWith('owner', 'repo');
+      expect(cursorApiLaunchAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: {
+            repository: 'owner/repo',
+            ref: 'master',
+          },
+        })
+      );
+      expect(writeFileSyncMock).toHaveBeenCalled();
+    });
+
+    it('honors an explicit ref without resolving the repository default branch', async () => {
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      const result = await manager.initiateHandoff('bc-pred', {
+        repository: 'owner/repo',
+        ref: 'release/2026-04',
+        currentPr: 1,
+        currentBranch: 'feature/current-work',
+      });
+
+      expect(result).toEqual({
+        success: true,
+        successorId: 'bc-succ',
+        successorHealthy: true,
+      });
+      expect(getRepoMock).not.toHaveBeenCalled();
+      expect(cursorApiLaunchAgentMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: {
+            repository: 'owner/repo',
+            ref: 'release/2026-04',
+          },
+        })
+      );
+    });
+
+    it('fails before writing handoff state when the default branch cannot be resolved', async () => {
+      getRepoMock.mockResolvedValue({
+        success: false,
+        error: 'No token available for this repository',
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      const result = await manager.initiateHandoff('bc-pred', {
+        repository: 'owner/repo',
+        currentPr: 1,
+        currentBranch: 'feature/current-work',
+      });
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Failed to resolve default branch');
+      expect(cursorApiLaunchAgentMock).not.toHaveBeenCalled();
+      expect(writeFileSyncMock).not.toHaveBeenCalled();
     });
   });
 
