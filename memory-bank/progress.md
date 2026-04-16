@@ -69,3 +69,7 @@
 - hardened `packages/agentic/src/triage/agent.ts` `fixFile()` helper to validate its target path up front and use `git diff -- <path>` when collecting post-fix diffs, so traversal attempts fail fast and filenames beginning with `-` are treated as pathspecs instead of git options
 - extended `packages/agentic/tests/triage-agent-tools.test.ts` with direct `fixFile()` coverage for traversal rejection and option-like filenames such as `--stat.ts`
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the `fixFile()` hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` so takeover resolves the repository's actual default branch before merging the predecessor PR instead of hardcoding `main`
+- changed the takeover sync step to check out the resolved default branch and pull it with `git pull --ff-only origin <defaultBranch>`, keeping the local base update explicit and non-merging
+- extended `packages/agentic/tests/handoff-protocol.test.ts` to cover non-`main` default branches and the fail-before-merge path when default-branch resolution fails
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff default-branch hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions

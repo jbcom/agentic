@@ -165,3 +165,11 @@ Additional runtime work completed in `packages/agentic/src/triage/agent.ts` conv
 - normalized `fixFile()` diff collection onto `git diff -- <path>` so filenames beginning with `-` are treated as pathspecs rather than git options
 - added direct coverage for traversal rejection in `fixFile()` and for option-like filenames such as `--stat.ts`
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the `fixFile()` hardening, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts`:
+
+- fixed takeover branch handling so it now resolves the repository's actual default branch before any merge side effects instead of assuming `main`
+- made takeover fail early when default-branch resolution fails, preventing the predecessor PR from being merged before the local branch-sync step is known to be safe
+- changed the local sync step to `git pull --ff-only origin <defaultBranch>` after checking out the resolved default branch, making the update path explicit and non-merging
+- added direct handoff coverage for non-`main` default branches and for failure-before-merge when branch resolution cannot succeed
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff changes, again keeping coverage runs sequential to avoid V8 artifact collisions
