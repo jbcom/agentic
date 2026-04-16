@@ -91,4 +91,13 @@ Additional cleanup completed in `@jbcom/agentic-triage`:
 Remaining work should now focus on:
 
 - deeper production-readiness work in triage provider/runtime behavior rather than packaging or build-noise cleanup
-- closing the highest-value implementation and coverage gaps in `agentic-crew`
+- cross-framework tool wiring for `agentic-crew` runners beyond CrewAI, especially LangGraph and Strands
+- closing the highest-value remaining implementation gaps in `agentic-crew` after the CrewAI execution path
+
+Additional runtime work completed in `agentic-crew`:
+
+- added a lazy tool registry that resolves configured tool names, aliases, and selected filesystem MCP-style identifiers to concrete tool instances
+- wired the default `CrewAIRunner` to actually attach configured tools instead of dropping them on the floor
+- wired the legacy loader path and `ConnectorBuilderCrew` to use the same resolver
+- made `agentic_crew.tools` lazy so the core package can import without immediately requiring CrewAI-only dependencies
+- verified `agentic-crew` and `pytest-agentic-crew` end to end with lint, typecheck, tests, and the repo-level Python workspace gate

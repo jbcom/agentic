@@ -31,3 +31,8 @@
 - confirmed the docs duplicate-id warning was local `.astro` cache state again; a clean docs build runs without the warning
 - implemented real Linear label mutation support so `LinearProvider.addLabels()` and `removeLabels()` no longer no-op, and added provider tests for label creation/removal behavior
 - re-ran `triage` lint, build, typecheck, and coverage after the Linear provider work and kept the package green
+- added `agentic_crew.tools.registry` to resolve configured CrewAI tool names, aliases like `FileWriteTool`, and selected filesystem MCP-style identifiers to concrete tool instances
+- wired `CrewAIRunner`, the legacy loader path, and `ConnectorBuilderCrew` to use that resolver so declared tools are no longer silently dropped
+- made `agentic_crew.tools` lazy-loaded so importing the core package no longer forces CrewAI-only modules during test collection or non-CrewAI usage
+- added regression coverage for tool resolution and connector-builder tool wiring
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate and kept everything green
