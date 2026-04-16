@@ -20,6 +20,7 @@ import { getConfig, log } from '../core/config.js';
 import { getEnvForRepo } from '../core/tokens.js';
 import type { HandoffContext, HandoffOptions, HandoffResult, Result } from '../core/types.js';
 import { CursorAPI } from '../fleet/cursor-api.js';
+import { GitHubClient } from '../github/client.js';
 import { AIAnalyzer } from '../triage/analyzer.js';
 
 // ============================================
@@ -83,6 +84,36 @@ export class HandoffManager {
    */
   setRepo(repo: string): void {
     this.repo = repo;
+  }
+
+  private async resolveDefaultBranch(): Promise<Result<string>> {
+    if (!this.repo) {
+      return {
+        success: false,
+        error: 'Repository is required. Set via constructor options or setRepo()',
+      };
+    }
+
+    const [owner, repo] = this.repo.split('/');
+    if (!owner || !repo) {
+      return {
+        success: false,
+        error: `Repository must be in owner/repo format: ${this.repo}`,
+      };
+    }
+
+    const repoResult = await GitHubClient.getRepo(owner, repo);
+    if (!repoResult.success || !repoResult.data?.defaultBranch) {
+      return {
+        success: false,
+        error: `Failed to resolve default branch for ${this.repo}: ${repoResult.error ?? 'unknown error'}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: repoResult.data.defaultBranch,
+    };
   }
 
   /**
@@ -239,6 +270,15 @@ You can safely conclude your session.
       return { success: false, error: 'Cannot use --admin and --auto simultaneously' };
     }
 
+    const branchResult = await this.resolveDefaultBranch();
+    if (!branchResult.success || !branchResult.data) {
+      return {
+        success: false,
+        error: branchResult.error ?? 'Failed to resolve repository default branch',
+      };
+    }
+    const defaultBranch = branchResult.data;
+
     // Use appropriate token for the repo
     const env = { ...process.env, ...getEnvForRepo(this.repo) };
 
@@ -280,28 +320,30 @@ You can safely conclude your session.
       return { success: false, error: `Failed to merge PR: ${err}` };
     }
 
-    // 2. Pull latest main using spawnSync
-    log.info('📥 Pulling latest main...');
+    // 2. Pull latest default branch using spawnSync
+    log.info(`📥 Pulling latest ${defaultBranch}...`);
     try {
-      // First checkout main
-      const checkoutMain = spawnSync('git', ['checkout', 'main'], { encoding: 'utf-8' });
+      // First checkout the repository default branch
+      const checkoutMain = spawnSync('git', ['checkout', defaultBranch], { encoding: 'utf-8' });
       if (checkoutMain.error || checkoutMain.status !== 0) {
         return {
           success: false,
-          error: `Failed to checkout main: ${checkoutMain.stderr || checkoutMain.error}`,
+          error: `Failed to checkout ${defaultBranch}: ${checkoutMain.stderr || checkoutMain.error}`,
         };
       }
 
-      // Then pull
-      const pullProc = spawnSync('git', ['pull'], { encoding: 'utf-8' });
+      // Then fast-forward from origin/defaultBranch explicitly
+      const pullProc = spawnSync('git', ['pull', '--ff-only', 'origin', defaultBranch], {
+        encoding: 'utf-8',
+      });
       if (pullProc.error || pullProc.status !== 0) {
         return {
           success: false,
-          error: `Failed to pull main: ${pullProc.stderr || pullProc.error}`,
+          error: `Failed to pull ${defaultBranch}: ${pullProc.stderr || pullProc.error}`,
         };
       }
     } catch (err) {
-      return { success: false, error: `Failed to pull main: ${err}` };
+      return { success: false, error: `Failed to pull ${defaultBranch}: ${err}` };
     }
 
     // 3. Create own branch using spawnSync (with validated branch name)

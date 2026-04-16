@@ -5,7 +5,13 @@
  * without requiring live API connections.
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const { spawnSyncMock, getRepoMock, getEnvForRepoMock } = vi.hoisted(() => ({
+  spawnSyncMock: vi.fn(),
+  getRepoMock: vi.fn(),
+  getEnvForRepoMock: vi.fn(() => ({})),
+}));
 
 // Mock config first (before any imports that use it)
 vi.mock('../src/core/config.js', () => ({
@@ -18,7 +24,34 @@ vi.mock('../src/core/config.js', () => ({
   getConfig: vi.fn().mockReturnValue({ defaultRepository: undefined }),
 }));
 
+vi.mock('node:child_process', () => ({
+  spawnSync: spawnSyncMock,
+}));
+
+vi.mock('../src/core/tokens.js', () => ({
+  getEnvForRepo: getEnvForRepoMock,
+}));
+
+vi.mock('../src/github/client.js', () => ({
+  GitHubClient: {
+    getRepo: getRepoMock,
+  },
+}));
+
 describe('Handoff Protocol', () => {
+  beforeEach(() => {
+    spawnSyncMock.mockReset();
+    spawnSyncMock.mockReturnValue({ status: 0, stdout: '', stderr: '' });
+    getRepoMock.mockReset();
+    getRepoMock.mockResolvedValue({
+      success: true,
+      data: {
+        defaultBranch: 'main',
+      },
+    });
+    getEnvForRepoMock.mockClear();
+  });
+
   describe('Branch Name Validation', () => {
     // The validation logic from manager.ts
     const isValidBranchName = (branch: string): boolean =>
@@ -110,6 +143,63 @@ describe('Handoff Protocol', () => {
 
       expect(result.success).toBe(false);
       expect(result.error).toContain('Cannot use --admin and --auto simultaneously');
+    });
+
+    it('uses the repository default branch instead of assuming main', async () => {
+      getRepoMock.mockResolvedValue({
+        success: true,
+        data: {
+          defaultBranch: 'master',
+        },
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ repo: 'owner/repo' });
+
+      const result = await manager.takeover('bc-pred', 42, 'successor/continue-work');
+
+      expect(result.success).toBe(true);
+      expect(getRepoMock).toHaveBeenCalledWith('owner', 'repo');
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        1,
+        'gh',
+        ['pr', 'merge', '42', '--squash', '--repo', 'owner/repo', '--delete-branch'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        2,
+        'git',
+        ['checkout', 'master'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        3,
+        'git',
+        ['pull', '--ff-only', 'origin', 'master'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+      expect(spawnSyncMock).toHaveBeenNthCalledWith(
+        4,
+        'git',
+        ['checkout', '-b', 'successor/continue-work'],
+        expect.objectContaining({ encoding: 'utf-8' })
+      );
+    });
+
+    it('fails before merging when the default branch cannot be resolved', async () => {
+      getRepoMock.mockResolvedValue({
+        success: false,
+        error: 'No token available for this repository',
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ repo: 'owner/repo' });
+
+      const result = await manager.takeover('bc-pred', 42, 'successor/continue-work');
+
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('Failed to resolve default branch');
+      expect(spawnSyncMock).not.toHaveBeenCalled();
     });
 
     it('should reject branch names with shell injection characters', async () => {
