@@ -88,3 +88,6 @@
 - fixed `packages/agentic/src/github/client.ts` `listPRComments()` so it paginates past the first 100 PR issue comments instead of dropping newer coordination comments on long-lived PRs
 - added `packages/agentic/tests/github-client-static.test.ts` coverage for multi-page PR comment retrieval
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR comment pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/fleet/fleet.ts` inbound coordination polling so `✅ DONE:` and `⚠️ BLOCKED:` agent updates are handled even without an `@cursor` mention
+- added `packages/agentic/tests/fleet-management.test.ts` coverage for DONE comments, BLOCKED comments, and unrelated coordination chatter
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions

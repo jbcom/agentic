@@ -208,3 +208,10 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts` sta
 - this closes a fleet coordination failure mode where new `@cursor` instructions on long-lived coordination PRs could disappear once the PR exceeded 100 comments
 - added direct static-client coverage in `packages/agentic/tests/github-client-static.test.ts` for multi-page PR comment retrieval across page 1 and page 2
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` coordination comment handling:
+
+- fixed inbound coordination polling so agent status comments like `✅ DONE:` and `⚠️ BLOCKED:` are processed even when they do not include an `@cursor` mention
+- extracted the single-pass inbound poll into `pollCoordinationComments()` and added explicit coordination-signal detection so the loop can distinguish actionable DONE/BLOCKED comments from ordinary chatter
+- added direct fleet coordination coverage in `packages/agentic/tests/fleet-management.test.ts` for DONE comments, BLOCKED comments, and unrelated comments
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
