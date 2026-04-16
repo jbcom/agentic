@@ -27,3 +27,7 @@
 - rewired `octokit` and the tool/CLI entrypoints to consume the narrower modules so `tsup` no longer drags the broad MCP/AI helper surface into unrelated bundles
 - eliminated the remaining `tsup` unused-import build noise in `@jbcom/agentic-triage`
 - re-ran `triage` lint, build, typecheck, tests, and the full TypeScript workspace gate after the internal module split and kept everything green
+- corrected stale `@strata/triage` references and "coming soon" stub remarks in `triage` source examples and committed API docs, and added a docs contract test to keep that drift from returning
+- confirmed the docs duplicate-id warning was local `.astro` cache state again; a clean docs build runs without the warning
+- implemented real Linear label mutation support so `LinearProvider.addLabels()` and `removeLabels()` no longer no-op, and added provider tests for label creation/removal behavior
+- re-ran `triage` lint, build, typecheck, and coverage after the Linear provider work and kept the package green

@@ -84,6 +84,9 @@ Additional cleanup completed in `@jbcom/agentic-triage`:
 - split MCP client factories into `src/mcp/clients.ts` so `octokit` no longer pulls the broader MCP/AI helper surface into every build artifact
 - rewired `cli`, `mcp`, `octokit`, `sage`, and `visual` to depend on the narrower modules
 - eliminated the remaining build-time `tsup` unused-import noise while keeping lint, typecheck, tests, and the full TypeScript workspace gate green
+- corrected stale `triage` contract text in source examples and committed API docs so project/review APIs are no longer described as "coming soon" stubs
+- added docs contract coverage for stale `@strata/triage` branding and old stub remarks
+- implemented real Linear label mutation support in `LinearProvider` for create/add/remove label flows and covered it with provider tests
 
 Remaining work should now focus on:
 
