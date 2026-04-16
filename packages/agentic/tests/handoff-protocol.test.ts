@@ -463,6 +463,62 @@ describe('Handoff Protocol', () => {
       expect(cursorApiLaunchAgentMock).not.toHaveBeenCalled();
       expect(writeFileSyncMock).not.toHaveBeenCalled();
     });
+
+    it('marks the successor healthy when it confirms health and then completes quickly', async () => {
+      cursorApiGetAgentStatusMock.mockResolvedValue({
+        success: true,
+        data: { status: 'COMPLETED' },
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      const result = await manager.initiateHandoff('bc-pred', {
+        repository: 'owner/repo',
+        ref: 'feature/current-work',
+        currentPr: 1,
+        currentBranch: 'feature/current-work',
+      });
+
+      expect(result).toEqual({
+        success: true,
+        successorId: 'bc-succ',
+        successorHealthy: true,
+      });
+      expect(cursorApiGetAgentConversationMock).toHaveBeenCalledWith('bc-succ');
+    });
+
+    it('marks the successor unhealthy immediately when it is cancelled before confirming health', async () => {
+      cursorApiGetAgentStatusMock.mockResolvedValue({
+        success: true,
+        data: { status: 'CANCELLED' },
+      });
+      cursorApiGetAgentConversationMock.mockResolvedValue({
+        success: true,
+        data: {
+          agentId: 'bc-succ',
+          messages: [],
+          totalMessages: 0,
+        },
+      });
+
+      const { HandoffManager } = await import('../src/handoff/manager.js');
+      const manager = new HandoffManager({ cursorApiKey: 'cursor-key' });
+
+      const result = await manager.initiateHandoff('bc-pred', {
+        repository: 'owner/repo',
+        ref: 'feature/current-work',
+        currentPr: 1,
+        currentBranch: 'feature/current-work',
+      });
+
+      expect(result).toEqual({
+        success: true,
+        successorId: 'bc-succ',
+        successorHealthy: false,
+      });
+      expect(cursorApiGetAgentConversationMock).not.toHaveBeenCalledWith('bc-succ');
+    });
   });
 
   describe('Health Confirmation (without API)', () => {

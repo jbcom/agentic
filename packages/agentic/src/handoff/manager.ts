@@ -506,12 +506,14 @@ BEGIN by sending health confirmation NOW.
 
     const start = Date.now();
     const interval = 15000;
+    const confirmableStatuses = new Set(['PENDING', 'RUNNING', 'COMPLETED', 'FINISHED']);
+    const terminalUnhealthyStatuses = new Set(['FAILED', 'CANCELLED', 'COMPLETED', 'FINISHED']);
 
     while (Date.now() - start < timeout) {
       const status = await this.api.getAgentStatus(successorId);
 
       if (status.success && status.data) {
-        if (status.data.status === 'RUNNING') {
+        if (confirmableStatuses.has(status.data.status)) {
           const conv = await this.api.getAgentConversation(successorId);
           if (conv.success && conv.data) {
             const messages = conv.data.messages || [];
@@ -521,7 +523,9 @@ BEGIN by sending health confirmation NOW.
               }
             }
           }
-        } else if (status.data.status === 'FAILED') {
+        }
+
+        if (terminalUnhealthyStatuses.has(status.data.status)) {
           return { healthy: false };
         }
       }
