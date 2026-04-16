@@ -73,3 +73,6 @@
 - changed the takeover sync step to check out the resolved default branch and pull it with `git pull --ff-only origin <defaultBranch>`, keeping the local base update explicit and non-merging
 - extended `packages/agentic/tests/handoff-protocol.test.ts` to cover non-`main` default branches and the fail-before-merge path when default-branch resolution fails
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff default-branch hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `getCIStatus()` so it combines classic commit statuses with check runs instead of reporting status-context-only repos as green when `check_runs` is empty
+- added `packages/agentic/tests/github-client-runtime.test.ts` to cover pending and failing combined-status contexts with no GitHub Check Runs present
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the GitHub CI-status hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions

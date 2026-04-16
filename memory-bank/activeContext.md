@@ -173,3 +173,10 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts`:
 - changed the local sync step to `git pull --ff-only origin <defaultBranch>` after checking out the resolved default branch, making the update path explicit and non-merging
 - added direct handoff coverage for non-`main` default branches and for failure-before-merge when branch resolution cannot succeed
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff changes, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/github/client.ts`:
+
+- fixed `getCIStatus()` so it now merges classic combined commit-status contexts with check runs instead of treating repos without GitHub Checks as implicitly green
+- classic commit statuses in `pending`, `error`, and `failure` states now flow into the returned `checks`, `failures`, `anyPending`, and `allPassing` fields correctly
+- added direct runtime coverage for legacy commit-status-only repos, including pending and failing status contexts with no check runs present
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the GitHub client changes, again keeping coverage runs sequential to avoid V8 artifact collisions
