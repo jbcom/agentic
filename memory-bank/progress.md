@@ -41,3 +41,5 @@
 - made cross-framework tool adaptation fail soft when no tools are declared or framework-specific wrapper helpers are unavailable, so test doubles and partial installs do not crash runner construction
 - added runner regression coverage for LangGraph and Strands configured-tool resolution
 - re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the cross-framework tool work and kept everything green
+- added direct adapter tests that exercise LangGraph and Strands wrapper behavior with mocked framework imports, covering invocation, schema forwarding, metadata naming, and passthrough behavior
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the adapter execution coverage work and kept everything green

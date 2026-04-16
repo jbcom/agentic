@@ -103,4 +103,5 @@ Additional runtime work completed in `agentic-crew`:
 - added framework-specific tool adapters for LangGraph and Strands so config-declared tools now flow through all three runner families instead of only CrewAI
 - made those adapters fail soft when framework-specific wrapping helpers are unavailable or no tools are declared, keeping runner construction stable in partial environments and test doubles
 - added regression coverage for LangGraph and Strands crew builds that resolve configured tools from agent config
+- added direct adapter execution coverage so LangGraph and Strands wrappers are now tested for real invocation, schema forwarding, metadata naming, and passthrough behavior for already-native tool objects
 - verified `agentic-crew` and `pytest-agentic-crew` end to end with lint, typecheck, tests, and the repo-level Python workspace gate
