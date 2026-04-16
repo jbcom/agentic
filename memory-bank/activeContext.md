@@ -100,4 +100,7 @@ Additional runtime work completed in `agentic-crew`:
 - wired the default `CrewAIRunner` to actually attach configured tools instead of dropping them on the floor
 - wired the legacy loader path and `ConnectorBuilderCrew` to use the same resolver
 - made `agentic_crew.tools` lazy so the core package can import without immediately requiring CrewAI-only dependencies
+- added framework-specific tool adapters for LangGraph and Strands so config-declared tools now flow through all three runner families instead of only CrewAI
+- made those adapters fail soft when framework-specific wrapping helpers are unavailable or no tools are declared, keeping runner construction stable in partial environments and test doubles
+- added regression coverage for LangGraph and Strands crew builds that resolve configured tools from agent config
 - verified `agentic-crew` and `pytest-agentic-crew` end to end with lint, typecheck, tests, and the repo-level Python workspace gate

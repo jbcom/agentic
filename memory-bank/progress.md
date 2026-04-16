@@ -36,3 +36,8 @@
 - made `agentic_crew.tools` lazy-loaded so importing the core package no longer forces CrewAI-only modules during test collection or non-CrewAI usage
 - added regression coverage for tool resolution and connector-builder tool wiring
 - re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate and kept everything green
+- added `agentic_crew.tools.adapters` to adapt resolved configured tools into LangGraph `StructuredTool`s and Strands `@tool` wrappers
+- wired `LangGraphRunner` and `StrandsRunner` to collect tool declarations from agent config instead of always building with empty tool lists
+- made cross-framework tool adaptation fail soft when no tools are declared or framework-specific wrapper helpers are unavailable, so test doubles and partial installs do not crash runner construction
+- added runner regression coverage for LangGraph and Strands configured-tool resolution
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the cross-framework tool work and kept everything green
