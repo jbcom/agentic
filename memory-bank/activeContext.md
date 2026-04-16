@@ -182,6 +182,14 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` a
 - extended focused handoff protocol coverage to assert the generated takeover command includes the repository argument alongside the successor branch name
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the CLI/prompt contract fix; when coverage artifact collisions appeared during overlapping runs, cleared `packages/agentic/coverage` and reran sequentially to restore a clean green state
 
+Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` health confirmation flow:
+
+- fixed the health-check polling path so `waitForHealthCheck()` now looks for the confirmation marker in the predecessor conversation, which is where `confirmHealthAndBegin()` actually posts the followup
+- kept a successor-conversation fallback for compatibility, but the primary runtime contract is now aligned with the actual followup destination
+- hardened `confirmHealthAndBegin()` to throw when Cursor followup posting fails instead of silently reporting success while the predecessor keeps waiting
+- extended `packages/agentic/tests/handoff-protocol.test.ts` to model predecessor-thread confirmation and to assert followup-post failures surface as errors
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-confirmation fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
 Additional runtime work completed in `packages/agentic/src/github/client.ts`:
 
 - fixed `getCIStatus()` so it now merges classic combined commit-status contexts with check runs instead of treating repos without GitHub Checks as implicitly green

@@ -109,3 +109,7 @@
 - updated `packages/agentic/src/handoff/manager.ts` successor prompts so the generated takeover command includes `--repo <owner/repo>` and does not depend on implicit local default-repository config
 - extended `packages/agentic/tests/handoff-protocol.test.ts` to assert the generated takeover command includes the repository argument
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the CLI/prompt contract fix; when coverage artifact collisions appeared during overlapping runs, cleared `packages/agentic/coverage` and reran sequentially to restore a clean green state
+- fixed `packages/agentic/src/handoff/manager.ts` health confirmation polling so it now checks the predecessor conversation for the `HANDOFF CONFIRMED` followup that `confirmHealthAndBegin()` actually posts, with a successor-conversation fallback only for compatibility
+- hardened `packages/agentic/src/handoff/manager.ts` `confirmHealthAndBegin()` so a failed Cursor followup post throws instead of silently pretending the handoff was confirmed
+- updated `packages/agentic/tests/handoff-protocol.test.ts` to use predecessor-thread confirmation and to assert followup-post failures surface as errors
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-confirmation fix, again keeping coverage runs sequential to avoid V8 artifact collisions
