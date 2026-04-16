@@ -542,8 +542,12 @@ Use these commands:
       return this.config.approval?.requireApproval?.includes(toolName) ?? false;
     };
 
-    const checkApproval = async (toolName: string, input: unknown): Promise<boolean> => {
-      if (!requiresApproval(toolName)) return true;
+    const checkApproval = async (
+      toolName: string,
+      input: unknown,
+      force = false
+    ): Promise<boolean> => {
+      if (!force && !requiresApproval(toolName)) return true;
       if (!this.config.approval?.onApprovalRequest) return true;
       return this.config.approval.onApprovalRequest(toolName, input);
     };
@@ -561,7 +565,7 @@ Use these commands:
         const needsApproval = requiresApproval('bash') || !safety.safe;
 
         if (needsApproval) {
-          const approved = await checkApproval('bash', { command, risks: safety.risks });
+          const approved = await checkApproval('bash', { command, risks: safety.risks }, true);
           if (!approved) {
             recordStep('bash', { command }, 'Command rejected by approval', false);
             return 'Command rejected by approval policy';
@@ -694,7 +698,7 @@ Use these commands:
       inputSchema: z.object({}),
       execute: async () => {
         try {
-          const status = execSync('git status --porcelain -b', {
+          const status = execFileSync('git', ['status', '--porcelain', '-b'], {
             cwd: this.config.workingDirectory,
             encoding: 'utf-8',
           });
@@ -728,7 +732,7 @@ Use these commands:
             // Use -- to separate paths from options (git best practice)
             args.push('--', file);
           }
-          const diff = execSync(`git diff ${args.join(' ')}`, {
+          const diff = execFileSync('git', ['diff', ...args], {
             cwd: this.config.workingDirectory,
             encoding: 'utf-8',
           });
@@ -758,7 +762,7 @@ Use these commands:
         const fullPath = pathValidation.resolvedPath;
 
         // Always check approval for delete operations
-        const approved = await checkApproval('delete_file', { path });
+        const approved = await checkApproval('delete_file', { path }, true);
         if (!approved) {
           recordStep('delete_file', { path }, 'Delete rejected by approval', false);
           return 'Delete operation rejected by approval policy';
