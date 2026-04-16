@@ -88,6 +88,21 @@ function resolveToken(serverConfig: MCPServerConfig): string | undefined {
 }
 
 /**
+ * Determine whether a server can initialize without a token.
+ *
+ * Built-in optional servers are allowed to start without credentials, and
+ * custom servers with no token configuration should also be permitted.
+ */
+function canInitializeWithoutToken(name: string, serverConfig: MCPServerConfig): boolean {
+  const builtInOptionalServers = new Set(['context7', '21st-magic', 'vendor-connectors']);
+  if (builtInOptionalServers.has(name)) {
+    return true;
+  }
+
+  return !serverConfig.tokenEnvVar && !(serverConfig.tokenEnvVarFallbacks?.length);
+}
+
+/**
  * Get merged MCP config (user config + defaults)
  */
 function getMCPConfig(): MCPConfig {
@@ -184,11 +199,10 @@ export async function initializeMCPClients(overrides: MCPClientConfig = {}): Pro
   const mcpConfig = getMCPConfig();
 
   for (const [name, serverConfig] of Object.entries(mcpConfig)) {
-    if (!serverConfig || serverConfig.enabled === false) continue;
-
     // Apply overrides
     const override = overrides[name as keyof MCPClientConfig];
     const config = override ? { ...serverConfig, ...override } : serverConfig;
+    if (!config || config.enabled === false) continue;
 
     // Resolve token
     let token = resolveToken(config);
@@ -199,9 +213,7 @@ export async function initializeMCPClients(overrides: MCPClientConfig = {}): Pro
       if ('token' in override && override.token) token = override.token;
     }
 
-    // Optional servers that can run without tokens
-    const optionalServers = ['context7', '21st-magic', 'vendor-connectors'];
-    if (!token && !optionalServers.includes(name)) {
+    if (!token && !canInitializeWithoutToken(name, config)) {
       // Skip non-optional servers without tokens
       continue;
     }
