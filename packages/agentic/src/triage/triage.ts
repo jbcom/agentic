@@ -66,13 +66,27 @@ export class Triage {
    */
   async plan(prNumber: number): Promise<ResolutionPlan> {
     const triage = await this.analyze(prNumber);
+
+    if (triage.status === 'merged' || triage.status === 'closed') {
+      return {
+        prNumber,
+        steps: [],
+        estimatedTotalDuration: '0 minutes',
+        requiresHumanIntervention: false,
+        humanInterventionReason: null,
+      };
+    }
+
     const steps: ResolutionPlan['steps'] = [];
     let order = 1;
+    const remediationStepOrders: number[] = [];
 
     // CI failures first
     for (const blocker of triage.blockers.filter((b) => b.type === 'ci_failure')) {
+      const stepOrder = order++;
+      remediationStepOrders.push(stepOrder);
       steps.push({
-        order: order++,
+        order: stepOrder,
         action: 'Fix CI failure',
         description: blocker.description,
         automated: blocker.isAutoResolvable,
@@ -82,49 +96,57 @@ export class Triage {
     }
 
     // Then feedback
-    const feedbackStep = order;
     const unaddressed = triage.feedback.items.filter((f) => f.status === 'unaddressed');
     if (unaddressed.length > 0) {
+      const stepOrder = order++;
+      remediationStepOrders.push(stepOrder);
       steps.push({
-        order: order++,
+        order: stepOrder,
         action: 'Address feedback',
         description: `${unaddressed.length} feedback items to address`,
         automated: unaddressed.every((f) => f.isAutoResolvable),
         estimatedDuration: `${unaddressed.length * 2}-${unaddressed.length * 5} minutes`,
-        dependencies: steps.filter((s) => s.action === 'Fix CI failure').map((s) => s.order),
+        dependencies: remediationStepOrders.filter((existingOrder) => existingOrder < stepOrder),
       });
     }
 
     // Request re-review if needed
-    if (steps.length > 0) {
+    const needsReviewStep = triage.status === 'needs_review' || remediationStepOrders.length > 0;
+    if (needsReviewStep) {
+      const stepOrder = order++;
       steps.push({
-        order: order++,
+        order: stepOrder,
         action: 'Request re-review',
         description: 'Request AI reviewers to re-review changes',
         automated: true,
         estimatedDuration: '1-5 minutes',
-        dependencies: [feedbackStep],
+        dependencies: [...remediationStepOrders],
       });
     }
 
     // Wait for CI
-    steps.push({
-      order: order++,
-      action: 'Wait for CI',
-      description: 'Wait for all CI checks to complete',
-      automated: true,
-      estimatedDuration: '5-15 minutes',
-      dependencies: steps.map((s) => s.order),
-    });
+    if (triage.status !== 'ready_to_merge') {
+      const stepOrder = order++;
+      steps.push({
+        order: stepOrder,
+        action: 'Wait for CI',
+        description: 'Wait for all CI checks to complete',
+        automated: true,
+        estimatedDuration: '5-15 minutes',
+        dependencies: steps.map((s) => s.order),
+      });
+    }
 
     // Final merge
+    const lastStep = steps.at(-1);
+    const mergeDependencies = lastStep ? [lastStep.order] : [];
     steps.push({
       order: order++,
       action: 'Merge PR',
       description: 'Merge the PR once all checks pass',
       automated: false, // Requires explicit approval
       estimatedDuration: '1 minute',
-      dependencies: [order - 1],
+      dependencies: mergeDependencies,
     });
 
     const hasHumanStep = steps.some((s) => !s.automated);
