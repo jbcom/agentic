@@ -421,12 +421,7 @@ export class GitHubClient {
     }
 
     try {
-      const { data } = await octokit.issues.listComments({
-        owner,
-        repo,
-        issue_number: prNumber,
-        per_page: 100,
-      });
+      const data = await GitHubClient.listAllIssueComments(octokit, owner, repo, prNumber);
 
       return {
         success: true,
@@ -441,6 +436,36 @@ export class GitHubClient {
     } catch (error) {
       return { success: false, error: String(error) };
     }
+  }
+
+  private static async listAllIssueComments(
+    octokit: Octokit,
+    owner: string,
+    repo: string,
+    prNumber: number
+  ) {
+    const comments = [];
+    let page = 1;
+
+    while (true) {
+      const { data } = await octokit.issues.listComments({
+        owner,
+        repo,
+        issue_number: prNumber,
+        per_page: 100,
+        page,
+      });
+
+      comments.push(...data);
+
+      if (data.length < 100) {
+        break;
+      }
+
+      page += 1;
+    }
+
+    return comments;
   }
 
   /**
