@@ -243,6 +243,47 @@ class TestCrewAIRunner:
         assert "context" in second_task_kwargs
         assert second_task_kwargs["context"] == [mock_task1]
 
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Tool names declared in agent config should be instantiated and attached."""
+        crew_mocker.mock_crewai()
+
+        from agentic_crew.runners.crewai_runner import CrewAIRunner
+
+        crew_mocker.patch_crewai_crew()
+        MockAgent = crew_mocker.patch_crewai_agent()
+        crew_mocker.patch_crewai_task()
+        crew_mocker.patch_crewai_process()
+        crew_mocker.patch_get_llm()
+
+        resolved_tool = crew_mocker.MagicMock()
+
+        runner = CrewAIRunner()
+        runner._resolve_tools = crew_mocker.MagicMock(return_value=[resolved_tool])
+
+        crew_config = {
+            "agents": {
+                "agent1": {
+                    "role": "Agent 1",
+                    "goal": "Goal 1",
+                    "backstory": "Backstory 1",
+                    "tools": ["FileWriteTool"],
+                }
+            },
+            "tasks": {
+                "task1": {
+                    "description": "Task 1",
+                    "expected_output": "Output 1",
+                    "agent": "agent1",
+                }
+            },
+            "knowledge_paths": [],
+        }
+
+        runner.build_crew(crew_config)
+
+        runner._resolve_tools.assert_called_once_with(["FileWriteTool"])
+        assert MockAgent.call_args[1]["tools"] == [resolved_tool]
+
 
 class TestLangGraphRunner:
     """Tests for LangGraph runner implementation."""

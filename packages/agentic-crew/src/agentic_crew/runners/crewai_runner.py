@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from agentic_crew.runners.base import BaseRunner
+from agentic_crew.tools.registry import resolve_tools
 
 
 class CrewAIRunner(BaseRunner):
@@ -158,10 +159,7 @@ class CrewAIRunner(BaseRunner):
         Returns:
             List of tool instances.
         """
-        # For now, return empty list - tools should be registered externally
-        # A more sophisticated implementation would look up tools by name
-        # from a registry or import them dynamically
-        return []
+        return resolve_tools(tool_names)
 
     def _load_knowledge(self, knowledge_paths: list[Path]) -> list:
         """Load knowledge sources from paths.

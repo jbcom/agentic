@@ -13,6 +13,8 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from crewai import Agent, Crew, Task
 
+from agentic_crew.tools.registry import resolve_tools
+
 
 def load_knowledge_sources(knowledge_paths: list[Path]) -> list:
     """Load knowledge sources from the specified paths.
@@ -144,8 +146,13 @@ def load_crew_from_config(crew_config: dict) -> Crew:
     agents: dict[str, Any] = {}
 
     for agent_name, agent_cfg in agents_config.items():
-        # Determine which tools to give based on agent role
-        tools = all_tools if "engineer" in agent_name.lower() or "developer" in agent_name.lower() else read_tools
+        resolved_tools = resolve_tools(agent_cfg.get("tools", []))
+
+        # Preserve the older role-based fallback when no concrete tool could be resolved.
+        if resolved_tools:
+            tools = resolved_tools
+        else:
+            tools = all_tools if "engineer" in agent_name.lower() or "developer" in agent_name.lower() else read_tools
 
         agents[agent_name] = create_agent_from_config(agent_name, agent_cfg, tools)
 

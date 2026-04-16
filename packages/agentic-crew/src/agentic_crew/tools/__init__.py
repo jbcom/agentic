@@ -1,74 +1,63 @@
-"""Custom tools for CrewAI game development crews.
+"""Custom tools for agentic-crew.
 
-This module provides file manipulation and web scraping tools.
-
-For Meshy 3D asset generation tools, use mesh-toolkit directly:
-    from mesh_toolkit.agent_tools.crewai import get_tools as get_meshy_tools
-
-Usage:
-    from agentic_crew.tools import (
-        GameCodeReaderTool,
-        GameCodeWriterTool,
-        DirectoryListTool,
-        CrawlWebsiteTool,
-        ScrapeWebsiteTool,
-        get_all_tools,
-    )
+Tool modules are imported lazily so the core package can be imported without
+pulling in optional framework dependencies like CrewAI or scraping extras.
 """
 
 from __future__ import annotations
 
-from agentic_crew.tools.file_tools import (
-    DirectoryListTool,
-    GameCodeReaderTool,
-    GameCodeWriterTool,
-)
-from agentic_crew.tools.scraping_tools import CrawlWebsiteTool, ScrapeWebsiteTool
+from contextlib import suppress
+from importlib import import_module
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from agentic_crew.tools.file_tools import DirectoryListTool, GameCodeReaderTool, GameCodeWriterTool
+    from agentic_crew.tools.scraping_tools import CrawlWebsiteTool, ScrapeWebsiteTool
 
 
-def get_file_tools():
-    """Get the standard file manipulation tools.
+def _load_attr(module_name: str, attr_name: str) -> Any:
+    module = import_module(module_name)
+    return getattr(module, attr_name)
 
-    Returns:
-        List of file tool instances
-    """
+
+def __getattr__(name: str) -> Any:
+    if name in {"DirectoryListTool", "GameCodeReaderTool", "GameCodeWriterTool"}:
+        return _load_attr("agentic_crew.tools.file_tools", name)
+    if name in {"CrawlWebsiteTool", "ScrapeWebsiteTool"}:
+        return _load_attr("agentic_crew.tools.scraping_tools", name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def get_file_tools() -> list[Any]:
+    """Get the standard file manipulation tools."""
     return [
-        GameCodeReaderTool(),
-        GameCodeWriterTool(),
-        DirectoryListTool(),
+        __getattr__("GameCodeReaderTool")(),
+        __getattr__("GameCodeWriterTool")(),
+        __getattr__("DirectoryListTool")(),
     ]
 
 
-def get_scraping_tools():
-    """Get the web scraping tools.
-
-    Returns:
-        List of scraping tool instances
-    """
+def get_scraping_tools() -> list[Any]:
+    """Get the web scraping tools."""
     return [
-        ScrapeWebsiteTool(),
-        CrawlWebsiteTool(),
+        __getattr__("ScrapeWebsiteTool")(),
+        __getattr__("CrawlWebsiteTool")(),
     ]
 
 
-def get_all_tools():
-    """Get all available tools.
-
-    Returns file and scraping tools. For Meshy tools, use mesh_toolkit.agent_tools.crewai.
-
-    Returns:
-        List of all tool instances
-    """
+def get_all_tools() -> list[Any]:
+    """Get all available tools."""
     tools = get_file_tools()
-    tools.extend(get_scraping_tools())
 
-    # Try to load mesh-toolkit tools if available
+    with suppress(ImportError):
+        tools.extend(get_scraping_tools())
+
     try:
         from mesh_toolkit.agent_tools.crewai import get_tools as get_meshy_tools
 
         tools.extend(get_meshy_tools())
     except ImportError:
-        pass  # mesh-toolkit not installed with crewai extra
+        pass
 
     return tools
 
