@@ -9,7 +9,7 @@ jobs:
     if: "github.event.state == 'failure'"
     steps:
       - name: 'Run Agentic CI Resolution'
-        uses: jbcom/agentic-control/actions/agentic-ci-resolution@v1
+        uses: jbcom/agentic/actions/agentic-ci-resolution@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           model: 'llama3'

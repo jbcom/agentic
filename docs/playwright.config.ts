@@ -1,10 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 
 /**
- * Use port 4322 for e2e tests to avoid conflicts with dev servers
- * commonly running on 4321.
+ * Use a dedicated high port for docs preview so Playwright does not attach
+ * to unrelated local sites already running on common Astro defaults.
  */
-const PORT = Number(process.env.DOCS_PREVIEW_PORT) || 4322;
+const PORT = Number(process.env.DOCS_PREVIEW_PORT) || 44123;
 const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -35,7 +35,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: `npx astro preview --port ${PORT}`,
+    command: `pnpm exec astro preview --host 127.0.0.1 --port ${PORT}`,
     url: BASE_URL,
     reuseExistingServer: false,
     timeout: 120_000,

@@ -5,7 +5,7 @@ prev: false
 title: "MockStreamChunk"
 ---
 
-Defined in: [providers.ts:72](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L72)
+Defined in: [providers.ts:72](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L72)
 
 Mock stream chunk for streaming responses.
 
@@ -15,7 +15,7 @@ Mock stream chunk for streaming responses.
 
 > `optional` **isFinished**: `boolean`
 
-Defined in: [providers.ts:86](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L86)
+Defined in: [providers.ts:86](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L86)
 
 Whether this is the final chunk
 
@@ -25,7 +25,7 @@ Whether this is the final chunk
 
 > `optional` **textDelta**: `string`
 
-Defined in: [providers.ts:74](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L74)
+Defined in: [providers.ts:74](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L74)
 
 Text delta
 
@@ -35,7 +35,7 @@ Text delta
 
 > `optional` **toolCallDelta**: `object`
 
-Defined in: [providers.ts:81](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L81)
+Defined in: [providers.ts:81](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L81)
 
 Tool call delta (args)
 
@@ -53,7 +53,7 @@ Tool call delta (args)
 
 > `optional` **toolCallStart**: `object`
 
-Defined in: [providers.ts:76](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L76)
+Defined in: [providers.ts:76](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L76)
 
 Tool call start
 

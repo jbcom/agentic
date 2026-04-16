@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
-import starlightTypeDoc, { typeDocSidebarGroup } from 'starlight-typedoc';
 
 // https://astro.build/config
 export default defineConfig({
@@ -9,7 +8,7 @@ export default defineConfig({
 	integrations: [
 		starlight({
 			title: 'Agentic',
-			description: 'The polyglot AI agent toolkit — fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.',
+			description: 'The AI agent toolkit for TypeScript and Python — fleet orchestration, crew management, triage, and declarative asset pipelines.',
 			logo: {
 				light: './src/assets/logo-light.svg',
 				dark: './src/assets/logo-dark.svg',
@@ -47,46 +46,9 @@ export default defineConfig({
 					tag: 'meta',
 					attrs: {
 						property: 'og:description',
-						content: 'The polyglot AI agent toolkit. Fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust.',
+						content: 'The AI agent toolkit for TypeScript and Python. Fleet orchestration, crew management, triage, and declarative asset pipelines.',
 					},
 				},
-			],
-			plugins: [
-				starlightTypeDoc({
-					entryPoints: ['../packages/agentic-control/src/index.ts'],
-					tsconfig: '../packages/agentic-control/tsconfig.json',
-					output: 'api/control',
-					sidebar: { label: '@jbcom/agentic API', collapsed: true },
-					typeDoc: { skipErrorChecking: true },
-				}),
-				starlightTypeDoc({
-					entryPoints: ['../packages/triage/src/index.ts'],
-					tsconfig: '../packages/triage/tsconfig.json',
-					output: 'api/triage',
-					sidebar: { label: '@jbcom/agentic-triage API', collapsed: true },
-					typeDoc: { skipErrorChecking: true },
-				}),
-				starlightTypeDoc({
-					entryPoints: ['../packages/meshy-content-generator/src/index.ts'],
-					tsconfig: '../packages/meshy-content-generator/tsconfig.json',
-					output: 'api/meshy',
-					sidebar: { label: '@jbcom/agentic-meshy API', collapsed: true },
-					typeDoc: { skipErrorChecking: true },
-				}),
-				starlightTypeDoc({
-					entryPoints: ['../packages/providers/src/index.ts'],
-					tsconfig: '../packages/providers/tsconfig.json',
-					output: 'api/providers',
-					sidebar: { label: '@jbcom/agentic-providers API', collapsed: true },
-					typeDoc: { skipErrorChecking: true },
-				}),
-				starlightTypeDoc({
-					entryPoints: ['../packages/vitest-agentic-control/src/index.ts'],
-					tsconfig: '../packages/vitest-agentic-control/tsconfig.json',
-					output: 'api/vitest',
-					sidebar: { label: '@jbcom/vitest-agentic API', collapsed: true },
-					typeDoc: { skipErrorChecking: true },
-				}),
 			],
 			sidebar: [
 				{
@@ -100,11 +62,10 @@ export default defineConfig({
 				{
 					label: 'Packages',
 					items: [
-						{ label: '@jbcom/agentic (Control)', slug: 'packages/control' },
-						{ label: '@jbcom/agentic (Triage)', slug: 'packages/triage' },
+						{ label: '@jbcom/agentic', slug: 'packages/agentic' },
+						{ label: '@jbcom/agentic-triage', slug: 'packages/triage' },
 						{ label: 'agentic-crew', slug: 'packages/crew' },
-						{ label: '@agentic/meshy', slug: 'packages/meshy-content-generator' },
-						{ label: 'game-generator', slug: 'packages/game-generator' },
+						{ label: '@jbcom/agentic-meshy', slug: 'packages/meshy-content-generator' },
 					],
 				},
 				{
@@ -145,10 +106,8 @@ export default defineConfig({
 						{ label: 'Token Management', slug: 'api/token-management' },
 						{ label: 'Configuration', slug: 'api/configuration' },
 						{ label: 'Python (agentic-crew)', slug: 'api/crew' },
-						{ label: 'Rust (game-gen)', slug: 'api/game-gen' },
 					],
 				},
-				typeDocSidebarGroup,
 			],
 		}),
 	],

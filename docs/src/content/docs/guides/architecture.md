@@ -1,9 +1,9 @@
 ---
 title: Architecture Overview
-description: System design, package relationships, data flow, event system, and extension points for the Agentic polyglot AI agent orchestration toolkit.
+description: System design, package relationships, data flow, event system, and extension points for the Agentic TypeScript and Python toolkit.
 ---
 
-The Agentic toolkit is a polyglot system spanning TypeScript, Python, and Rust. Each language targets the domain where it excels, and the packages communicate through well-defined interfaces.
+The Agentic toolkit spans TypeScript and Python. Each language targets the domain where it excels, and the packages communicate through well-defined interfaces.
 
 ## System Design Diagram
 
@@ -41,11 +41,11 @@ The Agentic toolkit is a polyglot system spanning TypeScript, Python, and Rust. 
    +---------+--------+   |  (3D Asset Pipelines)|
              |             +----------------------+
              |
-   +---------v--------+   +----------------------+
-   |   LLM Services   |   |   game-generator     |
-   | Ollama/Jules/     |   |  (Rust Game Engine)  |
-   | Cursor/Anthropic  |   +----------------------+
-   +-------------------+
+   +---------v--------+
+   |   LLM Services   |
+   | Ollama/Jules/    |
+   | Cursor/Anthropic |
+   +------------------+
 ```
 
 ## Package Responsibilities
@@ -85,14 +85,6 @@ Framework-agnostic crew orchestration:
 - Run crews on CrewAI, LangGraph, or AWS Strands without code changes.
 - Integrates with the TypeScript layer through the `CrewTool` subprocess bridge.
 
-### game-generator (Rust)
-
-Visual-first vintage game generator:
-
-- Bevy-powered desktop UI with guided wizard and freeform conversation modes.
-- AI-assisted content generation (text, image, audio, code).
-- Game mechanic blending via graph-based similarity scoring.
-
 ## Package Dependency Graph
 
 ### Core Dependency Chain
@@ -103,7 +95,6 @@ Visual-first vintage game generator:
 @jbcom/vitest-agentic  (standalone, mocks agentic components)
 pytest-agentic-crew  (standalone, fixtures for agentic-crew)
 @jbcom/agentic-meshy  (standalone)
-game-generator  (standalone Rust crate)
 agentic-crew  (standalone Python package)
 ```
 
@@ -276,12 +267,12 @@ To add support for a new AI framework in `agentic-crew`:
 
 To add a new container runtime (beyond Claude and Cursor):
 
-1. Create a runtime module in `packages/agentic-control/src/sandbox/runtime/`.
-2. Register the runtime in `packages/agentic-control/src/sandbox/runtime/index.ts`.
+1. Create a runtime module in `packages/agentic/src/sandbox/runtime/`.
+2. Register the runtime in `packages/agentic/src/sandbox/runtime/index.ts`.
 
 ### Adding a New CLI Command
 
-Add the command in `packages/agentic-control/src/cli.ts` using Commander.js. The CLI loads configuration via cosmiconfig and resolves tokens before dispatching to the appropriate subsystem.
+Add the command in `packages/agentic/src/cli.ts` using Commander.js. The CLI loads configuration via cosmiconfig and resolves tokens before dispatching to the appropriate subsystem.
 
 ## Technology Stack
 

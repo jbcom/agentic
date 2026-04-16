@@ -5,7 +5,7 @@ prev: false
 title: "TestFleetConfig"
 ---
 
-Defined in: [fixtures.ts:44](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L44)
+Defined in: [fixtures.ts:44](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L44)
 
 Fleet configuration for testing.
 
@@ -15,7 +15,7 @@ Fleet configuration for testing.
 
 > **autoCreatePr**: `boolean`
 
-Defined in: [fixtures.ts:45](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L45)
+Defined in: [fixtures.ts:45](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L45)
 
 ***
 
@@ -23,7 +23,7 @@ Defined in: [fixtures.ts:45](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **concurrency**: `number`
 
-Defined in: [fixtures.ts:46](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L46)
+Defined in: [fixtures.ts:46](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L46)
 
 ***
 
@@ -31,4 +31,4 @@ Defined in: [fixtures.ts:46](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **timeout**: `number`
 
-Defined in: [fixtures.ts:47](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L47)
+Defined in: [fixtures.ts:47](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L47)

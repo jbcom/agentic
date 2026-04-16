@@ -1,65 +1,84 @@
 # Active Context
 
-## agentic-control v1.1.0 - PNPM MONOREPO ✅
+## Monorepo Reality
 
-Unified AI agent fleet management, triage, and orchestration toolkit.
+`agentic` is now organized around a clearer TypeScript + Python core:
 
-### Monorepo Structure
+- `@jbcom/agentic` is the most production-ready package
+- `@jbcom/agentic-triage` is usable and well-tested, but still has some partial provider surface area
+- `agentic-crew` and `pytest-agentic-crew` are in good shape after workspace command cleanup
+- docs now build and unit-test cleanly, with contract tests for renamed package surfaces
+- package layout now matches the public product names more closely:
+  - `packages/agentic`
+  - `packages/triage`
+  - `packages/providers`
+  - `packages/meshy-content-generator`
+  - `packages/agentic-crew`
+  - `tooling/vitest-agentic`
+  - `tooling/pytest-agentic-crew`
+  - `internal/` for non-public planning and legacy docs
 
-The project is a pnpm workspace monorepo:
+## Extraction Decision
 
-```
-/workspace/
-├── pnpm-workspace.yaml          # Workspace configuration
-├── packages/
-│   ├── agentic-control/         # Main CLI and runtime package (npm)
-│   └── vitest-agentic-control/  # Vitest plugin for E2E testing (npm)
-├── scripts/
-│   ├── monitor-npm.ts           # NPM health & stats monitoring
-│   └── sync-versions.ts         # Version sync for monorepo
-└── python/                      # Python CrewAI companion (PyPI)
-```
+The Rust `game-generator` package and the Python `game-asset-mcp` package were judged to make more sense as standalone repositories than as first-class monorepo packages.
 
-### Release & Maintenance (UPDATED 2025-12-24)
+Standalone repositories were created locally and published publicly:
 
-- **Standardized Naming**: All package references updated to use `agentic-control` (unscoped) to match the published npm package.
-- **Automated Version Sync**: Added `scripts/sync-versions.ts` and `@semantic-release/exec` to ensure workspace packages stay in sync with the root version during release.
-- **NPM Monitoring**: New `pnpm run monitor:npm` command and `.github/workflows/monitor.yml` for daily health and download tracking.
-- **CI/CD Fixes**: Resolved TypeScript build error in `cli.ts` that was blocking releases.
+- `/Users/jbogaty/src/jbcom/game-generator`
+- `/Users/jbogaty/src/jbcom/game-asset-mcp`
 
-### Test Status
+GitHub remotes:
 
-- **82 tests passing** (23 vitest-agentic-control + 59 agentic-control)
-- Workspace-level `pnpm run build` and `pnpm run test` commands work
-- Production release property tests are passing, validating build purity and architecture.
+- `https://github.com/jbcom/game-generator`
+- `https://github.com/jbcom/game-asset-mcp`
 
-### Development Commands
+## Current State Of Those Extracted Repos
 
-```bash
-# Install dependencies (workspace)
-pnpm install
+### game-generator
 
-# Build all packages
-pnpm run build
+- converted from workspace-bound Cargo metadata to a self-contained crate
+- added standalone Rust CI
+- updated CLI defaults from `vintage_game_generator` to `game_generator`
+- rewritten README to describe the package honestly as experimental
+- verified with `cargo test`
 
-# Test all packages
-pnpm run test
+### game-asset-mcp
 
-# Monitor npm stats
-pnpm run monitor:npm
+- converted from monorepo-root tooling assumptions to self-contained `pyproject.toml` config
+- added standalone Python CI
+- updated repo metadata and README for standalone use
+- verified with `ruff`, `mypy`, and `pytest`
 
-# Sync versions (manual)
-pnpm tsx scripts/sync-versions.ts
-```
+## What Remains In This Monorepo
 
-### Key Features
+The extracted package directories have now been removed from the monorepo.
 
-- **Multi-org token management** with automatic switching
-- **AI-powered triage** (Anthropic, OpenAI, Google, Mistral, Azure, Ollama)
-- **Sandbox execution** with Docker isolation
-- **Fleet coordination** and agent handoff protocols
-- **MCP server mocking** for E2E testing
-- **Provider mocking** for unit testing without API calls
+The monorepo is now scoped around:
 
----
-*Release maintenance & monitoring implemented: 2025-12-24*
+- `@jbcom/agentic`
+- `@jbcom/agentic-triage`
+- `agentic-crew`
+- `pytest-agentic-crew`
+- `@jbcom/agentic-meshy`
+- `@jbcom/agentic-providers`
+- `@jbcom/vitest-agentic`
+
+Cleanup completed:
+
+- removed root Rust workspace and Rust release/CI assumptions
+- removed `game-generator` and `game-asset-mcp` package directories from `packages/`
+- rewrote the docs site to describe only the remaining TypeScript and Python product surface
+- moved `game-generator` public docs into its standalone repository
+- added ignore rules for local docs/playwright/temp artifacts
+- aligned Nx, CI, release, tox, justfile, docs tests, and package release checks with the renamed directories and package-local Python environments
+- verified the retained monorepo end to end:
+  - `pnpm nx run-many -t lint,build,typecheck,test:coverage --projects=tag:lang:ts`
+  - `pnpm nx run-many -t lint,typecheck,test --projects=tag:lang:py`
+  - `pnpm --dir docs run build`
+  - `pnpm --dir docs run test`
+  - `pnpm --dir docs run test:e2e --project=chromium`
+
+Remaining work should focus on:
+
+- driving down remaining `@jbcom/agentic-triage` lint warnings and complexity hotspots
+- continuing production-readiness work in triage and crew

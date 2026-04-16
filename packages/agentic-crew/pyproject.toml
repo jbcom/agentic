@@ -111,3 +111,22 @@ token = { env = "GH_TOKEN" }
 [tool.semantic_release.publish]
 dist_glob_patterns = ["dist/*"]
 upload_to_vcs_release = true
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "bs4",
+    "crewai",
+    "crewai.*",
+    "crewai_tools",
+    "langchain_anthropic",
+    "langgraph",
+    "langgraph.*",
+    "mesh_toolkit.*",
+    "strands",
+]
+ignore_missing_imports = true

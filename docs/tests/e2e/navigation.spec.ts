@@ -52,7 +52,7 @@ test.describe('Homepage', () => {
   test('displays the hero section with tagline', async ({ page }) => {
     await page.goto('/');
     const body = page.locator('body');
-    await expect(body).toContainText('polyglot');
+    await expect(body).toContainText('TypeScript and Python');
   });
 
   test('displays the "Get Started" call-to-action', async ({ page }) => {
@@ -73,7 +73,6 @@ test.describe('Homepage', () => {
     await page.goto('/');
     await expect(page.locator('.lang-badge--ts').first()).toBeVisible();
     await expect(page.locator('.lang-badge--py').first()).toBeVisible();
-    await expect(page.locator('.lang-badge--rs').first()).toBeVisible();
   });
 
   test('displays the stats section', async ({ page }) => {
@@ -225,11 +224,10 @@ test.describe('Content pages', () => {
 
   test('all package pages are accessible', async ({ page }) => {
     const packagePaths = [
-      '/packages/control/',
+      '/packages/agentic/',
       '/packages/triage/',
       '/packages/crew/',
       '/packages/meshy-content-generator/',
-      '/packages/game-generator/',
     ];
 
     for (const path of packagePaths) {
@@ -398,14 +396,14 @@ test.describe('Mobile responsive menu', () => {
 // ---------------------------------------------------------------------------
 
 test.describe('TypeDoc API pages', () => {
-  test('control API readme page is accessible', async ({ page }) => {
-    const response = await page.goto('/api/control/readme/');
+  test('agentic API readme page is accessible', async ({ page }) => {
+    const response = await page.goto('/api/agentic/readme/');
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1').first()).toBeVisible();
   });
 
   test('API page contains class or interface documentation', async ({ page }) => {
-    await page.goto('/api/control/readme/');
+    await page.goto('/api/agentic/readme/');
     const mainContent = page.locator('main');
     await expect(mainContent).toBeVisible();
     const text = await mainContent.textContent();
@@ -413,7 +411,7 @@ test.describe('TypeDoc API pages', () => {
   });
 
   test('Fleet class documentation page is accessible', async ({ page }) => {
-    const response = await page.goto('/api/control/classes/fleet/');
+    const response = await page.goto('/api/agentic/classes/fleet/');
     expect(response?.status()).toBe(200);
     await expect(page.locator('h1').first()).toBeVisible();
   });

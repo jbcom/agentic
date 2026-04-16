@@ -272,7 +272,8 @@ def _cmd_run_single_agent(args, use_json: bool, start_time: float):
             sys.exit(2)
 
         if not use_json:
-            print(f"📋 Runner: {runner.config.name or args.runner}")
+            runner_label = getattr(getattr(runner, "config", None), "name", None) or args.runner
+            print(f"📋 Runner: {runner_label}")
             if working_dir:
                 print(f"📁 Working dir: {working_dir}")
 

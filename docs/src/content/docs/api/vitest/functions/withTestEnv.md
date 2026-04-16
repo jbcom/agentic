@@ -7,7 +7,7 @@ title: "withTestEnv"
 
 > **withTestEnv**(`env?`): () => `void`
 
-Defined in: [fixtures.ts:295](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L295)
+Defined in: [fixtures.ts:295](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L295)
 
 Set up test environment variables and return cleanup function.
 
@@ -32,7 +32,7 @@ Cleanup function to restore original values
 ## Example
 
 ```typescript
-import { withTestEnv, DEFAULT_TEST_ENV } from 'vitest-agentic-control';
+import { withTestEnv, DEFAULT_TEST_ENV } from '/vitest-agentic';
 import { beforeEach, afterEach } from 'vitest';
 
 describe('My Tests', () => {

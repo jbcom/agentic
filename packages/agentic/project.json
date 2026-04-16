@@ -1,0 +1,22 @@
+{
+  "name": "agentic",
+  "tags": ["lang:ts", "scope:agentic"],
+  "targets": {
+    "build": {
+      "command": "tsc",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "test": {
+      "command": "vitest",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "lint": {
+      "command": "biome lint src/ tests/",
+      "options": { "cwd": "{projectRoot}" }
+    },
+    "typecheck": {
+      "command": "tsc --noEmit",
+      "options": { "cwd": "{projectRoot}" }
+    }
+  }
+}

@@ -10,7 +10,7 @@ export default defineConfig({
       reportsDirectory: './coverage',
       include: ['src/**'],
       exclude: [
-        'src/content/docs/api/control/**',
+        'src/content/docs/api/agentic/**',
         'src/content/docs/api/triage/**',
         'src/content/docs/api/meshy/**',
         'src/content/docs/api/providers/**',

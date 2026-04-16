@@ -5,7 +5,7 @@ prev: false
 title: "McpMocker"
 ---
 
-Defined in: [mcp.ts:297](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L297)
+Defined in: [mcp.ts:297](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L297)
 
 MCP mocking utilities class.
 
@@ -15,7 +15,7 @@ during testing.
 ## Example
 
 ```typescript
-import { McpMocker } from 'vitest-agentic-control';
+import { McpMocker } from '/vitest-agentic';
 
 const mocker = new McpMocker();
 
@@ -47,7 +47,7 @@ const result = await server.callTool('get_weather', { location: 'NYC' });
 
 > **new McpMocker**(`options?`): `McpMocker`
 
-Defined in: [mcp.ts:304](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L304)
+Defined in: [mcp.ts:304](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L304)
 
 #### Parameters
 
@@ -65,7 +65,7 @@ Defined in: [mcp.ts:304](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > `readonly` **servers**: `Map`\<`string`, [`MockMcpServer`](/api/vitest/classes/mockmcpserver/)\>
 
-Defined in: [mcp.ts:299](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L299)
+Defined in: [mcp.ts:299](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L299)
 
 Map of mock servers by name
 
@@ -75,7 +75,7 @@ Map of mock servers by name
 
 > **createMockResource**(`uri`, `content`, `options?`): [`MockResourceDefinition`](/api/vitest/interfaces/mockresourcedefinition/)
 
-Defined in: [mcp.ts:424](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L424)
+Defined in: [mcp.ts:424](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L424)
 
 Create a mock resource that can be registered with servers.
 
@@ -121,7 +121,7 @@ Resource definition
 
 > **createMockTool**(`name`, `handler`, `options?`): [`MockToolDefinition`](/api/vitest/interfaces/mocktooldefinition/)
 
-Defined in: [mcp.ts:400](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L400)
+Defined in: [mcp.ts:400](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L400)
 
 Create a mock tool that can be registered with servers.
 
@@ -163,7 +163,7 @@ Tool definition
 
 > **getServer**(`name`): [`MockMcpServer`](/api/vitest/classes/mockmcpserver/) \| `undefined`
 
-Defined in: [mcp.ts:329](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L329)
+Defined in: [mcp.ts:329](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L329)
 
 Get a mock server by name.
 
@@ -187,7 +187,7 @@ The mock server or undefined
 
 > **mockAllModules**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [mcp.ts:360](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L360)
+Defined in: [mcp.ts:360](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L360)
 
 Mock all MCP-related modules.
 
@@ -203,7 +203,7 @@ Dictionary of mocked modules
 
 > **mockClient**(): `Mock`
 
-Defined in: [mcp.ts:338](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L338)
+Defined in: [mcp.ts:338](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L338)
 
 Mock the MCP client module.
 
@@ -219,7 +219,7 @@ Mock client factory
 
 > **mockServer**(`name`, `config?`): [`MockMcpServer`](/api/vitest/classes/mockmcpserver/)
 
-Defined in: [mcp.ts:317](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L317)
+Defined in: [mcp.ts:317](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L317)
 
 Create a mock MCP server.
 
@@ -249,7 +249,7 @@ The mock server
 
 > **resetAll**(): `void`
 
-Defined in: [mcp.ts:453](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L453)
+Defined in: [mcp.ts:453](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L453)
 
 Reset all mock servers.
 
@@ -263,7 +263,7 @@ Reset all mock servers.
 
 > **restoreAll**(): `void`
 
-Defined in: [mcp.ts:445](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L445)
+Defined in: [mcp.ts:445](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L445)
 
 Restore all mocked modules.
 

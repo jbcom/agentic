@@ -1,0 +1,88 @@
+{
+  "name": "@jbcom/vitest-agentic",
+  "version": "1.0.0",
+  "description": "Vitest plugin with fixtures and utilities for @jbcom/agentic E2E testing",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./mocking": {
+      "types": "./dist/mocking.d.ts",
+      "import": "./dist/mocking.js"
+    },
+    "./fixtures": {
+      "types": "./dist/fixtures.d.ts",
+      "import": "./dist/fixtures.js"
+    },
+    "./mcp": {
+      "types": "./dist/mcp.d.ts",
+      "import": "./dist/mcp.js"
+    },
+    "./providers": {
+      "types": "./dist/providers.d.ts",
+      "import": "./dist/providers.js"
+    },
+    "./sandbox": {
+      "types": "./dist/sandbox.d.ts",
+      "import": "./dist/sandbox.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest",
+    "lint": "biome lint src/",
+    "lint:fix": "biome lint --write src/",
+    "format": "biome format --write src/",
+    "format:check": "biome format src/",
+    "check": "biome check src/",
+    "check:fix": "biome check --write src/",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "vitest": ">=1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.14"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "vitest",
+    "testing",
+    "fixtures",
+    "jbcom",
+    "agentic",
+    "e2e",
+    "mcp",
+    "ai-agents",
+    "mocking"
+  ],
+  "author": "Jon Bogaty",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbcom/agentic.git",
+    "directory": "tooling/vitest-agentic"
+  },
+  "homepage": "https://agentic.coach/packages/agentic/",
+  "bugs": {
+    "url": "https://github.com/jbcom/agentic/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -124,7 +124,7 @@ agentic triage review --base main --head HEAD
 Or use the TypeScript API:
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic/tools';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 

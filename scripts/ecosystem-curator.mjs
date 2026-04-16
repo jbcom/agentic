@@ -8,7 +8,7 @@
  * - Issue triage
  * - PR processing
  * 
- * @see https://github.com/jbcom/nodejs-agentic-control
+ * @see https://github.com/jbcom/agentic
  */
 
 import { writeFile } from 'fs/promises';

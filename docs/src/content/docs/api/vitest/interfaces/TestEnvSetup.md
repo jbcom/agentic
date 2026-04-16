@@ -5,7 +5,7 @@ prev: false
 title: "TestEnvSetup"
 ---
 
-Defined in: [fixtures.ts:238](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L238)
+Defined in: [fixtures.ts:238](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L238)
 
 Environment variable setup for testing.
 
@@ -21,7 +21,7 @@ Additional environment variables
 
 > `optional` **ANOTHER\_ORG\_TOKEN**: `string`
 
-Defined in: [fixtures.ts:248](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L248)
+Defined in: [fixtures.ts:248](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L248)
 
 Another organization token
 
@@ -31,7 +31,7 @@ Another organization token
 
 > `optional` **ANTHROPIC\_API\_KEY**: `string`
 
-Defined in: [fixtures.ts:242](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L242)
+Defined in: [fixtures.ts:242](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L242)
 
 Anthropic API key
 
@@ -41,7 +41,7 @@ Anthropic API key
 
 > `optional` **GITHUB\_TOKEN**: `string`
 
-Defined in: [fixtures.ts:240](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L240)
+Defined in: [fixtures.ts:240](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L240)
 
 GitHub token
 
@@ -51,7 +51,7 @@ GitHub token
 
 > `optional` **OPENAI\_API\_KEY**: `string`
 
-Defined in: [fixtures.ts:244](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L244)
+Defined in: [fixtures.ts:244](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L244)
 
 OpenAI API key
 
@@ -61,7 +61,7 @@ OpenAI API key
 
 > `optional` **PR\_REVIEW\_TOKEN**: `string`
 
-Defined in: [fixtures.ts:250](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L250)
+Defined in: [fixtures.ts:250](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L250)
 
 PR review token
 
@@ -71,6 +71,6 @@ PR review token
 
 > `optional` **TEST\_ORG\_TOKEN**: `string`
 
-Defined in: [fixtures.ts:246](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L246)
+Defined in: [fixtures.ts:246](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L246)
 
 Test organization token

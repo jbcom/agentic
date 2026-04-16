@@ -1,9 +1,9 @@
 ---
 title: "Command Your AI Fleet"
-description: "Agentic — the polyglot AI agent toolkit. Fleet orchestration, crew management, triage, and game generation across TypeScript, Python, and Rust."
+description: "Agentic — the AI agent toolkit for TypeScript and Python. Fleet orchestration, crew management, triage, and declarative asset pipelines."
 template: splash
 hero:
-  tagline: "The polyglot command center for AI agent orchestration. Spawn fleets, coordinate crews, triage at scale, and generate entire game worlds — across TypeScript, Python, and Rust."
+  tagline: "The command center for AI agent orchestration. Spawn fleets, coordinate crews, triage at scale, and run asset pipelines across TypeScript and Python."
   image:
     file: ../../assets/logo-dark.svg
   actions:
@@ -21,7 +21,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 <div class="polyglot-bar polyglot-bar--center" style="margin-top: -0.5rem; margin-bottom: 1rem;">
   <span class="lang-badge lang-badge--ts">TypeScript</span>
   <span class="lang-badge lang-badge--py">Python</span>
-  <span class="lang-badge lang-badge--rs">Rust</span>
 </div>
 
 <div class="hero-accent-line"></div>
@@ -32,7 +31,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
     <div class="stat-label">Packages</div>
   </div>
   <div class="stat">
-    <div class="stat-number">3</div>
+    <div class="stat-number">2</div>
     <div class="stat-label">Languages</div>
   </div>
   <div class="stat">
@@ -48,12 +47,12 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
 <hr class="section-divider" />
 
 <div class="mission-section">
-  <h2 class="gradient-text">One Toolkit. Three Languages. Infinite Agents.</h2>
+  <h2 class="gradient-text">One Toolkit. Two Languages. Coordinated Agents.</h2>
   <p class="mission-text">
     Agentic is the command center for AI agent orchestration. Whether you are spawning
     fleets of coding agents, orchestrating AI crews, triaging thousands of issues, or
-    generating entire game worlds — you do it from one unified toolkit that speaks
-    TypeScript, Python, and Rust.
+    running declarative 3D asset pipelines, you do it from one unified toolkit built for
+    TypeScript and Python teams.
   </p>
 </div>
 
@@ -89,14 +88,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
     <a href="/packages/triage/">Triage Docs</a>
   </div>
 
-  <div class="bento-card">
-    <div class="bento-card__icon">&#x1F3AE;</div>
-    <h3>Generate Retro RPGs</h3>
-    <span class="lang-badge lang-badge--rs">Rust</span>
-    <p>AI-powered game generation with Bevy. Procedural worlds, characters, quests, and assets from config.</p>
-    <a href="/packages/game-generator/">Game Generator Docs</a>
-  </div>
-
   <div class="bento-card bento-card--wide">
     <div class="bento-card__icon">&#x1F4A0;</div>
     <h3>Create 3D Assets</h3>
@@ -118,7 +109,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
     <h3>@jbcom/agentic</h3>
     <span class="lang-badge lang-badge--ts">TypeScript</span>
     <p>The orchestration layer. Fleet management, token routing, sandbox execution, and multi-agent handoff protocols.</p>
-    <a href="/packages/control/">View Package</a>
+    <a href="/packages/agentic/">View Package</a>
   </div>
 
   <div class="bento-card">
@@ -136,17 +127,10 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
   </div>
 
   <div class="bento-card">
-    <h3>@agentic/meshy</h3>
+    <h3>@jbcom/agentic-meshy</h3>
     <span class="lang-badge lang-badge--ts">TypeScript</span>
     <p>Declarative 3D asset pipelines. Text-to-3D, rigging, animation via Meshy AI with manifest state.</p>
     <a href="/packages/meshy-content-generator/">View Package</a>
-  </div>
-
-  <div class="bento-card">
-    <h3>game-generator</h3>
-    <span class="lang-badge lang-badge--rs">Rust</span>
-    <p>AI-powered retro RPG generation with Bevy. Procedural worlds, characters, and quests.</p>
-    <a href="/packages/game-generator/">View Package</a>
   </div>
 
   <div class="bento-card">
@@ -161,6 +145,13 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
     <span class="lang-badge lang-badge--ts">TypeScript</span>
     <p>Vitest utilities for testing agent workflows. Mock providers, snapshot conversations.</p>
     <a href="/api/vitest/">View Package</a>
+  </div>
+
+  <div class="bento-card">
+    <h3>pytest-agentic-crew</h3>
+    <span class="lang-badge lang-badge--py">Python</span>
+    <p>Pytest fixtures and helpers for crew testing, replayable runs, and framework-aware assertions.</p>
+    <a href="/api/crew/">View Package</a>
   </div>
 </div>
 
@@ -191,7 +182,7 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
   </TabItem>
   <TabItem label="TypeScript (Triage)">
     ```typescript
-    import { getTriageTools } from '@jbcom/agentic/tools';
+    import { getTriageTools } from '@jbcom/agentic-triage';
     import { generateText } from 'ai';
     import { anthropic } from '@ai-sdk/anthropic';
 
@@ -223,23 +214,6 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
                       inputs={"code": "..."})
     ```
   </TabItem>
-  <TabItem label="Rust (Games)">
-    ```bash
-    # Build and run the game generator
-    cargo run --bin vintage-game-generator
-    ```
-
-    ```rust
-    use vintage_game_generator::prelude::*;
-
-    fn main() {
-        let game = QuickGenerator::new()
-            .genre(Genre::Jrpg)
-            .theme(Theme::Fantasy)
-            .generate_and_run();
-    }
-    ```
-  </TabItem>
 </Tabs>
 </div>
 
@@ -261,9 +235,9 @@ import { Tabs, TabItem } from '@astrojs/starlight/components';
     <p>Standardize AI workflows across your organization. Define crews once, run them consistently. Multi-org token management handles the authentication complexity.</p>
   </div>
   <div class="persona-card">
-    <div class="persona-card__icon">&#x1F3AE;</div>
-    <h4>Game Studios</h4>
-    <p>Generate retro RPG content procedurally — worlds, characters, quests, and assets. Blend classic game aesthetics with AI-driven creativity.</p>
+    <div class="persona-card__icon">&#x1F6E0;</div>
+    <h4>Support And QA Teams</h4>
+    <p>Turn issue queues, flaky PRs, and review backlog into structured triage and repeatable automation instead of one-off scripts.</p>
   </div>
   <div class="persona-card">
     <div class="persona-card__icon">&#x1F4A0;</div>

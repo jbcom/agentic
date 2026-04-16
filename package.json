@@ -1,8 +1,8 @@
 {
-  "name": "agentic-control-monorepo",
+  "name": "agentic-monorepo",
   "version": "1.1.0",
   "private": true,
-  "description": "Unified AI agent fleet management, triage, and orchestration toolkit - Monorepo",
+  "description": "Unified TypeScript and Python AI agent orchestration toolkit monorepo",
   "type": "module",
   "scripts": {
     "build": "nx run-many -t build",

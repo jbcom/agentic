@@ -78,7 +78,7 @@ runs:
         if [ -n "$OLLAMA_HOST" ] && [ -n "$OLLAMA_API_KEY" ]; then
           echo "Using Ollama API at $OLLAMA_HOST"
           
-          # Direct Ollama API call (more reliable than agentic-control)
+          # Direct Ollama API call (more reliable than shelling out to the CLI)
           PROMPT="You are an expert code reviewer. Review this diff and provide:
         1. A brief summary of changes
         2. Any issues found (bugs, security, performance)
@@ -138,8 +138,8 @@ runs:
           
         elif [ -n "$JULES_API_KEY" ]; then
           echo "Using Google API (Jules key)"
-          # Fallback to agentic-control with Google
-          npm install -g agentic-control@1.1.0 @ai-sdk/google 2>/dev/null || true
+          # Fallback to @jbcom/agentic with Google
+          npm install -g @jbcom/agentic@1.2.0 @ai-sdk/google 2>/dev/null || true
           echo '{"triage": {"provider": "google"}}' > agentic.config.json
           export GOOGLE_API_KEY="$JULES_API_KEY"
           

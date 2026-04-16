@@ -7,7 +7,7 @@ title: "createFleetConfig"
 
 > **createFleetConfig**(`overrides?`): [`TestFleetConfig`](/api/vitest/interfaces/testfleetconfig/)
 
-Defined in: [fixtures.ts:176](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L176)
+Defined in: [fixtures.ts:176](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L176)
 
 Create a fleet configuration for testing.
 
@@ -28,7 +28,7 @@ Fleet configuration
 ## Example
 
 ```typescript
-import { createFleetConfig } from 'vitest-agentic-control';
+import { createFleetConfig } from '/vitest-agentic';
 
 const fleet = createFleetConfig({
   concurrency: 5,

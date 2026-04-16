@@ -31,6 +31,8 @@ Cargo.lock
 node_modules/
 dist/
 .npm
+coverage/
+packages/*/coverage/
 
 # Python
 __pycache__/
@@ -58,6 +60,18 @@ docs/src/content/docs/api/_generated/
 # Astro
 docs/.astro/
 docs/dist/
+docs/playwright-report/
+docs/test-results/
+
+# Local docs review artifacts
+agentic-coach-*.png
+amber-rebrand-*.png
+signal-amber-*.png
+output.json
+
+# Local package preview artifacts
+packages/meshy-content-generator/.tmp-preview/
+packages/meshy-content-generator/.tmp-test/
 
 # AI / Agents
 memory-bank/

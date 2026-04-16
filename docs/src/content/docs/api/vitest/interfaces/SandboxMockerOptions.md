@@ -5,7 +5,7 @@ prev: false
 title: "SandboxMockerOptions"
 ---
 
-Defined in: [sandbox.ts:59](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L59)
+Defined in: [sandbox.ts:59](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L59)
 
 Options for creating a SandboxMocker instance.
 
@@ -15,7 +15,7 @@ Options for creating a SandboxMocker instance.
 
 > `optional` **autoMock**: `boolean`
 
-Defined in: [sandbox.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L65)
+Defined in: [sandbox.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L65)
 
 Whether to auto-mock Docker commands
 
@@ -25,7 +25,7 @@ Whether to auto-mock Docker commands
 
 > `optional` **defaultConfig**: [`MockContainerConfig`](/api/vitest/interfaces/mockcontainerconfig/)
 
-Defined in: [sandbox.ts:61](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L61)
+Defined in: [sandbox.ts:61](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L61)
 
 Default container configuration
 
@@ -35,6 +35,6 @@ Default container configuration
 
 > `optional` **defaultResult**: [`MockExecutionResult`](/api/vitest/interfaces/mockexecutionresult/)
 
-Defined in: [sandbox.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L63)
+Defined in: [sandbox.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L63)
 
 Default execution result

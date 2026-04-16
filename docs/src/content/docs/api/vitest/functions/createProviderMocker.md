@@ -7,7 +7,7 @@ title: "createProviderMocker"
 
 > **createProviderMocker**(`options?`): [`ProviderMocker`](/api/vitest/classes/providermocker/)
 
-Defined in: [providers.ts:476](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L476)
+Defined in: [providers.ts:476](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L476)
 
 Factory function to create a ProviderMocker instance.
 

@@ -1,5 +1,5 @@
-# CI - Polyglot Build, Lint, Test
-# Runs TypeScript, Python, Rust, and Docs checks in parallel
+# CI - TypeScript, Python, and Docs
+# Runs the monorepo verification suite in parallel
 name: CI
 
 on:
@@ -73,25 +73,33 @@ jobs:
         python-version: ['3.11', '3.12', '3.13']
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: astral-sh/setup-uv@v6
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Install JS dependencies
+        run: pnpm install
+
       - name: Install dependencies
         run: uv sync --all-packages --all-extras
 
-      - name: Lint
-        run: |
-          uvx ruff check packages/agentic-crew/ packages/pytest-agentic-crew/
-          uvx ruff format --check packages/agentic-crew/ packages/pytest-agentic-crew/
+      - name: Lint, type check, and test
+        run: pnpm nx run-many -t lint,typecheck,test --projects=tag:lang:py
 
-      - name: Test with coverage
+      - name: Coverage artifact
         run: >
-          uv run pytest packages/agentic-crew/tests/
+          uv run --extra tests python -m pytest tests
           -v --tb=short
-          --cov=packages/agentic-crew/src
-          --cov-report=xml:packages/agentic-crew/coverage.xml
+          --cov=src/agentic_crew
+          --cov-report=xml:coverage.xml
+        working-directory: packages/agentic-crew
 
       - name: Upload coverage artifacts
         if: matrix.python-version == '3.13'
@@ -100,44 +108,6 @@ jobs:
           name: py-coverage
           path: packages/agentic-crew/coverage.xml
           retention-days: 1
-
-  rust:
-    name: Rust
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install system dependencies for Bevy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            pkg-config \
-            libasound2-dev \
-            libudev-dev \
-            libx11-dev \
-            libxcursor-dev \
-            libxrandr-dev \
-            libxi-dev \
-            libxkbcommon-dev \
-            libwayland-dev \
-            libvulkan-dev
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: '. -> target'
-
-      - name: Clippy
-        run: cargo clippy --workspace -- -D warnings
-
-      - name: Build
-        run: cargo build --workspace
-
-      - name: Test
-        run: cargo test --workspace
 
   docs:
     name: Documentation
@@ -206,10 +176,10 @@ jobs:
           name: py-coverage
           path: packages/agentic-crew/
 
-      - name: SonarCloud Scan - agentic-control
+      - name: SonarCloud Scan - agentic
         uses: SonarSource/sonarqube-scan-action@v6
         with:
-          projectBaseDir: packages/agentic-control
+          projectBaseDir: packages/agentic
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

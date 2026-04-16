@@ -6,7 +6,7 @@
 [![PyPI: agentic-crew](https://img.shields.io/pypi/v/agentic-crew.svg?label=agentic-crew)](https://pypi.org/project/agentic-crew/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Polyglot AI agent orchestration toolkit.** TypeScript for fleet management and triage, Python for multi-framework crew orchestration, Rust for game generation.
+**TypeScript and Python AI agent orchestration toolkit.** Fleet management, triage, crew orchestration, and testing utilities in one focused monorepo.
 
 ## Documentation
 
@@ -22,20 +22,23 @@
 
 | Package | Language | Description | Docs |
 |---------|----------|-------------|------|
-| [`@jbcom/agentic`](packages/agentic-control) | TypeScript | Fleet management, multi-agent routing, CI resolution, GitHub Actions | [Docs](https://agentic.coach/packages/control/) |
+| [`@jbcom/agentic`](packages/agentic) | TypeScript | Fleet management, multi-agent routing, CI resolution, GitHub Actions | [Docs](https://agentic.coach/packages/agentic/) |
 | [`@jbcom/agentic-triage`](packages/triage) | TypeScript | AI-powered issue triage, PR review, sprint planning (Vercel AI SDK + MCP) | [Docs](https://agentic.coach/packages/triage/) |
 | [`agentic-crew`](packages/agentic-crew) | Python | Framework-agnostic crew orchestration (CrewAI, LangGraph, Strands) | [Docs](https://agentic.coach/packages/crew/) |
 | [`@jbcom/agentic-meshy`](packages/meshy-content-generator) | TypeScript | Declarative Meshy 3D asset generation pipelines | [Docs](https://agentic.coach/packages/meshy-content-generator/) |
-| [`@jbcom/agentic-providers`](packages/providers) | TypeScript | LLM provider implementations (Ollama, Jules, Cursor) | [Docs](https://agentic.coach/packages/control/) |
-| [`game-generator`](packages/game-generator) | Rust | Visual-first vintage game generator with AI assistance | [Docs](https://agentic.coach/packages/game-generator/) |
-| [`game-asset-mcp`](packages/game-asset-mcp) | Python | MCP server for local 3D game asset libraries — search, browse, PolyHaven integration | [README](packages/game-asset-mcp/README.md) |
+| [`@jbcom/agentic-providers`](packages/providers) | TypeScript | LLM provider implementations (Ollama, Jules, Cursor) | [Docs](https://agentic.coach/packages/agentic/) |
 
 ### Testing Plugins
 
 | Package | Language | Description | Docs |
 |---------|----------|-------------|------|
-| [`@jbcom/vitest-agentic`](packages/vitest-agentic-control) | TypeScript | Vitest fixtures and utilities for agentic E2E testing | [Docs](https://agentic.coach/packages/control/) |
-| [`pytest-agentic-crew`](packages/pytest-agentic-crew) | Python | Pytest plugin with fixtures for agentic-crew E2E testing | [Docs](https://agentic.coach/packages/crew/) |
+| [`@jbcom/vitest-agentic`](tooling/vitest-agentic) | TypeScript | Vitest fixtures and utilities for agentic E2E testing | [Docs](https://agentic.coach/packages/agentic/) |
+| [`pytest-agentic-crew`](tooling/pytest-agentic-crew) | Python | Pytest plugin with fixtures for agentic-crew E2E testing | [Docs](https://agentic.coach/packages/crew/) |
+
+## Related Standalone Repositories
+
+- [`jbcom/game-generator`](https://github.com/jbcom/game-generator) — experimental Bevy-based retro-RPG design sandbox
+- [`jbcom/game-asset-mcp`](https://github.com/jbcom/game-asset-mcp) — MCP server for local 3D asset libraries and PolyHaven ingestion
 
 ## Quick Start
 
@@ -117,17 +120,17 @@ agentic-crew run my-package analyzer --input "Review this code"
 ```
 agentic/
 ├── packages/
-│   ├── agentic-control/          # @jbcom/agentic (TypeScript)
+│   ├── agentic/                  # @jbcom/agentic (TypeScript)
 │   ├── triage/                   # @jbcom/agentic-triage (TypeScript)
 │   ├── agentic-crew/             # agentic-crew (Python)
 │   ├── meshy-content-generator/  # @jbcom/agentic-meshy (TypeScript)
 │   ├── providers/                # @jbcom/agentic-providers (TypeScript)
-│   ├── game-generator/           # game-generator (Rust)
-│   ├── vitest-agentic-control/   # @jbcom/vitest-agentic (TypeScript)
-│   ├── pytest-agentic-crew/      # pytest-agentic-crew (Python)
-│   └── game-asset-mcp/           # game-asset-mcp (Python)
+├── tooling/
+│   ├── vitest-agentic/           # @jbcom/vitest-agentic (TypeScript)
+│   └── pytest-agentic-crew/      # pytest-agentic-crew (Python)
 ├── actions/                      # GitHub Marketplace actions
 ├── docs/                         # Documentation site (Astro + Starlight)
+├── internal/                     # Internal plans and legacy references
 └── scripts/                      # Ecosystem automation
 ```
 
@@ -146,18 +149,9 @@ pnpm run check          # biome lint + format
 
 ```bash
 uv sync --all-extras
-uv run pytest
+uv run python -m pytest
 uvx ruff check --fix .
 uvx ruff format .
-```
-
-### Rust
-
-```bash
-cargo check
-cargo test
-cargo clippy
-cargo fmt
 ```
 
 ## GitHub Actions

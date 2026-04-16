@@ -5,7 +5,7 @@ prev: false
 title: "TestTokenConfig"
 ---
 
-Defined in: [fixtures.ts:29](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L29)
+Defined in: [fixtures.ts:29](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L29)
 
 Token configuration for testing.
 
@@ -15,7 +15,7 @@ Token configuration for testing.
 
 > **defaultTokenEnvVar**: `string`
 
-Defined in: [fixtures.ts:37](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L37)
+Defined in: [fixtures.ts:37](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L37)
 
 ***
 
@@ -23,7 +23,7 @@ Defined in: [fixtures.ts:37](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **organizations**: `Record`\<`string`, \{ `name`: `string`; `tokenEnvVar`: `string`; \}\>
 
-Defined in: [fixtures.ts:30](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L30)
+Defined in: [fixtures.ts:30](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L30)
 
 ***
 
@@ -31,4 +31,4 @@ Defined in: [fixtures.ts:30](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **prReviewTokenEnvVar**: `string`
 
-Defined in: [fixtures.ts:38](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L38)
+Defined in: [fixtures.ts:38](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L38)

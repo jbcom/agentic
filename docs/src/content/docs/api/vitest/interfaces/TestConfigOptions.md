@@ -5,7 +5,7 @@ prev: false
 title: "TestConfigOptions"
 ---
 
-Defined in: [fixtures.ts:13](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L13)
+Defined in: [fixtures.ts:13](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L13)
 
 Options for creating test configurations.
 
@@ -15,7 +15,7 @@ Options for creating test configurations.
 
 > `optional` **fleet**: `boolean`
 
-Defined in: [fixtures.ts:19](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L19)
+Defined in: [fixtures.ts:19](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L19)
 
 Whether to enable fleet configuration
 
@@ -25,7 +25,7 @@ Whether to enable fleet configuration
 
 > `optional` **logLevel**: `"debug"` \| `"info"` \| `"warn"` \| `"error"`
 
-Defined in: [fixtures.ts:15](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L15)
+Defined in: [fixtures.ts:15](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L15)
 
 Log level
 
@@ -35,7 +35,7 @@ Log level
 
 > `optional` **sandbox**: `boolean`
 
-Defined in: [fixtures.ts:23](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L23)
+Defined in: [fixtures.ts:23](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L23)
 
 Whether to enable sandbox configuration
 
@@ -45,7 +45,7 @@ Whether to enable sandbox configuration
 
 > `optional` **tokens**: `boolean`
 
-Defined in: [fixtures.ts:17](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L17)
+Defined in: [fixtures.ts:17](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L17)
 
 Whether to enable token configuration
 
@@ -55,6 +55,6 @@ Whether to enable token configuration
 
 > `optional` **triage**: `boolean`
 
-Defined in: [fixtures.ts:21](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L21)
+Defined in: [fixtures.ts:21](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L21)
 
 Whether to enable triage configuration

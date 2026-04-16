@@ -2,8 +2,8 @@
  * Configuration Validation Tests
  *
  * These tests validate the Astro and Starlight configuration for the Agentic
- * documentation site. They check site URL, sidebar structure, TypeDoc plugin
- * setup, and content file integrity without requiring a build.
+ * documentation site. They check site URL, sidebar structure, API reference
+ * navigation, and content file integrity without requiring a build.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -50,7 +50,7 @@ describe('Astro site configuration', () => {
   it('includes a description for the site', () => {
     const config = readConfig();
     expect(config).toContain('description:');
-    expect(config).toContain('polyglot');
+    expect(config).toContain('TypeScript and Python');
   });
 
   it('configures logo with light and dark variants', () => {
@@ -114,11 +114,6 @@ describe('Sidebar structure', () => {
     expect(config).toContain("label: 'API Reference'");
   });
 
-  it('includes typeDocSidebarGroup in sidebar', () => {
-    const config = readConfig();
-    expect(config).toContain('typeDocSidebarGroup');
-  });
-
   it('includes Architecture and Troubleshooting guides', () => {
     const config = readConfig();
     expect(config).toContain("label: 'Architecture'");
@@ -127,12 +122,10 @@ describe('Sidebar structure', () => {
     expect(config).toContain("slug: 'guides/troubleshooting'");
   });
 
-  it('includes crew and game-gen API Reference entries', () => {
+  it('includes the Python API Reference entry', () => {
     const config = readConfig();
     expect(config).toContain("label: 'Python (agentic-crew)'");
     expect(config).toContain("slug: 'api/crew'");
-    expect(config).toContain("label: 'Rust (game-gen)'");
-    expect(config).toContain("slug: 'api/game-gen'");
   });
 });
 
@@ -149,11 +142,10 @@ describe('Sidebar slugs have corresponding content files', () => {
     'getting-started/introduction': ['getting-started/introduction.md', 'getting-started/introduction.mdx'],
     'getting-started/quick-start': ['getting-started/quick-start.md', 'getting-started/quick-start.mdx'],
     'getting-started/configuration': ['getting-started/configuration.md', 'getting-started/configuration.mdx'],
-    'packages/control': ['packages/control.md', 'packages/control.mdx'],
+    'packages/agentic': ['packages/agentic.md', 'packages/agentic.mdx'],
     'packages/triage': ['packages/triage.md', 'packages/triage.mdx'],
     'packages/crew': ['packages/crew.md', 'packages/crew.mdx'],
     'packages/meshy-content-generator': ['packages/meshy-content-generator.md', 'packages/meshy-content-generator.mdx'],
-    'packages/game-generator': ['packages/game-generator.md', 'packages/game-generator.mdx'],
     'guides/agent-spawning': ['guides/agent-spawning.md', 'guides/agent-spawning.mdx'],
     'guides/fleet-management': ['guides/fleet-management.md', 'guides/fleet-management.mdx'],
     'guides/orchestration-patterns': ['guides/orchestration-patterns.md', 'guides/orchestration-patterns.mdx'],
@@ -172,7 +164,6 @@ describe('Sidebar slugs have corresponding content files', () => {
     'api/token-management': ['api/token-management.md', 'api/token-management.mdx'],
     'api/configuration': ['api/configuration.md', 'api/configuration.mdx'],
     'api/crew': ['api/crew/index.md', 'api/crew/index.mdx', 'api/crew.md', 'api/crew.mdx'],
-    'api/game-gen': ['api/game-gen/index.md', 'api/game-gen/index.mdx', 'api/game-gen.md', 'api/game-gen.mdx'],
     'guides/architecture': ['guides/architecture.md', 'guides/architecture.mdx'],
     'guides/troubleshooting': ['guides/troubleshooting.md', 'guides/troubleshooting.mdx'],
   };
@@ -197,7 +188,7 @@ describe('Content files have valid frontmatter', () => {
     'getting-started/introduction.md',
     'getting-started/quick-start.md',
     'getting-started/configuration.md',
-    'packages/control.md',
+    'packages/agentic.md',
     'packages/triage.md',
     'guides/agent-spawning.md',
     'guides/fleet-management.md',
@@ -222,69 +213,23 @@ describe('Content files have valid frontmatter', () => {
 });
 
 // ---------------------------------------------------------------------------
-// 5. TypeDoc Plugin Configuration
+// 5. API Reference Configuration
 // ---------------------------------------------------------------------------
 
-describe('TypeDoc plugin configuration', () => {
-  it('configures starlightTypeDoc plugin', () => {
+describe('API reference configuration', () => {
+  it('uses the manual API pages as the navigation source of truth', () => {
     const config = readConfig();
-    expect(config).toContain('starlightTypeDoc(');
+    expect(config).not.toContain('starlightTypeDoc(');
+    expect(config).not.toContain('typeDocSidebarGroup');
   });
 
-  it('configures control package TypeDoc output', () => {
+  it('keeps the manual API reference entries in the sidebar', () => {
     const config = readConfig();
-    expect(config).toContain("output: 'api/control'");
-  });
-
-  it('configures triage package TypeDoc output', () => {
-    const config = readConfig();
-    expect(config).toContain("output: 'api/triage'");
-  });
-
-  it('configures meshy package TypeDoc output', () => {
-    const config = readConfig();
-    expect(config).toContain("output: 'api/meshy'");
-  });
-
-  it('configures providers package TypeDoc output', () => {
-    const config = readConfig();
-    expect(config).toContain("output: 'api/providers'");
-  });
-
-  it('configures vitest package TypeDoc output', () => {
-    const config = readConfig();
-    expect(config).toContain("output: 'api/vitest'");
-  });
-
-  it('all TypeDoc plugins have skipErrorChecking enabled', () => {
-    const config = readConfig();
-    // Count occurrences of starlightTypeDoc( — should match skipErrorChecking count
-    const pluginCount = (config.match(/starlightTypeDoc\(/g) || []).length;
-    const skipCount = (config.match(/skipErrorChecking:\s*true/g) || []).length;
-    expect(skipCount).toBe(pluginCount);
-  });
-
-  it('all TypeDoc plugins reference entry points', () => {
-    const config = readConfig();
-    const pluginCount = (config.match(/starlightTypeDoc\(/g) || []).length;
-    const entryPointCount = (config.match(/entryPoints:\s*\[/g) || []).length;
-    expect(entryPointCount).toBe(pluginCount);
-  });
-
-  it('all TypeDoc plugins reference tsconfig files', () => {
-    const config = readConfig();
-    const pluginCount = (config.match(/starlightTypeDoc\(/g) || []).length;
-    const tsconfigCount = (config.match(/tsconfig:\s*'/g) || []).length;
-    expect(tsconfigCount).toBe(pluginCount);
-  });
-
-  it('TypeDoc sidebar labels are descriptive', () => {
-    const config = readConfig();
-    expect(config).toContain("label: '@jbcom/agentic API'");
-    expect(config).toContain("label: '@jbcom/agentic-triage API'");
-    expect(config).toContain("label: '@jbcom/agentic-meshy API'");
-    expect(config).toContain("label: '@jbcom/agentic-providers API'");
-    expect(config).toContain("label: '@jbcom/vitest-agentic API'");
+    expect(config).toContain("slug: 'api/fleet-management'");
+    expect(config).toContain("slug: 'api/triage-tools'");
+    expect(config).toContain("slug: 'api/token-management'");
+    expect(config).toContain("slug: 'api/configuration'");
+    expect(config).toContain("slug: 'api/crew'");
   });
 });
 
@@ -335,13 +280,10 @@ describe('docs package.json', () => {
     expect(pkg.dependencies['@astrojs/starlight']).toBeDefined();
   });
 
-  it('depends on starlight-typedoc', () => {
+  it('does not depend on build-time TypeDoc generators', () => {
     const pkg = JSON.parse(readFileSync(join(DOCS_ROOT, 'package.json'), 'utf-8'));
-    expect(pkg.dependencies['starlight-typedoc']).toBeDefined();
-  });
-
-  it('depends on typedoc', () => {
-    const pkg = JSON.parse(readFileSync(join(DOCS_ROOT, 'package.json'), 'utf-8'));
-    expect(pkg.dependencies['typedoc']).toBeDefined();
+    expect(pkg.dependencies['starlight-typedoc']).toBeUndefined();
+    expect(pkg.dependencies['typedoc']).toBeUndefined();
+    expect(pkg.dependencies['typedoc-plugin-markdown']).toBeUndefined();
   });
 });

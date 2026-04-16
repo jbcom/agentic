@@ -3,15 +3,15 @@
   "tags": ["lang:py", "scope:crew"],
   "targets": {
     "test": {
-      "command": "uv run pytest tests/ -v --tb=short",
+      "command": "uv run --project {projectRoot} --extra tests python -m pytest {projectRoot}/tests -v --tb=short",
       "inputs": ["{projectRoot}/src/**/*.py", "{projectRoot}/tests/**/*.py", "{projectRoot}/pyproject.toml"]
     },
     "lint": {
-      "command": "uvx ruff check {projectRoot}",
+      "command": "uv run --project {projectRoot} --extra dev python -m ruff check {projectRoot}",
       "inputs": ["{projectRoot}/src/**/*.py"]
     },
     "typecheck": {
-      "command": "uvx mypy {projectRoot}/src/",
+      "command": "uv run --project {projectRoot} --extra dev python -m mypy --disable-error-code import-not-found --disable-error-code import-untyped {projectRoot}/src/agentic_crew",
       "inputs": ["{projectRoot}/src/**/*.py"]
     }
   }

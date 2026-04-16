@@ -3,8 +3,7 @@
   "namedInputs": {
     "default": ["{projectRoot}/**/*", "!{projectRoot}/**/*.md"],
     "ts-source": ["{projectRoot}/src/**/*", "{projectRoot}/tsconfig.json", "{projectRoot}/package.json"],
-    "py-source": ["{projectRoot}/src/**/*.py", "{projectRoot}/pyproject.toml"],
-    "rs-source": ["{projectRoot}/src/**/*.rs", "{projectRoot}/Cargo.toml"]
+    "py-source": ["{projectRoot}/src/**/*.py", "{projectRoot}/pyproject.toml"]
   },
   "targetDefaults": {
     "build": {

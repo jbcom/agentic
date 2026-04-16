@@ -160,14 +160,14 @@ async function reviewPR() {
 }
 ```
 
-## Using @agentic/triage Directly
+## Using @jbcom/agentic-triage Directly
 
 For more control, use the triage package directly with the Vercel AI SDK:
 
 ### All Triage Tools
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 

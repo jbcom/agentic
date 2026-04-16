@@ -1,11 +1,11 @@
 ---
 title: MCP Server Integration
-description: Use @agentic/triage as an MCP server for Claude Desktop and Cursor
+description: Use @jbcom/agentic-triage as an MCP server for Claude Desktop and Cursor
 ---
 
 # MCP Server Integration
 
-`@agentic/triage` includes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server, enabling integration with Claude Desktop, Cursor, and other MCP-compatible clients.
+`@jbcom/agentic-triage` includes a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server, enabling integration with Claude Desktop, Cursor, and other MCP-compatible clients.
 
 ## What is MCP?
 
@@ -271,5 +271,5 @@ For GitHub, your token needs:
 ## Next Steps
 
 - [Vercel AI SDK Integration](/integrations/vercel-ai-sdk/) - Programmatic usage
-- [@agentic/triage Package](/packages/triage/) - Full package reference
+- [@jbcom/agentic-triage Package](/packages/triage/) - Full package reference
 - [GitHub Actions Integration](/integrations/github-actions/) - CI/CD integration

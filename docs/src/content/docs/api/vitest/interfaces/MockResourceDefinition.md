@@ -5,7 +5,7 @@ prev: false
 title: "MockResourceDefinition"
 ---
 
-Defined in: [mcp.ts:40](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L40)
+Defined in: [mcp.ts:40](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L40)
 
 Definition for a mock MCP resource.
 
@@ -15,7 +15,7 @@ Definition for a mock MCP resource.
 
 > **content**: `string` \| `Buffer`\<`ArrayBufferLike`\>
 
-Defined in: [mcp.ts:50](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L50)
+Defined in: [mcp.ts:50](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L50)
 
 Resource content
 
@@ -25,7 +25,7 @@ Resource content
 
 > `optional` **description**: `string`
 
-Defined in: [mcp.ts:46](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L46)
+Defined in: [mcp.ts:46](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L46)
 
 Resource description
 
@@ -35,7 +35,7 @@ Resource description
 
 > `optional` **mimeType**: `string`
 
-Defined in: [mcp.ts:48](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L48)
+Defined in: [mcp.ts:48](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L48)
 
 MIME type
 
@@ -45,7 +45,7 @@ MIME type
 
 > `optional` **name**: `string`
 
-Defined in: [mcp.ts:44](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L44)
+Defined in: [mcp.ts:44](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L44)
 
 Resource name
 
@@ -55,6 +55,6 @@ Resource name
 
 > **uri**: `string`
 
-Defined in: [mcp.ts:42](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L42)
+Defined in: [mcp.ts:42](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L42)
 
 Resource URI

@@ -5,7 +5,7 @@ prev: false
 title: "MockMcpServer"
 ---
 
-Defined in: [mcp.ts:104](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L104)
+Defined in: [mcp.ts:104](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L104)
 
 Mock MCP server instance.
 
@@ -15,7 +15,7 @@ Mock MCP server instance.
 
 > **new MockMcpServer**(`config`): `MockMcpServer`
 
-Defined in: [mcp.ts:116](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L116)
+Defined in: [mcp.ts:116](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L116)
 
 #### Parameters
 
@@ -33,7 +33,7 @@ Defined in: [mcp.ts:116](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > `readonly` **capabilities**: `object`
 
-Defined in: [mcp.ts:108](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L108)
+Defined in: [mcp.ts:108](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L108)
 
 #### prompts
 
@@ -53,7 +53,7 @@ Defined in: [mcp.ts:108](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > `readonly` **name**: `string`
 
-Defined in: [mcp.ts:105](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L105)
+Defined in: [mcp.ts:105](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L105)
 
 ***
 
@@ -61,7 +61,7 @@ Defined in: [mcp.ts:105](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > `readonly` **resources**: `Map`\<`string`, [`MockMcpResource`](/api/vitest/interfaces/mockmcpresource/)\>
 
-Defined in: [mcp.ts:107](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L107)
+Defined in: [mcp.ts:107](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L107)
 
 ***
 
@@ -69,7 +69,7 @@ Defined in: [mcp.ts:107](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > `readonly` **tools**: `Map`\<`string`, [`MockMcpTool`](/api/vitest/interfaces/mockmcptool/)\>
 
-Defined in: [mcp.ts:106](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L106)
+Defined in: [mcp.ts:106](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L106)
 
 ## Methods
 
@@ -77,7 +77,7 @@ Defined in: [mcp.ts:106](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cc
 
 > **callTool**(`name`, `args`): `Promise`\<`unknown`\>
 
-Defined in: [mcp.ts:201](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L201)
+Defined in: [mcp.ts:201](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L201)
 
 Call a tool.
 
@@ -101,7 +101,7 @@ Call a tool.
 
 > **connect**(): `Promise`\<`void`\>
 
-Defined in: [mcp.ts:163](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L163)
+Defined in: [mcp.ts:163](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L163)
 
 Connect to this mock server.
 
@@ -115,7 +115,7 @@ Connect to this mock server.
 
 > **disconnect**(): `Promise`\<`void`\>
 
-Defined in: [mcp.ts:170](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L170)
+Defined in: [mcp.ts:170](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L170)
 
 Disconnect from this mock server.
 
@@ -129,7 +129,7 @@ Disconnect from this mock server.
 
 > **isConnected**(): `boolean`
 
-Defined in: [mcp.ts:177](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L177)
+Defined in: [mcp.ts:177](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L177)
 
 Check if connected.
 
@@ -143,7 +143,7 @@ Check if connected.
 
 > **listResources**(): `Promise`\<`object`[]\>
 
-Defined in: [mcp.ts:213](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L213)
+Defined in: [mcp.ts:213](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L213)
 
 List available resources.
 
@@ -157,7 +157,7 @@ List available resources.
 
 > **listTools**(): `Promise`\<`object`[]\>
 
-Defined in: [mcp.ts:184](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L184)
+Defined in: [mcp.ts:184](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L184)
 
 List available tools.
 
@@ -171,7 +171,7 @@ List available tools.
 
 > **readResource**(`uri`): `Promise`\<\{ `content`: `string` \| `Buffer`\<`ArrayBufferLike`\>; `mimeType?`: `string`; `uri`: `string`; \}\>
 
-Defined in: [mcp.ts:232](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L232)
+Defined in: [mcp.ts:232](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L232)
 
 Read a resource.
 
@@ -191,7 +191,7 @@ Read a resource.
 
 > **registerResource**(`definition`): [`MockMcpResource`](/api/vitest/interfaces/mockmcpresource/)
 
-Defined in: [mcp.ts:151](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L151)
+Defined in: [mcp.ts:151](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L151)
 
 Register a resource with this mock server.
 
@@ -211,7 +211,7 @@ Register a resource with this mock server.
 
 > **registerTool**(`definition`): [`MockMcpTool`](/api/vitest/interfaces/mockmcptool/)
 
-Defined in: [mcp.ts:138](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L138)
+Defined in: [mcp.ts:138](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L138)
 
 Register a tool with this mock server.
 
@@ -231,7 +231,7 @@ Register a tool with this mock server.
 
 > **reset**(): `void`
 
-Defined in: [mcp.ts:252](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L252)
+Defined in: [mcp.ts:252](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L252)
 
 Reset all call history.
 

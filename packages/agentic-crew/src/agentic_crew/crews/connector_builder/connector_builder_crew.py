@@ -69,4 +69,5 @@ class ConnectorBuilderCrew:
         Returns:
             A string representing the result of the crew's execution.
         """
-        return self.crew.kickoff(inputs=inputs)
+        result = self.crew.kickoff(inputs=inputs)
+        return result.raw if hasattr(result, "raw") else str(result)

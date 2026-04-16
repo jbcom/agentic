@@ -399,17 +399,6 @@ code, pre, kbd, samp {
   box-shadow: 0 0 12px rgba(55, 118, 171, 0.2);
 }
 
-/* Rust — warm orange (standard) */
-.lang-badge--rs {
-  background: rgba(222, 165, 132, 0.15);
-  color: #fdba74;
-  border: 1px solid rgba(222, 165, 132, 0.3);
-}
-
-.lang-badge--rs:hover {
-  box-shadow: 0 0 12px rgba(222, 165, 132, 0.2);
-}
-
 /* Light mode language badges */
 [data-theme='light'] .lang-badge--ts {
   background: rgba(49, 120, 198, 0.1);
@@ -421,12 +410,6 @@ code, pre, kbd, samp {
   background: rgba(55, 118, 171, 0.1);
   color: #1e40af;
   border-color: rgba(55, 118, 171, 0.25);
-}
-
-[data-theme='light'] .lang-badge--rs {
-  background: rgba(222, 165, 132, 0.1);
-  color: #9a3412;
-  border-color: rgba(222, 165, 132, 0.25);
 }
 
 /* ================================================================

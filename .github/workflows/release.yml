@@ -3,7 +3,6 @@
 # Publishes:
 #   - 5 TypeScript packages to npm (OIDC provenance)
 #   - 2 Python packages to PyPI (OIDC trusted publishing)
-#   - 1 Rust crate to crates.io
 #   - Docker multi-platform image to GHCR
 #
 # Triggered ONLY on GitHub Release events.
@@ -28,14 +27,60 @@ concurrency:
 # npm publish - TypeScript packages (OIDC provenance)
 # =============================================================================
 jobs:
+  verify:
+    name: Verify release inputs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: astral-sh/setup-uv@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install JS dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Python dependencies
+        run: uv sync --all-packages --all-extras
+
+      - name: Verify TypeScript
+        run: pnpm nx run-many -t lint,build,typecheck,test:coverage --projects=tag:lang:ts
+
+      - name: Verify Python
+        run: pnpm nx run-many -t lint,typecheck,test --projects=tag:lang:py
+
+      - name: Verify docs build and tests
+        run: |
+          pnpm --dir docs run build
+          pnpm --dir docs run test
+
+      - name: Install Playwright browsers
+        run: pnpm --dir docs exec playwright install --with-deps chromium
+
+      - name: Verify docs e2e
+        run: pnpm --dir docs run test:e2e --project=chromium
+
   npm-publish:
     name: 'npm: ${{ matrix.name }}'
     runs-on: ubuntu-latest
+    needs: verify
     strategy:
       fail-fast: false
       matrix:
         include:
-          - dir: packages/agentic-control
+          - dir: packages/agentic
             name: '@jbcom/agentic'
           - dir: packages/triage
             name: '@jbcom/agentic-triage'
@@ -43,7 +88,7 @@ jobs:
             name: '@jbcom/agentic-meshy'
           - dir: packages/providers
             name: '@jbcom/agentic-providers'
-          - dir: packages/vitest-agentic-control
+          - dir: tooling/vitest-agentic
             name: '@jbcom/vitest-agentic'
     permissions:
       contents: read
@@ -88,13 +133,14 @@ jobs:
   pypi-publish:
     name: 'pypi: ${{ matrix.name }}'
     runs-on: ubuntu-latest
+    needs: verify
     strategy:
       fail-fast: false
       matrix:
         include:
           - dir: packages/agentic-crew
             name: agentic-crew
-          - dir: packages/pytest-agentic-crew
+          - dir: tooling/pytest-agentic-crew
             name: pytest-agentic-crew
     permissions:
       contents: read
@@ -113,36 +159,12 @@ jobs:
         working-directory: ${{ matrix.dir }}
 
   # ===========================================================================
-  # crates.io publish - Rust crate
-  # ===========================================================================
-  crates-publish:
-    name: 'crates: game-generator'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - name: Publish to crates.io
-        run: |
-          cargo publish 2>&1 | tee /tmp/cargo-publish.log; rc=${PIPESTATUS[0]}
-          if [ $rc -ne 0 ]; then
-            if grep -qiE 'already uploaded|already exists' /tmp/cargo-publish.log; then
-              echo "Crate version already published — skipping."
-            else
-              exit $rc
-            fi
-          fi
-        working-directory: packages/game-generator
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
-
-  # ===========================================================================
   # Docker multi-platform build & push
   # ===========================================================================
   docker-publish:
     name: Docker image
     runs-on: ubuntu-latest
+    needs: verify
     permissions:
       contents: read
       packages: write

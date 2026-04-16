@@ -5,7 +5,7 @@ prev: false
 title: "SandboxMocker"
 ---
 
-Defined in: [sandbox.ts:120](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L120)
+Defined in: [sandbox.ts:120](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L120)
 
 Sandbox execution mocking utilities class.
 
@@ -14,7 +14,7 @@ Provides methods for mocking Docker container execution during testing.
 ## Example
 
 ```typescript
-import { SandboxMocker } from 'vitest-agentic-control';
+import { SandboxMocker } from '/vitest-agentic';
 
 const mocker = new SandboxMocker();
 
@@ -42,7 +42,7 @@ expect(result.success).toBe(true);
 
 > **new SandboxMocker**(`options?`): `SandboxMocker`
 
-Defined in: [sandbox.ts:139](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L139)
+Defined in: [sandbox.ts:139](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L139)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [sandbox.ts:139](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > `readonly` **containers**: `Map`\<`string`, `MockContainer`\>
 
-Defined in: [sandbox.ts:128](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L128)
+Defined in: [sandbox.ts:128](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L128)
 
 Track mock containers
 
@@ -70,7 +70,7 @@ Track mock containers
 
 > **createMockContainer**(`config?`): `MockContainer`
 
-Defined in: [sandbox.ts:197](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L197)
+Defined in: [sandbox.ts:197](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L197)
 
 Create a mock container.
 
@@ -94,7 +94,7 @@ Mock container instance
 
 > **createMockRuntime**(`name`, `command?`): `object`
 
-Defined in: [sandbox.ts:423](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L423)
+Defined in: [sandbox.ts:423](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L423)
 
 Create a mock runtime adapter.
 
@@ -134,7 +134,7 @@ Command to return from prepareCommand
 
 > **getContainer**(`id`): `MockContainer` \| `undefined`
 
-Defined in: [sandbox.ts:448](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L448)
+Defined in: [sandbox.ts:448](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L448)
 
 Get a container by ID.
 
@@ -154,7 +154,7 @@ Get a container by ID.
 
 > **getContainerIds**(): `string`[]
 
-Defined in: [sandbox.ts:441](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L441)
+Defined in: [sandbox.ts:441](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L441)
 
 Get all container IDs.
 
@@ -168,9 +168,9 @@ Get all container IDs.
 
 > **mockContainerManager**(): `Mock`
 
-Defined in: [sandbox.ts:356](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L356)
+Defined in: [sandbox.ts:356](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L356)
 
-Mock the ContainerManager class from agentic-control.
+Mock the ContainerManager class from /agentic.
 
 #### Returns
 
@@ -182,7 +182,7 @@ Mock the ContainerManager class from agentic-control.
 
 > **mockDockerCommands**(): `void`
 
-Defined in: [sandbox.ts:255](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L255)
+Defined in: [sandbox.ts:255](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L255)
 
 Mock Docker CLI commands.
 
@@ -196,7 +196,7 @@ Mock Docker CLI commands.
 
 > **mockExecution**(`result`): `void`
 
-Defined in: [sandbox.ts:162](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L162)
+Defined in: [sandbox.ts:162](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L162)
 
 Set the default execution result.
 
@@ -218,9 +218,9 @@ The result to return from executions
 
 > **mockSandboxExecutor**(): `Mock`
 
-Defined in: [sandbox.ts:399](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L399)
+Defined in: [sandbox.ts:399](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L399)
 
-Mock the SandboxExecutor class from agentic-control.
+Mock the SandboxExecutor class from /agentic.
 
 #### Returns
 
@@ -232,7 +232,7 @@ Mock the SandboxExecutor class from agentic-control.
 
 > **queueResult**(`result`): `void`
 
-Defined in: [sandbox.ts:171](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L171)
+Defined in: [sandbox.ts:171](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L171)
 
 Queue a result to be returned from the next execution.
 
@@ -254,7 +254,7 @@ The result to queue
 
 > **queueResults**(`results`): `void`
 
-Defined in: [sandbox.ts:180](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L180)
+Defined in: [sandbox.ts:180](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L180)
 
 Queue multiple results to be returned from executions.
 
@@ -276,7 +276,7 @@ The results to queue
 
 > **resetAll**(): `void`
 
-Defined in: [sandbox.ts:464](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L464)
+Defined in: [sandbox.ts:464](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L464)
 
 Reset all mocks.
 
@@ -290,7 +290,7 @@ Reset all mocks.
 
 > **restoreAll**(): `void`
 
-Defined in: [sandbox.ts:455](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L455)
+Defined in: [sandbox.ts:455](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L455)
 
 Restore all mocked modules.
 

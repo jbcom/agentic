@@ -10,7 +10,7 @@
  * - Repository context from git/environment
  */
 
-import { execSync } from 'node:child_process';
+import { execFileSync, execSync } from 'node:child_process';
 import { createGitHubClient, createGraphQLClient, type MCPClient } from './mcp.js';
 
 // Singleton MCP clients
@@ -951,9 +951,9 @@ export async function areAllChecksPassing(ref: string): Promise<{
 }
 
 export async function createCheckRun(
-    _name: string,
-    _headSha: string,
-    _options?: {
+    name: string,
+    headSha: string,
+    options?: {
         status?: 'queued' | 'in_progress' | 'completed';
         conclusion?: 'success' | 'failure' | 'neutral' | 'cancelled' | 'skipped' | 'timed_out' | 'action_required';
         title?: string;
@@ -961,19 +961,50 @@ export async function createCheckRun(
         text?: string;
     }
 ): Promise<number> {
-    throw new Error('createCheckRun not yet available via MCP. Use runAgenticTask.');
+    const { owner, repo } = getRepoContext();
+    const payload = {
+        name,
+        head_sha: headSha,
+        status: options?.status,
+        conclusion: options?.conclusion,
+        output:
+            options?.title || options?.summary || options?.text
+                ? {
+                      title: options?.title ?? name,
+                      summary: options?.summary ?? options?.text ?? '',
+                      text: options?.text,
+                  }
+                : undefined,
+    };
+
+    const result = callGhApi<{ id: number }>(`repos/${owner}/${repo}/check-runs`, payload, 'POST', [
+        'Accept: application/vnd.github+json',
+    ]);
+    return result.id;
 }
 
-export async function getCodeScanningAlerts(_state?: 'open' | 'dismissed' | 'fixed'): Promise<CodeScanningAlert[]> {
-    throw new Error('getCodeScanningAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getCodeScanningAlerts(state: 'open' | 'dismissed' | 'fixed' = 'open'): Promise<CodeScanningAlert[]> {
+    const { owner, repo } = getRepoContext();
+    const alerts = callGhApi<Array<Record<string, unknown>>>(
+        `repos/${owner}/${repo}/code-scanning/alerts?state=${state}`
+    );
+    return alerts.map(mapCodeScanningAlert);
 }
 
-export async function getPRCodeScanningAlerts(_prNumber: number): Promise<CodeScanningAlert[]> {
-    throw new Error('getPRCodeScanningAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getPRCodeScanningAlerts(prNumber: number): Promise<CodeScanningAlert[]> {
+    const alerts = await getCodeScanningAlerts('open');
+    return alerts.filter((alert) => alert.url.includes(`/code-scanning/${prNumber}`) || alert.url.includes(`/pull/${prNumber}`));
 }
 
-export async function getDependabotAlerts(_state?: 'open' | 'dismissed' | 'fixed'): Promise<DependabotAlert[]> {
-    throw new Error('getDependabotAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getDependabotAlerts(state: 'open' | 'dismissed' | 'fixed' = 'open'): Promise<DependabotAlert[]> {
+    const { owner, repo } = getRepoContext();
+    const alerts = callGhApi<Array<Record<string, unknown>>>(
+        `repos/${owner}/${repo}/dependabot/alerts?state=${state}`,
+        undefined,
+        'GET',
+        ['Accept: application/vnd.github+json']
+    );
+    return alerts.map(mapDependabotAlert);
 }
 
 /**
@@ -1030,6 +1061,97 @@ export function formatAlertsForAI(codeScanning: CodeScanningAlert[], dependabot:
     }
 
     return lines.join('\n');
+}
+
+function callGhApi<T>(
+    path: string,
+    payload?: Record<string, unknown>,
+    method: 'GET' | 'POST' = 'GET',
+    headers: string[] = []
+): T {
+    const args = ['api', path, '--method', method];
+
+    for (const header of headers) {
+        args.push('--header', header);
+    }
+
+    if (payload) {
+        args.push('--input', '-');
+    }
+
+    const env = { ...process.env };
+    const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+    if (token) {
+        env.GH_TOKEN = token;
+    }
+
+    const stdout = execFileSync('gh', args, {
+        encoding: 'utf-8',
+        env,
+        input: payload ? JSON.stringify(payload) : undefined,
+    });
+    return JSON.parse(stdout) as T;
+}
+
+function mapCodeScanningAlert(alert: Record<string, unknown>): CodeScanningAlert {
+    const rule = (alert.rule as Record<string, unknown> | undefined) ?? {};
+    const mostRecent = (alert.most_recent_instance as Record<string, unknown> | undefined) ?? {};
+    const location = (mostRecent.location as Record<string, unknown> | undefined) ?? {};
+    const tool = (mostRecent.analysis_tool as Record<string, unknown> | undefined) ?? {};
+
+    return {
+        number: Number(alert.number ?? 0),
+        rule: {
+            id: String(rule.id ?? 'unknown'),
+            name: typeof rule.name === 'string' ? rule.name : undefined,
+            severity: String(rule.severity ?? 'unknown'),
+            description: String(rule.description ?? ''),
+        },
+        state: String(alert.state ?? 'open'),
+        tool: String(tool.name ?? 'github'),
+        createdAt: String(alert.created_at ?? ''),
+        url: String(alert.html_url ?? ''),
+        location:
+            typeof location.path === 'string' && typeof location.start_line === 'number'
+                ? {
+                      path: location.path,
+                      startLine: location.start_line,
+                      endLine:
+                          typeof location.end_line === 'number' ? location.end_line : location.start_line,
+                  }
+                : undefined,
+    };
+}
+
+function mapDependabotAlert(alert: Record<string, unknown>): DependabotAlert {
+    const dependency = (alert.dependency as Record<string, unknown> | undefined) ?? {};
+    const securityAdvisory = (alert.security_advisory as Record<string, unknown> | undefined) ?? {};
+    const securityVulnerability = (alert.security_vulnerability as Record<string, unknown> | undefined) ?? {};
+    const firstPatchedVersion =
+        (securityVulnerability.first_patched_version as Record<string, unknown> | undefined) ?? {};
+
+    return {
+        number: Number(alert.number ?? 0),
+        state: String(alert.state ?? 'open'),
+        dependency: {
+            package: String(dependency.package?.toString?.() ?? dependency.package ?? ''),
+            ecosystem: String(dependency.ecosystem ?? ''),
+            manifestPath: String(dependency.manifest_path ?? ''),
+        },
+        securityAdvisory: {
+            ghsaId: String(securityAdvisory.ghsa_id ?? ''),
+            severity: String(securityAdvisory.severity ?? ''),
+            summary: String(securityAdvisory.summary ?? ''),
+        },
+        securityVulnerability: {
+            severity: String(securityVulnerability.severity ?? ''),
+            vulnerableVersionRange: String(securityVulnerability.vulnerable_version_range ?? ''),
+            firstPatchedVersion:
+                typeof firstPatchedVersion.identifier === 'string' ? firstPatchedVersion.identifier : undefined,
+        },
+        createdAt: String(alert.created_at ?? ''),
+        url: String(alert.html_url ?? ''),
+    };
 }
 
 /**
