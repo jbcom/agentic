@@ -23,4 +23,7 @@
 - confirmed the docs duplicate-id warning was cache churn; a clean docs build now runs without that warning after clearing stale `.astro` state
 - cleared the remaining Biome warning set in `@jbcom/agentic-triage` by refactoring escalation/connectors helpers and tightening tests
 - re-ran the full TypeScript workspace gate after the triage cleanup and kept it green
-- narrowed the next cleanup target to build-time `tsup` unused-import noise in `@jbcom/agentic-triage`
+- split the `@jbcom/agentic-triage` AI helpers into narrower `src/ai/` modules and moved MCP client factories into `src/mcp/clients.ts`
+- rewired `octokit` and the tool/CLI entrypoints to consume the narrower modules so `tsup` no longer drags the broad MCP/AI helper surface into unrelated bundles
+- eliminated the remaining `tsup` unused-import build noise in `@jbcom/agentic-triage`
+- re-ran `triage` lint, build, typecheck, tests, and the full TypeScript workspace gate after the internal module split and kept everything green

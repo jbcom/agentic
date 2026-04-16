@@ -78,7 +78,14 @@ Cleanup completed:
   - `pnpm --dir docs run test`
   - `pnpm --dir docs run test:e2e --project=chromium`
 
-Remaining work should focus on:
+Additional cleanup completed in `@jbcom/agentic-triage`:
 
-- driving down remaining build-time `tsup` unused-import noise in `@jbcom/agentic-triage`
-- continuing production-readiness work in triage and crew
+- split the old monolithic `src/ai.ts` helper into narrower internal modules under `src/ai/`
+- split MCP client factories into `src/mcp/clients.ts` so `octokit` no longer pulls the broader MCP/AI helper surface into every build artifact
+- rewired `cli`, `mcp`, `octokit`, `sage`, and `visual` to depend on the narrower modules
+- eliminated the remaining build-time `tsup` unused-import noise while keeping lint, typecheck, tests, and the full TypeScript workspace gate green
+
+Remaining work should now focus on:
+
+- deeper production-readiness work in triage provider/runtime behavior rather than packaging or build-noise cleanup
+- closing the highest-value implementation and coverage gaps in `agentic-crew`
