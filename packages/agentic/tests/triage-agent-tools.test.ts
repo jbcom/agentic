@@ -171,4 +171,54 @@ describe('Agent tool security and approval handling', () => {
       expect.stringContaining('Security Error:')
     );
   });
+
+  it('rejects fixFile path traversal before executing the task', async () => {
+    const agent = new Agent({
+      workingDirectory: workdir,
+    });
+    const executeSpy = vi.spyOn(agent, 'execute');
+
+    const result = await agent.fixFile('../outside.txt', 'Do not allow this');
+
+    expect(result).toEqual({
+      success: false,
+      result: expect.stringContaining('Security Error:'),
+    });
+    expect(executeSpy).not.toHaveBeenCalled();
+    expect(execFileSyncMock).not.toHaveBeenCalled();
+  });
+
+  it('uses a git pathspec separator when fixFile diffs option-like filenames', async () => {
+    execFileSyncMock.mockReturnValue('diff output');
+    const fileName = '--stat.ts';
+    await writeFile(join(workdir, fileName), 'export const value = 1;\n', 'utf-8');
+
+    const agent = new Agent({
+      workingDirectory: workdir,
+    });
+    const executeSpy = vi.spyOn(agent, 'execute').mockResolvedValue({
+      success: true,
+      result: 'Updated file',
+      steps: [],
+    });
+
+    const result = await agent.fixFile(fileName, 'Rename the exported constant');
+
+    expect(result).toEqual({
+      success: true,
+      result: 'Updated file',
+      diff: 'diff output',
+    });
+    expect(executeSpy).toHaveBeenCalledWith(
+      expect.stringContaining(`Fix the file ${fileName} based on this feedback:`)
+    );
+    expect(execFileSyncMock).toHaveBeenCalledWith(
+      'git',
+      ['diff', '--', fileName],
+      expect.objectContaining({
+        cwd: workdir,
+        encoding: 'utf-8',
+      })
+    );
+  });
 });

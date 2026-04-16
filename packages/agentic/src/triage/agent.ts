@@ -14,7 +14,7 @@
 
 import { execFileSync, execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { dirname, relative } from 'node:path';
 import { type AnthropicProviderOptions, anthropic } from '@ai-sdk/anthropic';
 import { generateObject, generateText, stepCountIs, streamText, type ToolSet, tool } from 'ai';
 import { z } from 'zod';
@@ -424,13 +424,22 @@ Consider:
     result: string;
     diff?: string;
   }> {
+    const pathValidation = validatePath(filePath, this.config.workingDirectory);
+    if (!pathValidation.valid) {
+      return {
+        success: false,
+        result: `Security Error: ${pathValidation.error}`,
+      };
+    }
+
+    const safeFilePath = relative(this.config.workingDirectory, pathValidation.resolvedPath);
     const task = suggestion
-      ? `Fix the file ${filePath} based on this feedback:
+      ? `Fix the file ${safeFilePath} based on this feedback:
 ${feedback}
 
 Apply this suggested change:
 ${suggestion}`
-      : `Fix the file ${filePath} based on this feedback:
+      : `Fix the file ${safeFilePath} based on this feedback:
 ${feedback}
 
 Analyze the file, understand the issue, and make the appropriate fix.`;
@@ -441,7 +450,7 @@ Analyze the file, understand the issue, and make the appropriate fix.`;
     let diff: string | undefined;
     if (result.success) {
       try {
-        diff = execFileSync('git', ['diff', filePath], {
+        diff = execFileSync('git', ['diff', '--', safeFilePath], {
           cwd: this.config.workingDirectory,
           encoding: 'utf-8',
         });
