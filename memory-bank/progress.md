@@ -55,3 +55,7 @@
 - fixed `packages/agentic/src/triage/analyzer.ts` review blocker classification so mixed high-severity feedback is only auto-resolvable when every blocking item can be automated
 - added `packages/agentic/tests/triage-analyzer.test.ts` to cover blocked vs. needs-work review feedback mixes and clean ready-to-merge PR classification
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the resolver/analyzer work and kept everything green
+- fixed stale initialization-promise reuse in `packages/agentic/src/triage/agent.ts` and `packages/agentic/src/triage/pr-triage-agent.ts` so both classes can safely reinitialize after `close()`
+- added `packages/agentic/tests/triage-agent-runtime.test.ts` to cover `Agent` post-close reinitialization and concurrent initialization lock behavior
+- added `packages/agentic/tests/triage-pr-agent.test.ts` to cover MCP-backed PR analysis, ready-workflow execution, blocked-workflow exit, post-close reinitialization, concurrent initialization locking, and `triagePR()` cleanup on failure
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent-layer work; when a concurrent coverage run corrupted `packages/agentic/coverage/.tmp`, cleaned the generated coverage directory and re-ran verification sequentially to restore a green state

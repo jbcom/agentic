@@ -135,3 +135,11 @@ Additional runtime work completed in `@jbcom/agentic` triage resolution and anal
 - fixed `analyzer.ts` review blocker classification so mixed critical/high feedback is only considered auto-resolvable when every blocking item can be automated
 - added direct analyzer coverage for blocked vs. needs-work review feedback mixes and clean ready-to-merge PR classification
 - re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the resolver and analyzer changes and kept everything green
+
+Additional runtime work completed in the MCP-backed triage agent layer:
+
+- fixed a real lifecycle bug in both `agent.ts` and `pr-triage-agent.ts` where `initialize()` could reuse a stale resolved initialization promise after `close()`, preventing proper reinitialization
+- added direct `Agent` lifecycle coverage for post-close reinitialization and concurrent initialization lock behavior
+- added direct `PRTriageAgent` coverage for MCP-backed analysis, ready-to-merge workflow execution, blocked workflow exit, post-close reinitialization, concurrent initialization locking, and `triagePR()` cleanup on failure
+- verified that `PRTriageAgent` now formats and returns stable reports while exercising the real workflow methods instead of only lower-level helpers
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent-layer changes and kept everything green
