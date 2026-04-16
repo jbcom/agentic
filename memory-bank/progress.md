@@ -113,3 +113,7 @@
 - hardened `packages/agentic/src/handoff/manager.ts` `confirmHealthAndBegin()` so a failed Cursor followup post throws instead of silently pretending the handoff was confirmed
 - updated `packages/agentic/tests/handoff-protocol.test.ts` to use predecessor-thread confirmation and to assert followup-post failures surface as errors
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-confirmation fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- removed the fake `successor-agent` fallback from `packages/agentic/src/cli.ts` `handoff confirm`; the command now requires a real successor id from `--successor-id` or `CURSOR_AGENT_ID`
+- added `packages/agentic/src/handoff/cli.ts` to resolve and validate successor ids so the command layer no longer invents successful-looking confirmations with bogus agent identities
+- added `packages/agentic/tests/handoff-cli.test.ts` coverage for explicit successor-id precedence, environment fallback, missing-id failure, and invalid-id rejection
+- re-ran focused handoff tests, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the confirm-identity fix, again keeping coverage runs sequential to avoid V8 artifact collisions

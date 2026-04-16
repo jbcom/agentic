@@ -190,6 +190,13 @@ Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` h
 - extended `packages/agentic/tests/handoff-protocol.test.ts` to model predecessor-thread confirmation and to assert followup-post failures surface as errors
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-confirmation fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 
+Additional runtime work completed in `packages/agentic/src/cli.ts` handoff confirmation identity handling:
+
+- removed the fake `successor-agent` fallback from `handoff confirm`; the command now requires a real successor agent id from either `--successor-id` or `CURSOR_AGENT_ID`
+- added a focused helper in `packages/agentic/src/handoff/cli.ts` to resolve and validate successor ids, keeping the command contract explicit and testable
+- added direct coverage in `packages/agentic/tests/handoff-cli.test.ts` for explicit-id precedence, environment fallback, missing-id failure, and invalid-id rejection
+- re-ran focused handoff tests, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the confirm-identity fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
 Additional runtime work completed in `packages/agentic/src/github/client.ts`:
 
 - fixed `getCIStatus()` so it now merges classic combined commit-status contexts with check runs instead of treating repos without GitHub Checks as implicitly green
