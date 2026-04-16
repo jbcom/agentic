@@ -619,9 +619,10 @@ export class GitHubClient {
    * Collect all feedback on a PR
    */
   async collectFeedback(prNumber: number): Promise<FeedbackItem[]> {
-    const [reviewComments, reviews] = await Promise.all([
+    const [reviewComments, reviews, issueComments] = await Promise.all([
       this.getReviewComments(prNumber),
       this.getReviews(prNumber),
+      this.getIssueComments(prNumber),
     ]);
 
     const feedbackItems: FeedbackItem[] = [];
@@ -662,6 +663,27 @@ export class GitHubClient {
         url: review.html_url,
         isAutoResolvable: false,
         suggestedAction: null,
+        resolution: null,
+      });
+    }
+
+    // Process top-level PR conversation comments
+    for (const comment of issueComments) {
+      if (!comment.body || comment.body.trim() === '') continue;
+
+      const severity = this.inferSeverity(comment.body);
+      feedbackItems.push({
+        id: `issue-${comment.id}`,
+        author: comment.user?.login ?? 'unknown',
+        body: comment.body,
+        path: null,
+        line: null,
+        severity,
+        status: 'unaddressed',
+        createdAt: comment.created_at,
+        url: comment.html_url,
+        isAutoResolvable: this.isAutoResolvable(comment.body, severity),
+        suggestedAction: this.extractSuggestion(comment.body),
         resolution: null,
       });
     }

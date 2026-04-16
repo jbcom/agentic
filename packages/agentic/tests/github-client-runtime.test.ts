@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const {
   checksListForRefMock,
   getCombinedStatusForRefMock,
+  listIssueCommentsMock,
   listReviewCommentsMock,
   listReviewsMock,
   octokitConstructorMock,
@@ -11,6 +12,7 @@ const {
   const pullsGet = vi.fn();
   const listReviews = vi.fn();
   const listReviewComments = vi.fn();
+  const listIssueComments = vi.fn();
   const checksListForRef = vi.fn();
   const getCombinedStatusForRef = vi.fn();
   const octokitInstance = {
@@ -18,6 +20,9 @@ const {
       get: pullsGet,
       listReviewComments,
       listReviews,
+    },
+    issues: {
+      listComments: listIssueComments,
     },
     checks: {
       listForRef: checksListForRef,
@@ -30,6 +35,7 @@ const {
   return {
     checksListForRefMock: checksListForRef,
     getCombinedStatusForRefMock: getCombinedStatusForRef,
+    listIssueCommentsMock: listIssueComments,
     listReviewCommentsMock: listReviewComments,
     listReviewsMock: listReviews,
     octokitConstructorMock: vi.fn(function MockOctokit() {
@@ -50,6 +56,7 @@ describe('GitHubClient runtime behavior', () => {
     pullsGetMock.mockReset();
     checksListForRefMock.mockReset();
     getCombinedStatusForRefMock.mockReset();
+    listIssueCommentsMock.mockReset();
     listReviewsMock.mockReset();
     listReviewCommentsMock.mockReset();
 
@@ -72,6 +79,9 @@ describe('GitHubClient runtime behavior', () => {
       },
     });
     listReviewsMock.mockResolvedValue({
+      data: [],
+    });
+    listIssueCommentsMock.mockResolvedValue({
       data: [],
     });
     listReviewCommentsMock.mockResolvedValue({
@@ -234,6 +244,45 @@ describe('GitHubClient runtime behavior', () => {
       {
         id: 'review-22',
         status: 'dismissed',
+      },
+    ]);
+  });
+
+  it('includes top-level PR conversation comments in collected feedback', async () => {
+    listIssueCommentsMock.mockResolvedValue({
+      data: [
+        {
+          id: 31,
+          body: 'Please fix the release notes before merging.',
+          created_at: '2026-04-15T13:20:00Z',
+          html_url: 'https://github.com/owner/repo/pull/42#issuecomment-31',
+          user: { login: 'maintainer-1' },
+        },
+      ],
+    });
+
+    const client = new GitHubClient({
+      token: 'ghp_test_issue_comment_feedback',
+      owner: 'owner',
+      repo: 'repo',
+    });
+
+    const feedback = await client.collectFeedback(42);
+
+    expect(feedback).toEqual([
+      {
+        id: 'issue-31',
+        author: 'maintainer-1',
+        body: 'Please fix the release notes before merging.',
+        path: null,
+        line: null,
+        severity: 'high',
+        status: 'unaddressed',
+        createdAt: '2026-04-15T13:20:00Z',
+        url: 'https://github.com/owner/repo/pull/42#issuecomment-31',
+        isAutoResolvable: false,
+        suggestedAction: null,
+        resolution: null,
       },
     ]);
   });
