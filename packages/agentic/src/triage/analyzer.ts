@@ -706,7 +706,7 @@ Return analysis for each item by ID.`,
       blockers.push({
         type: 'review_feedback',
         description: `${criticalFeedback.length} critical/high severity feedback items unaddressed`,
-        isAutoResolvable: criticalFeedback.some((f) => f.isAutoResolvable),
+        isAutoResolvable: criticalFeedback.every((f) => f.isAutoResolvable),
         suggestedFix: 'Address each feedback item with a fix or justified response',
         url: null,
         resolved: false,

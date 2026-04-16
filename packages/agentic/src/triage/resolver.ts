@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
-import { writeFile } from 'node:fs/promises';
+import { readFile, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
 import { type SimpleGit, simpleGit } from 'simple-git';
@@ -208,7 +209,30 @@ Be specific about which files to change and what changes to make.`,
       };
     }
 
-    const filePath = `${this.config.workingDirectory}/${feedback.path}`;
+    const replacement = this.extractReplacementContent(feedback.suggestedAction, true);
+    if (!replacement) {
+      return {
+        success: false,
+        action: 'Apply suggestion',
+        description: `No replacement content found for ${feedback.path}`,
+        error: 'Suggestion did not contain usable replacement content',
+        changes: null,
+        commitSha: null,
+      };
+    }
+
+    if (feedback.line == null) {
+      return {
+        success: false,
+        action: 'Apply suggestion',
+        description: `Missing target line for ${feedback.path}`,
+        error: 'Cannot safely apply suggestion without a target line',
+        changes: null,
+        commitSha: null,
+      };
+    }
+
+    const filePath = join(this.config.workingDirectory, feedback.path);
 
     if (!existsSync(filePath)) {
       return {
@@ -232,21 +256,14 @@ Be specific about which files to change and what changes to make.`,
       };
     }
 
-    // Read file, apply suggestion, write back
-    // This is simplified - full implementation would handle line-specific changes
-    // Apply the suggestion by replacing the file content with the suggestedAction
-    const newContent = feedback.suggestedAction;
-
-    await writeFile(filePath, newContent, 'utf-8');
-
-    return {
-      success: true,
+    return this.replaceLineInFile({
       action: 'Apply suggestion',
       description: `Applied suggestion to ${feedback.path}`,
-      error: null,
-      changes: [{ file: feedback.path, type: 'modified' }],
-      commitSha: null,
-    };
+      filePath,
+      relativePath: feedback.path,
+      line: feedback.line,
+      replacement,
+    });
   }
 
   private async generateResponse(
@@ -308,9 +325,32 @@ CONTENT: <the fix code or justification text>`,
       };
     }
 
-    // Apply the fix - post as comment for human review
+    const replacement = this.extractReplacementContent(fix, false);
+    if (feedback.line != null && replacement) {
+      const filePath = join(this.config.workingDirectory, feedback.path);
+      if (!existsSync(filePath)) {
+        return {
+          success: false,
+          action: 'Apply fix',
+          description: `File not found: ${feedback.path}`,
+          error: 'Target file does not exist',
+          changes: null,
+          commitSha: null,
+        };
+      }
+
+      return this.replaceLineInFile({
+        action: 'Apply fix',
+        description: `Applied fix to ${feedback.path}`,
+        filePath,
+        relativePath: feedback.path,
+        line: feedback.line,
+        replacement,
+      });
+    }
+
+    // Fall back to posting the fix for human review when we can't apply it safely.
     try {
-      // For now, post the fix as a comment for human review
       await github.postComment(
         prNumber,
         `## Suggested Fix for ${feedback.path}\n\n\`\`\`\n${fix}\n\`\`\`\n\n_Responding to feedback from ${feedback.author}_`
@@ -334,6 +374,79 @@ CONTENT: <the fix code or justification text>`,
         commitSha: null,
       };
     }
+  }
+
+  private extractReplacementContent(raw: string, allowPlainText: boolean): string | null {
+    const suggestionMatch = raw.match(/```suggestion\s*\n([\s\S]*?)```/i);
+    if (suggestionMatch?.[1] !== undefined) {
+      return suggestionMatch[1].trimEnd();
+    }
+
+    const fencedCodeMatch = raw.match(/```(?:[\w+-]+)?\s*\n([\s\S]*?)```/);
+    if (fencedCodeMatch?.[1] !== undefined) {
+      return fencedCodeMatch[1].trimEnd();
+    }
+
+    if (!allowPlainText) {
+      return null;
+    }
+
+    const trimmed = raw.trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }
+
+  private async replaceLineInFile(options: {
+    action: string;
+    description: string;
+    filePath: string;
+    relativePath: string;
+    line: number;
+    replacement: string;
+  }): Promise<ActionResult> {
+    const { action, description, filePath, relativePath, line, replacement } = options;
+    const currentContent = await readFile(filePath, 'utf-8');
+    const hasTrailingNewline = currentContent.endsWith('\n');
+    const lines = currentContent.split(/\r?\n/);
+    if (hasTrailingNewline) {
+      lines.pop();
+    }
+
+    if (line < 1 || line > lines.length) {
+      return {
+        success: false,
+        action,
+        description,
+        error: `Target line ${line} is outside the file bounds for ${relativePath}`,
+        changes: null,
+        commitSha: null,
+      };
+    }
+
+    const replacementLines = replacement.split(/\r?\n/);
+    lines.splice(line - 1, 1, ...replacementLines);
+    const updatedContent = `${lines.join('\n')}${hasTrailingNewline ? '\n' : ''}`;
+
+    if (updatedContent === currentContent) {
+      return {
+        success: true,
+        action,
+        description: `${description} (already applied)`,
+        error: null,
+        changes: [],
+        commitSha: null,
+      };
+    }
+
+    await writeFile(filePath, updatedContent, 'utf-8');
+
+    return {
+      success: true,
+      action,
+      description,
+      error: null,
+      changes: [{ file: relativePath, type: 'modified' }],
+      commitSha: null,
+    };
   }
 
   private async postJustification(
