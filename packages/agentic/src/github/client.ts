@@ -766,14 +766,7 @@ export function cloneRepo(repoUrl: string, destPath: string): Result<void> {
     return { success: false, error: `No token available for repo: ${repoUrl}` };
   }
 
-  let cloneUrl = repoUrl;
-  if (cloneUrl.startsWith('https://github.com/')) {
-    cloneUrl = cloneUrl.replace('https://github.com/', `https://oauth2:${token}@github.com/`);
-  } else if (!cloneUrl.includes('@') && !cloneUrl.startsWith('https://')) {
-    const org = extractOrg(repoUrl);
-    const repoName = repoUrl.replace(`${org}/`, '');
-    cloneUrl = `https://oauth2:${token}@github.com/${org}/${repoName}.git`;
-  }
+  const cloneUrl = buildCloneUrl(repoUrl, token);
 
   const proc = spawnSync('git', ['clone', cloneUrl, destPath], {
     encoding: 'utf-8',
@@ -794,6 +787,27 @@ export function cloneRepo(repoUrl: string, destPath: string): Result<void> {
   }
 
   return { success: true };
+}
+
+function buildCloneUrl(repoUrl: string, token: string): string {
+  if (repoUrl.startsWith('https://github.com/')) {
+    return repoUrl.replace('https://github.com/', `https://oauth2:${token}@github.com/`);
+  }
+
+  const sshMatch = repoUrl.match(/^(?:git@github\.com:|ssh:\/\/git@github\.com\/)([^/]+)\/(.+?)(?:\.git)?$/);
+  if (sshMatch?.[1] && sshMatch[2]) {
+    return `https://oauth2:${token}@github.com/${sshMatch[1]}/${sshMatch[2]}.git`;
+  }
+
+  if (!repoUrl.includes('@') && !repoUrl.startsWith('https://')) {
+    const org = extractOrg(repoUrl);
+    if (org) {
+      const repoName = repoUrl.replace(`${org}/`, '').replace(/\.git$/, '');
+      return `https://oauth2:${token}@github.com/${org}/${repoName}.git`;
+    }
+  }
+
+  return repoUrl;
 }
 
 /**
