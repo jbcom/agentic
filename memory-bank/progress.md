@@ -91,3 +91,7 @@
 - fixed `packages/agentic/src/fleet/fleet.ts` inbound coordination polling so `✅ DONE:` and `⚠️ BLOCKED:` agent updates are handled even without an `@cursor` mention
 - added `packages/agentic/tests/fleet-management.test.ts` coverage for DONE comments, BLOCKED comments, and unrelated coordination chatter
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/fleet/fleet.ts` outbound lifecycle handling so `PENDING` agents are kept under coordination instead of being treated as finished before they start
+- fixed `packages/agentic/src/fleet/fleet.ts` `waitFor()` so it waits through `PENDING` and `RUNNING` states until a terminal result is reached
+- added `packages/agentic/tests/fleet-management.test.ts` coverage for pending-agent retention in outbound polling and `waitFor()` progression from `PENDING` to `COMPLETED`
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions

@@ -215,3 +215,10 @@ Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` coord
 - extracted the single-pass inbound poll into `pollCoordinationComments()` and added explicit coordination-signal detection so the loop can distinguish actionable DONE/BLOCKED comments from ordinary chatter
 - added direct fleet coordination coverage in `packages/agentic/tests/fleet-management.test.ts` for DONE comments, BLOCKED comments, and unrelated comments
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+
+Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` agent lifecycle handling:
+
+- fixed outbound coordination polling so agents in `PENDING` state are no longer dropped from the monitored set before they ever start running
+- fixed `waitFor()` so it now treats both `PENDING` and `RUNNING` as non-terminal states, instead of returning early while a newly launched agent is still pending
+- extracted the single-pass outbound work into `pollAgentStatuses()` and added direct fleet coverage for pending-agent retention and `waitFor()` progression from `PENDING` to `RUNNING` to `COMPLETED`
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
