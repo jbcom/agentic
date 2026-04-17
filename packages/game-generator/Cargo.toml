@@ -20,7 +20,7 @@ path = "src/lib.rs"
 
 [dependencies]
 # Core UI Framework
-bevy = { version = "0.16.1", features = ["dynamic_linking"] }
+bevy = { version = "0.18.1", features = ["dynamic_linking"] }
 bevy_egui = "0.35"
 bevy-inspector-egui = "0.32"
 egui_dock = "0.16"
