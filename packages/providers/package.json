@@ -34,6 +34,6 @@
     "@jbcom/agentic-triage": ">=0.2.0"
   },
   "devDependencies": {
-    "typescript": "^5.3.0"
+    "typescript": "^6.0.3"
   }
 }
