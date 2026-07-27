@@ -1,4 +1,4 @@
-# Pre-commit configuration for agentic-control
+# Pre-commit configuration for the agentic monorepo
 # Runs Biome for linting and formatting TypeScript/JavaScript files
 #
 # Installation:
