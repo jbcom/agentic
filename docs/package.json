@@ -20,7 +20,7 @@
     "sharp": "^0.34.2"
   },
   "devDependencies": {
-    "vitest": "^4.0.14",
+    "vitest": "^3.2.6",
     "@vitest/coverage-v8": "^4.0.14",
     "@playwright/test": "^1.52.0",
     "cheerio": "^1.0.0"

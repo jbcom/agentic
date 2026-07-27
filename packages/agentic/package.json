@@ -117,7 +117,7 @@
     "@types/node": "^22.15.0",
     "tsx": "4.21.0",
     "typescript": "^5.7.0",
-    "vitest": "^4.0.14",
+    "vitest": "^3.2.6",
     "@jbcom/vitest-agentic": "workspace:*"
   },
   "engines": {
