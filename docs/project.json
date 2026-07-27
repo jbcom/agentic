@@ -4,10 +4,12 @@
   "targets": {
     "build": {
       "command": "astro build",
+      "options": { "cwd": "{projectRoot}" },
       "inputs": ["{projectRoot}/src/**/*", "{projectRoot}/astro.config.mjs"]
     },
     "dev": {
-      "command": "astro dev"
+      "command": "astro dev",
+      "options": { "cwd": "{projectRoot}" }
     }
   }
 }
