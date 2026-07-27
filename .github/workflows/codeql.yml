@@ -1,0 +1,75 @@
+# Advanced-setup CodeQL workflow.
+#
+# Default-setup only runs CodeQL on push-to-default-branch + weekly
+# schedule. The Enterprise "PRs" ruleset requires a Code Scanning
+# result before accepting a push to any non-default branch — a
+# chicken-and-egg the default setup can't satisfy.
+#
+# This workflow runs on push to every branch (excluding noisy
+# dependabot fans), on every PR targeting main, and weekly so the
+# main-branch result stays fresh.
+#
+# Maintained centrally at github.com/jbdevprimary/gh-fleet-sync.
+# Sync via `scripts/fanout.sh` in that repo. Do not edit in place.
+
+name: CodeQL
+
+on:
+  push:
+    branches-ignore:
+      - 'dependabot/**'
+      - 'gh-readonly-queue/**'
+  pull_request:
+    branches: [main]
+  schedule:
+    # 04:17 UTC every Monday — well outside any deploy / release-please
+    # cron windows so it doesn't fight for the runner queue.
+    - cron: '17 4 * * 1'
+  # Manual dispatch lets us run scans against branches that already
+  # exist behind the Enterprise PRs ruleset (where the rule rejects
+  # the push that would otherwise trigger the scan — chicken-and-egg).
+  workflow_dispatch:
+
+# Only the most recent run per ref needs to be live; stale-cancel
+# everything else so the queue stays unclogged when a feature branch
+# gets a flurry of pushes.
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript-typescript
+            build-mode: none
+          - language: actions
+            build-mode: none
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # 'security-and-quality' matches the default-setup query
+          # suite so disabling default-setup doesn't lose coverage.
+          queries: security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:${{ matrix.language }}'
