@@ -54,13 +54,13 @@ build-py:
 
 # ── Documentation ───────────────────────────
 
-# Build internal Sphinx references, then build the Starlight site
+# Build Sphinx Python API reference, then build the Starlight site
 build-docs: build-sphinx
     pnpm --filter agentic-docs build
 
-# Build internal Sphinx markdown output for Python API docs
+# Build Sphinx markdown output for the Python API docs (agentic-crew)
 build-sphinx:
-    uv run sphinx-build -b markdown internal/sphinx docs/src/content/docs/api/_generated
+    uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated
 
 # Start docs dev server
 docs-dev:
