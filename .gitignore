@@ -58,6 +58,7 @@ uv.lock
 
 # Sphinx output (auto-generated)
 docs/src/content/docs/api/_generated/
+docs/sphinx/apidocs/
 
 # Astro
 docs/.astro/
