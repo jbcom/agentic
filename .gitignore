@@ -33,6 +33,8 @@ dist/
 .npm
 coverage/
 packages/*/coverage/
+coverage.xml
+.coverage
 
 # Python
 __pycache__/
