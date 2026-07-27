@@ -152,16 +152,9 @@ jobs:
     name: SonarCloud
     runs-on: ubuntu-latest
     needs: [typescript, python]
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     env:
-      # Secrets can't be referenced directly in `if:` — map to a job-level
-      # env var first. Without this gate, every scan step below would fail
-      # rather than skip until someone provisions the SonarCloud project +
-      # token (a one-time manual setup step), turning an optional quality
-      # gate into a hard CI failure for every fork/PR.
-      sonar_token_set: ${{ secrets.SONAR_TOKEN != '' }}
-    if: |
-      (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) &&
-      env.sonar_token_set == 'true'
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -179,30 +172,30 @@ jobs:
           name: py-coverage
           path: packages/agentic-crew/
 
+      # Every scan step below is gated on env.SONAR_TOKEN — without it, the
+      # scan action would fail rather than skip, turning an optional quality
+      # gate into a hard CI failure for every fork/PR until someone
+      # provisions the SonarCloud project + token (a one-time manual step).
       - name: SonarCloud Scan - agentic
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: packages/agentic
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan - triage
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: packages/triage
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan - agentic-crew
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: packages/agentic-crew
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
       - name: SonarCloud Scan - meshy
+        if: env.SONAR_TOKEN != ''
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: packages/meshy-content-generator
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
