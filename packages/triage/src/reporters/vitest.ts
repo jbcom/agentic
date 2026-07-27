@@ -18,8 +18,8 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import type { File, Reporter, Task, Vitest } from 'vitest';
-import type { CoverageData, TestError, TestFile, TestReport, TestResult } from '../test-results.js';
+import type { Reporter, SerializedError, TestCase, TestModule, TestRunEndReason, Vitest } from 'vitest/node';
+import type { CoverageData, TestError, TestFile, TestReport, TestResult as StrataTestResult } from '../test-results.js';
 
 export interface StrataReporterOptions {
     /** Output file path */
@@ -48,10 +48,14 @@ export class StrataReporter implements Reporter {
         this.startTime = Date.now();
     }
 
-    async onFinished(files?: File[], _errors?: unknown[]): Promise<void> {
-        if (!files) return;
+    async onTestRunEnd(
+        testModules: ReadonlyArray<TestModule>,
+        _unhandledErrors: ReadonlyArray<SerializedError>,
+        _reason: TestRunEndReason
+    ): Promise<void> {
+        if (!testModules.length) return;
 
-        const report = this.buildReport(files);
+        const report = this.buildReport(testModules);
 
         // Write report
         const outputPath = resolve(this.options.outputFile);
@@ -61,8 +65,8 @@ export class StrataReporter implements Reporter {
         console.log(`\n📊 Agentic triage test report: ${outputPath}`);
     }
 
-    private buildReport(files: File[]): TestReport {
-        const testFiles = files.map((f) => this.processFile(f));
+    private buildReport(testModules: ReadonlyArray<TestModule>): TestReport {
+        const testFiles = testModules.map((m) => this.processModule(m));
         const allTests = testFiles.flatMap((f) => f.tests);
 
         const summary = {
@@ -92,53 +96,50 @@ export class StrataReporter implements Reporter {
         return report;
     }
 
-    private processFile(file: File): TestFile {
-        const tests = this.collectTests(file.tasks, file.filepath);
+    private processModule(testModule: TestModule): TestFile {
+        const tests = [...testModule.children.allTests()].map((testCase) => this.processTestCase(testCase));
+        const diagnostic = testModule.diagnostic();
+
+        // A module-level (collection) error surfaces as a failing state with
+        // no test cases at all — vitest 4 no longer exposes a `result.errors`
+        // shortcut for this, so fall back to the module state.
+        const setupError =
+            tests.length === 0 && testModule.state() === 'failed' ? { message: `Failed to collect tests in ${testModule.moduleId}` } : undefined;
 
         return {
-            path: file.filepath,
+            path: testModule.moduleId,
             tests,
-            duration: file.result?.duration ?? 0,
-            setupError: file.result?.errors?.[0] ? this.processError(file.result.errors[0]) : undefined,
+            duration: diagnostic.duration,
+            setupError,
         };
     }
 
-    private collectTests(tasks: Task[], filepath: string, prefix = ''): TestResult[] {
-        const results: TestResult[] = [];
+    private processTestCase(testCase: TestCase): StrataTestResult {
+        const result = testCase.result();
+        const diagnostic = testCase.diagnostic();
+        const error = result.state === 'failed' ? result.errors[0] : undefined;
 
-        for (const task of tasks) {
-            const fullName = prefix ? `${prefix} > ${task.name}` : task.name;
-
-            if (task.type === 'test') {
-                results.push({
-                    id: task.id,
-                    name: task.name,
-                    fullName,
-                    file: filepath,
-                    line: task.location?.line,
-                    status: this.mapStatus(task.result?.state),
-                    duration: task.result?.duration ?? 0,
-                    error: task.result?.errors?.[0] ? this.processError(task.result.errors[0]) : undefined,
-                    retry: task.result?.retryCount,
-                });
-            } else if (task.type === 'suite' && task.tasks) {
-                results.push(...this.collectTests(task.tasks, filepath, fullName));
-            }
-        }
-
-        return results;
+        return {
+            id: testCase.id,
+            name: testCase.name,
+            fullName: testCase.fullName,
+            file: testCase.module.moduleId,
+            line: testCase.location?.line,
+            status: this.mapStatus(result.state),
+            duration: diagnostic?.duration ?? 0,
+            error: error ? this.processError(error) : undefined,
+            retry: diagnostic?.retryCount,
+        };
     }
 
-    private mapStatus(state?: string): TestResult['status'] {
+    private mapStatus(state: 'pending' | 'passed' | 'failed' | 'skipped'): StrataTestResult['status'] {
         switch (state) {
-            case 'pass':
+            case 'passed':
                 return 'passed';
-            case 'fail':
+            case 'failed':
                 return 'failed';
-            case 'skip':
+            case 'skipped':
                 return 'skipped';
-            case 'todo':
-                return 'todo';
             default:
                 return 'skipped';
         }
