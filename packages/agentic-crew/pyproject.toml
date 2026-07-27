@@ -113,7 +113,6 @@ dist_glob_patterns = ["dist/*"]
 upload_to_vcs_release = true
 
 [tool.mypy]
-python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 
@@ -129,4 +128,14 @@ module = [
     "mesh_toolkit.*",
     "strands",
 ]
+ignore_missing_imports = true
+
+# numpy's own .pyi stubs (pulled in transitively via crewai's RAG/chromadb
+# stack) use PEP 695 `type X = ...` syntax that requires Python 3.12+, but
+# our supported floor is 3.11 (requires-python = ">=3.11"). We don't need
+# numpy's internals type-checked — only how our code calls it — so skip
+# following its stubs rather than failing the whole run on their syntax.
+[[tool.mypy.overrides]]
+module = "numpy.*"
+follow_imports = "skip"
 ignore_missing_imports = true
