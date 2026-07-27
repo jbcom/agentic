@@ -74,15 +74,6 @@ importers:
       sharp:
         specifier: ^0.34.2
         version: 0.34.5
-      starlight-typedoc:
-        specifier: ^0.21.5
-        version: 0.21.5(@astrojs/starlight@0.37.6(astro@5.17.3(@types/node@25.3.0)(rollup@4.54.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)))(typedoc-plugin-markdown@4.10.0(typedoc@0.28.17(typescript@5.9.3)))(typedoc@0.28.17(typescript@5.9.3))
-      typedoc:
-        specifier: ^0.28.17
-        version: 0.28.17(typescript@5.9.3)
-      typedoc-plugin-markdown:
-        specifier: ^4.10.0
-        version: 4.10.0(typedoc@0.28.17(typescript@5.9.3))
     devDependencies:
       '@playwright/test':
         specifier: ^1.52.0
@@ -97,7 +88,7 @@ importers:
         specifier: ^4.0.14
         version: 4.0.18(@opentelemetry/api@1.9.0)(@types/node@25.3.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/agentic-control:
+  packages/agentic:
     dependencies:
       '@ai-sdk/azure':
         specifier: ^2.0.78
@@ -153,7 +144,7 @@ importers:
         version: 3.0.1(zod@4.2.1)
       '@jbcom/vitest-agentic':
         specifier: workspace:*
-        version: link:../vitest-agentic-control
+        version: link:../../tooling/vitest-agentic
       '@types/node':
         specifier: ^22.15.0
         version: 22.19.3
@@ -317,7 +308,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.12)(@types/node@25.3.0)(tsx@4.21.0)(yaml@2.8.2)
 
-  packages/vitest-agentic-control:
+  tooling/vitest-agentic:
     devDependencies:
       '@types/node':
         specifier: ^22.15.0
@@ -5759,14 +5750,6 @@ packages:
   stackback@0.0.2:
     resolution: {integrity: sha512-1XMJE5fQo1jGH6Y/7ebnwPOBEkIEnT4QF32d5R1+VXdXveM0IBMJt8zfaxX1P3QhVwrYe+576+jkANtSS2mBbw==}
 
-  starlight-typedoc@0.21.5:
-    resolution: {integrity: sha512-7JGaPHrP+HgX0sYGnafZcPuzMm+3OmHx7kqE0DWTrsuBfoQS02lJ6/PtJF9y0KCDcfsBynyo0G/1ttHcBq5Vww==}
-    engines: {node: '>=18.17.1'}
-    peerDependencies:
-      '@astrojs/starlight': '>=0.32.0'
-      typedoc: '>=0.28.0'
-      typedoc-plugin-markdown: '>=4.6.0'
-
   statuses@2.0.2:
     resolution: {integrity: sha512-DvEy55V3DB7uknRo+4iOGT5fP1slR8wQohVdknigZPMpMstaKJQWhwiYBACJE3Ul2pTnATihhBYnRhZQHGBiRw==}
     engines: {node: '>= 0.8'}
@@ -6044,21 +6027,8 @@ packages:
     resolution: {integrity: sha512-OZs6gsjF4vMp32qrCbiVSkrFmXtG/AZhY3t0iAMrMBiAZyV9oALtXO8hsrHbMXF9x6L3grlFuwW2oAz7cav+Gw==}
     engines: {node: '>= 0.6'}
 
-  typedoc-plugin-markdown@4.10.0:
-    resolution: {integrity: sha512-psrg8Rtnv4HPWCsoxId+MzEN8TVK5jeKCnTbnGAbTBqcDapR9hM41bJT/9eAyKn9C2MDG9Qjh3MkltAYuLDoXg==}
-    engines: {node: '>= 18'}
-    peerDependencies:
-      typedoc: 0.28.x
-
   typedoc@0.28.15:
     resolution: {integrity: sha512-mw2/2vTL7MlT+BVo43lOsufkkd2CJO4zeOSuWQQsiXoV2VuEn7f6IZp2jsUDPmBMABpgR0R5jlcJ2OGEFYmkyg==}
-    engines: {node: '>= 18', pnpm: '>= 10'}
-    hasBin: true
-    peerDependencies:
-      typescript: 5.0.x || 5.1.x || 5.2.x || 5.3.x || 5.4.x || 5.5.x || 5.6.x || 5.7.x || 5.8.x || 5.9.x
-
-  typedoc@0.28.17:
-    resolution: {integrity: sha512-ZkJ2G7mZrbxrKxinTQMjFqsCoYY6a5Luwv2GKbTnBCEgV2ihYm5CflA9JnJAwH0pZWavqfYxmDkFHPt4yx2oDQ==}
     engines: {node: '>= 18', pnpm: '>= 10'}
     hasBin: true
     peerDependencies:
@@ -13014,13 +12984,6 @@ snapshots:
 
   stackback@0.0.2: {}
 
-  starlight-typedoc@0.21.5(@astrojs/starlight@0.37.6(astro@5.17.3(@types/node@25.3.0)(rollup@4.54.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)))(typedoc-plugin-markdown@4.10.0(typedoc@0.28.17(typescript@5.9.3)))(typedoc@0.28.17(typescript@5.9.3)):
-    dependencies:
-      '@astrojs/starlight': 0.37.6(astro@5.17.3(@types/node@25.3.0)(rollup@4.54.0)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
-      github-slugger: 2.0.0
-      typedoc: 0.28.17(typescript@5.9.3)
-      typedoc-plugin-markdown: 4.10.0(typedoc@0.28.17(typescript@5.9.3))
-
   statuses@2.0.2: {}
 
   std-env@3.10.0: {}
@@ -13291,20 +13254,7 @@ snapshots:
       media-typer: 1.1.0
       mime-types: 3.0.2
 
-  typedoc-plugin-markdown@4.10.0(typedoc@0.28.17(typescript@5.9.3)):
-    dependencies:
-      typedoc: 0.28.17(typescript@5.9.3)
-
   typedoc@0.28.15(typescript@5.9.3):
-    dependencies:
-      '@gerrit0/mini-shiki': 3.20.0
-      lunr: 2.3.9
-      markdown-it: 14.1.1
-      minimatch: 10.2.2
-      typescript: 5.9.3
-      yaml: 2.8.2
-
-  typedoc@0.28.17(typescript@5.9.3):
     dependencies:
       '@gerrit0/mini-shiki': 3.20.0
       lunr: 2.3.9

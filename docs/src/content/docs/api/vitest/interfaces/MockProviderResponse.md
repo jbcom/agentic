@@ -5,7 +5,7 @@ prev: false
 title: "MockProviderResponse"
 ---
 
-Defined in: [providers.ts:47](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L47)
+Defined in: [providers.ts:47](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L47)
 
 Mock provider response configuration.
 
@@ -15,7 +15,7 @@ Mock provider response configuration.
 
 > `optional` **error**: `Error`
 
-Defined in: [providers.ts:60](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L60)
+Defined in: [providers.ts:60](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L60)
 
 Error to throw instead of returning response
 
@@ -25,7 +25,7 @@ Error to throw instead of returning response
 
 > `optional` **latency**: `number`
 
-Defined in: [providers.ts:58](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L58)
+Defined in: [providers.ts:58](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L58)
 
 Simulated latency in ms
 
@@ -35,7 +35,7 @@ Simulated latency in ms
 
 > `optional` **response**: `string`
 
-Defined in: [providers.ts:49](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L49)
+Defined in: [providers.ts:49](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L49)
 
 The text response to return
 
@@ -45,7 +45,7 @@ The text response to return
 
 > `optional` **stream**: `boolean`
 
-Defined in: [providers.ts:56](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L56)
+Defined in: [providers.ts:56](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L56)
 
 Whether the response should stream
 
@@ -55,7 +55,7 @@ Whether the response should stream
 
 > `optional` **toolCalls**: `object`[]
 
-Defined in: [providers.ts:51](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L51)
+Defined in: [providers.ts:51](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L51)
 
 Tool calls to include in response
 
@@ -73,7 +73,7 @@ Tool calls to include in response
 
 > `optional` **usage**: `object`
 
-Defined in: [providers.ts:62](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L62)
+Defined in: [providers.ts:62](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L62)
 
 Usage information
 

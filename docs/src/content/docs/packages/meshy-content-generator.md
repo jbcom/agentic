@@ -1,9 +1,9 @@
 ---
-title: "@agentic/meshy"
+title: "@jbcom/agentic-meshy"
 description: Declarative 3D asset pipelines powered by Meshy AI — text-to-3D, rigging, and animation without bespoke scripts
 ---
 
-# @agentic/meshy
+# @jbcom/agentic-meshy
 
 > Declarative 3D asset pipelines powered by Meshy AI — define pipelines in JSON, run from CLI or API, preview instantly.
 
@@ -11,9 +11,9 @@ description: Declarative 3D asset pipelines powered by Meshy AI — text-to-3D, 
   <span class="lang-badge lang-badge--ts">TypeScript</span>
 </div>
 
-**Stop writing bespoke scripts for every 3D asset.** @agentic/meshy wraps Meshy's text-to-image, text-to-3D, rigging, and animation endpoints in a declarative pipeline system. Define your pipeline as JSON, point it at an asset manifest, and get reproducible results every time.
+**Stop writing bespoke scripts for every 3D asset.** @jbcom/agentic-meshy wraps Meshy's text-to-image, text-to-3D, rigging, and animation endpoints in a declarative pipeline system. Define your pipeline as JSON, point it at an asset manifest, and get reproducible results every time.
 
-## Why @agentic/meshy?
+## Why @jbcom/agentic-meshy?
 
 | Problem | Solution |
 |---------|----------|
@@ -170,7 +170,7 @@ POLLY_MODE=replay pnpm test:unit
 
 ## Integration with Strata
 
-@agentic/meshy powers the 3D asset pipeline for [Strata](https://strata.game), the AI-powered gaming platform:
+@jbcom/agentic-meshy powers the 3D asset pipeline for [Strata](https://strata.game), the AI-powered gaming platform:
 
 - **Character models**: Text description → 3D model → rigged → animated
 - **Environment assets**: Procedural generation of buildings, terrain features, props
@@ -179,8 +179,7 @@ POLLY_MODE=replay pnpm test:unit
 
 ## Related Packages
 
-- **[game-generator](/packages/game-generator/)** — Uses meshy-generated assets in Bevy games
-- **[@jbcom/agentic](/packages/control/)** — Fleet management and orchestration
+- **[@jbcom/agentic](/packages/agentic/)** — Fleet management and orchestration
 - **[agentic-crew](/packages/crew/)** — Multi-agent workflows for content generation
 
 ## Links

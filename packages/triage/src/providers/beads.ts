@@ -27,6 +27,107 @@ function generateBeadId(): string {
     return `bd-${hex}`;
 }
 
+function filterByStatus(issues: TriageIssue[], status?: ListIssuesOptions['status']): TriageIssue[] {
+    if (!status) {
+        return issues;
+    }
+
+    const statuses = Array.isArray(status) ? status : [status];
+    return issues.filter((issue) => statuses.includes(issue.status));
+}
+
+function filterByPriority(issues: TriageIssue[], priority?: ListIssuesOptions['priority']): TriageIssue[] {
+    if (!priority) {
+        return issues;
+    }
+
+    const priorities = Array.isArray(priority) ? priority : [priority];
+    return issues.filter((issue) => priorities.includes(issue.priority));
+}
+
+function filterByType(issues: TriageIssue[], type?: ListIssuesOptions['type']): TriageIssue[] {
+    if (!type) {
+        return issues;
+    }
+
+    const types = Array.isArray(type) ? type : [type];
+    return issues.filter((issue) => types.includes(issue.type));
+}
+
+function filterByLabels(issues: TriageIssue[], labels?: string[]): TriageIssue[] {
+    if (!labels?.length) {
+        return issues;
+    }
+
+    return issues.filter((issue) => labels.every((label) => issue.labels.includes(label)));
+}
+
+function filterByAnyLabels(issues: TriageIssue[], labelsAny?: string[]): TriageIssue[] {
+    if (!labelsAny?.length) {
+        return issues;
+    }
+
+    return issues.filter((issue) => labelsAny.some((label) => issue.labels.includes(label)));
+}
+
+function filterByAssignee(issues: TriageIssue[], assignee?: string): TriageIssue[] {
+    if (!assignee) {
+        return issues;
+    }
+
+    return issues.filter((issue) => issue.assignee === assignee);
+}
+
+function filterByTitle(issues: TriageIssue[], titleContains?: string): TriageIssue[] {
+    if (!titleContains) {
+        return issues;
+    }
+
+    const search = titleContains.toLowerCase();
+    return issues.filter((issue) => issue.title.toLowerCase().includes(search));
+}
+
+function filterByDescription(issues: TriageIssue[], descriptionContains?: string): TriageIssue[] {
+    if (!descriptionContains) {
+        return issues;
+    }
+
+    const search = descriptionContains.toLowerCase();
+    return issues.filter((issue) => issue.description?.toLowerCase().includes(search));
+}
+
+function filterByCreatedAfter(issues: TriageIssue[], createdAfter?: string): TriageIssue[] {
+    if (!createdAfter) {
+        return issues;
+    }
+
+    const after = new Date(createdAfter);
+    return issues.filter((issue) => new Date(issue.createdAt) > after);
+}
+
+function filterByCreatedBefore(issues: TriageIssue[], createdBefore?: string): TriageIssue[] {
+    if (!createdBefore) {
+        return issues;
+    }
+
+    const before = new Date(createdBefore);
+    return issues.filter((issue) => new Date(issue.createdAt) < before);
+}
+
+function sortIssues(issues: TriageIssue[], options?: ListIssuesOptions): TriageIssue[] {
+    const sorted = [...issues];
+
+    if (options?.sortBy === 'priority') {
+        sorted.sort((a, b) => priorityToNumber(a.priority) - priorityToNumber(b.priority));
+    } else if (options?.sortBy === 'updated') {
+        sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    } else {
+        sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+
+    return options?.sortOrder === 'asc' ? sorted.reverse() : sorted;
+}
+
 export class BeadsProvider implements TriageProvider {
     readonly name = 'beads';
     readonly displayName = 'Beads';
@@ -131,66 +232,17 @@ export class BeadsProvider implements TriageProvider {
     async listIssues(options?: ListIssuesOptions): Promise<TriageIssue[]> {
         let issues = Array.from(this.issues.values());
 
-        if (options?.status) {
-            const statuses = Array.isArray(options.status) ? options.status : [options.status];
-            issues = issues.filter((i) => statuses.includes(i.status));
-        }
-
-        if (options?.priority) {
-            const priorities = Array.isArray(options.priority) ? options.priority : [options.priority];
-            issues = issues.filter((i) => priorities.includes(i.priority));
-        }
-
-        if (options?.type) {
-            const types = Array.isArray(options.type) ? options.type : [options.type];
-            issues = issues.filter((i) => types.includes(i.type));
-        }
-
-        if (options?.labels && options.labels.length > 0) {
-            issues = issues.filter((i) => options.labels!.every((l) => i.labels.includes(l)));
-        }
-
-        if (options?.labelsAny && options.labelsAny.length > 0) {
-            issues = issues.filter((i) => options.labelsAny!.some((l) => i.labels.includes(l)));
-        }
-
-        if (options?.assignee) {
-            issues = issues.filter((i) => i.assignee === options.assignee);
-        }
-
-        if (options?.titleContains) {
-            const search = options.titleContains.toLowerCase();
-            issues = issues.filter((i) => i.title.toLowerCase().includes(search));
-        }
-
-        if (options?.descriptionContains) {
-            const search = options.descriptionContains.toLowerCase();
-            issues = issues.filter((i) => i.description?.toLowerCase().includes(search));
-        }
-
-        if (options?.createdAfter) {
-            const after = new Date(options.createdAfter);
-            issues = issues.filter((i) => new Date(i.createdAt) > after);
-        }
-
-        if (options?.createdBefore) {
-            const before = new Date(options.createdBefore);
-            issues = issues.filter((i) => new Date(i.createdAt) < before);
-        }
-
-        // Sort
-        if (options?.sortBy === 'priority') {
-            issues.sort((a, b) => priorityToNumber(a.priority) - priorityToNumber(b.priority));
-        } else if (options?.sortBy === 'updated') {
-            issues.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-        } else {
-            // Default: sort by creation date, newest first
-            issues.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        }
-
-        if (options?.sortOrder === 'asc') {
-            issues.reverse();
-        }
+        issues = filterByStatus(issues, options?.status);
+        issues = filterByPriority(issues, options?.priority);
+        issues = filterByType(issues, options?.type);
+        issues = filterByLabels(issues, options?.labels);
+        issues = filterByAnyLabels(issues, options?.labelsAny);
+        issues = filterByAssignee(issues, options?.assignee);
+        issues = filterByTitle(issues, options?.titleContains);
+        issues = filterByDescription(issues, options?.descriptionContains);
+        issues = filterByCreatedAfter(issues, options?.createdAfter);
+        issues = filterByCreatedBefore(issues, options?.createdBefore);
+        issues = sortIssues(issues, options);
 
         if (options?.limit) {
             issues = issues.slice(0, options.limit);

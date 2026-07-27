@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Any
 
 from agentic_crew.runners.base import BaseRunner
+from agentic_crew.tools.adapters import resolve_langgraph_tools
 
 
 class LangGraphRunner(BaseRunner):
@@ -48,8 +49,8 @@ class LangGraphRunner(BaseRunner):
         model = llm_config.get("model") if isinstance(llm_config, dict) else llm_config
         llm = self.get_llm(model)
 
-        # Build tools from task descriptions
-        tools = self._build_tools_from_tasks(crew_config)
+        # Build tools declared by agents in the universal config
+        tools = self._build_tools_from_config(crew_config)
 
         # Create agent
         agent = create_react_agent(llm, tools)
@@ -90,9 +91,9 @@ class LangGraphRunner(BaseRunner):
         """
         from langchain_anthropic import ChatAnthropic
 
-        # Default to Claude 3.5 Sonnet if no model specified
+        # Default to Claude Haiku if no model specified
         default_model = "claude-haiku-4-5-20251001"
-        return ChatAnthropic(model=model or default_model)
+        return ChatAnthropic(model_name=model or default_model, timeout=None, stop=None)
 
     def build_agent(self, agent_config: dict[str, Any], tools: list | None = None) -> Any:
         """Build a LangGraph-compatible agent.
@@ -129,17 +130,9 @@ class LangGraphRunner(BaseRunner):
             "agent": agent,
         }
 
-    def _build_tools_from_tasks(self, crew_config: dict[str, Any]) -> list:
-        """Convert crew tasks to LangChain tools.
-
-        For simple crews, we create tools that represent each task's capability.
-
-        Args:
-            crew_config: Crew configuration.
-
-        Returns:
-            List of LangChain tools.
-        """
-        # For now, return empty - tools should be provided separately
-        # A more sophisticated implementation would create tools from task definitions
-        return []
+    def _build_tools_from_config(self, crew_config: dict[str, Any]) -> list:
+        """Resolve configured agent tools into LangGraph-compatible tools."""
+        tool_names: list[str] = []
+        for agent_cfg in crew_config.get("agents", {}).values():
+            tool_names.extend(agent_cfg.get("tools", []))
+        return resolve_langgraph_tools(tool_names)

@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { resolveModel } from './ai.js';
+import { resolveModel } from './ai/model.js';
 import {
     type AgentRouting,
-    answerQuestion,
-    classifyQuery,
     decomposeTask,
     routeToAgent,
     type SageResponse,

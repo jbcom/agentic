@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any, cast
 
 import yaml
 
 
-def load_config(path: Path | str) -> dict:
+def load_config(path: Path | str) -> dict[str, Any]:
     """Loads a YAML configuration file.
 
     Args:
@@ -15,4 +16,5 @@ def load_config(path: Path | str) -> dict:
         A dictionary containing the configuration.
     """
     with open(path) as f:
-        return yaml.safe_load(f)
+        loaded = yaml.safe_load(f) or {}
+    return cast(dict[str, Any], loaded)

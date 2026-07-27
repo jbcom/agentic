@@ -1,5 +1,12 @@
-import { describe, expect, it, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import * as octokit from '../src/octokit.js';
 import { TriageConnectors } from '../src/triage/connectors.js';
+import type { TriageIssue } from '../src/providers/types.js';
+
+function requireIssue(issue: TriageIssue | null): TriageIssue {
+    expect(issue).not.toBeNull();
+    return issue as TriageIssue;
+}
 
 /**
  * Tests for TriageConnectors ProjectAPI and ReviewAPI implementations.
@@ -11,6 +18,7 @@ describe('TriageConnectors', () => {
     let connectors: TriageConnectors;
 
     beforeEach(() => {
+        vi.restoreAllMocks();
         connectors = new TriageConnectors({
             provider: { type: 'beads' },
         });
@@ -39,9 +47,8 @@ describe('TriageConnectors', () => {
             expect(created.title).toBe('Test issue');
             expect(created.type).toBe('bug');
 
-            const retrieved = await connectors.issues.get(created.id);
-            expect(retrieved).not.toBeNull();
-            expect(retrieved!.title).toBe('Test issue');
+            const retrieved = requireIssue(await connectors.issues.get(created.id));
+            expect(retrieved.title).toBe('Test issue');
         });
 
         it('should list issues', async () => {
@@ -95,13 +102,13 @@ describe('TriageConnectors', () => {
             const issue = await connectors.issues.create({ title: 'Labels test' });
             await connectors.issues.addLabels(issue.id, ['bug', 'urgent']);
 
-            let updated = await connectors.issues.get(issue.id);
-            expect(updated!.labels).toContain('bug');
-            expect(updated!.labels).toContain('urgent');
+            let updated = requireIssue(await connectors.issues.get(issue.id));
+            expect(updated.labels).toContain('bug');
+            expect(updated.labels).toContain('urgent');
 
             await connectors.issues.removeLabels(issue.id, ['urgent']);
-            updated = await connectors.issues.get(issue.id);
-            expect(updated!.labels).toEqual(['bug']);
+            updated = requireIssue(await connectors.issues.get(issue.id));
+            expect(updated.labels).toEqual(['bug']);
         });
 
         it('should get blocked issues', async () => {
@@ -198,6 +205,145 @@ describe('TriageConnectors', () => {
             await expect(
                 connectors.reviews.replyToComment('123', 'response')
             ).rejects.toThrow('Reply to comment not supported by beads provider');
+        });
+
+        it('should map github review comments via octokit helpers', async () => {
+            const githubConnectors = new TriageConnectors({ repo: 'acme/widgets' });
+            vi.spyOn(githubConnectors, 'getProvider').mockResolvedValue({ name: 'github' } as any);
+            vi.spyOn(octokit, 'getPRReviews').mockResolvedValue([
+                {
+                    id: 41,
+                    user: 'alice',
+                    state: 'COMMENTED',
+                    body: 'General review note',
+                    submittedAt: '2026-04-15T00:00:00Z',
+                },
+            ]);
+            vi.spyOn(octokit, 'getPRReviewComments').mockResolvedValue([
+                {
+                    id: 123,
+                    nodeId: 'PRRC_123',
+                    body: 'Rename this variable',
+                    path: 'src/main.ts',
+                    line: 27,
+                    user: 'bob',
+                    createdAt: '2026-04-15T00:00:00Z',
+                },
+            ]);
+
+            const comments = await githubConnectors.reviews.getPRComments(7);
+
+            expect(comments).toEqual([
+                {
+                    id: '41',
+                    body: 'General review note',
+                    author: 'alice',
+                },
+                {
+                    id: '123',
+                    body: 'Rename this variable',
+                    author: 'bob',
+                    path: 'src/main.ts',
+                    line: 27,
+                },
+            ]);
+        });
+
+        it('should use unresolved github review threads for feedback', async () => {
+            const githubConnectors = new TriageConnectors({ repo: 'acme/widgets' });
+            vi.spyOn(githubConnectors, 'getProvider').mockResolvedValue({ name: 'github' } as any);
+            vi.spyOn(octokit, 'getPRReviews').mockResolvedValue([
+                {
+                    id: 55,
+                    user: 'alice',
+                    state: 'CHANGES_REQUESTED',
+                    body: 'Add tests before merge',
+                    submittedAt: '2026-04-15T00:00:00Z',
+                },
+                {
+                    id: 56,
+                    user: 'bob',
+                    state: 'COMMENTED',
+                    body: 'One small nit',
+                    submittedAt: '2026-04-15T00:00:00Z',
+                },
+            ]);
+            vi.spyOn(octokit, 'getPRReviewThreads').mockResolvedValue([
+                {
+                    id: 'thread-1',
+                    isResolved: false,
+                    isOutdated: false,
+                    path: 'src/main.ts',
+                    line: 27,
+                    comments: [
+                        {
+                            id: 'comment-1',
+                            body: 'Initial thread comment',
+                            author: 'carol',
+                            createdAt: '2026-04-15T00:00:00Z',
+                        },
+                        {
+                            id: 'comment-2',
+                            body: 'Latest unresolved comment',
+                            author: 'dana',
+                            createdAt: '2026-04-15T00:01:00Z',
+                        },
+                    ],
+                },
+                {
+                    id: 'thread-2',
+                    isResolved: true,
+                    isOutdated: false,
+                    path: 'src/old.ts',
+                    line: 10,
+                    comments: [
+                        {
+                            id: 'comment-3',
+                            body: 'Resolved thread comment',
+                            author: 'erin',
+                            createdAt: '2026-04-15T00:00:00Z',
+                        },
+                    ],
+                },
+                {
+                    id: 'thread-3',
+                    isResolved: false,
+                    isOutdated: true,
+                    path: 'src/legacy.ts',
+                    line: 2,
+                    comments: [
+                        {
+                            id: 'comment-4',
+                            body: 'Outdated thread comment',
+                            author: 'frank',
+                            createdAt: '2026-04-15T00:00:00Z',
+                        },
+                    ],
+                },
+            ]);
+
+            const feedback = await githubConnectors.reviews.getUnresolvedFeedback(7);
+
+            expect(feedback).toEqual([
+                {
+                    id: '55',
+                    body: 'Add tests before merge',
+                    author: 'alice',
+                    type: 'change_request',
+                },
+                {
+                    id: '56',
+                    body: 'One small nit',
+                    author: 'bob',
+                    type: 'comment',
+                },
+                {
+                    id: 'comment-2',
+                    body: 'Latest unresolved comment',
+                    author: 'dana',
+                    type: 'comment',
+                },
+            ]);
         });
     });
 

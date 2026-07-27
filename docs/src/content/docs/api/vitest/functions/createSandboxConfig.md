@@ -7,7 +7,7 @@ title: "createSandboxConfig"
 
 > **createSandboxConfig**(`overrides?`): [`TestSandboxConfig`](/api/vitest/interfaces/testsandboxconfig/)
 
-Defined in: [fixtures.ts:225](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L225)
+Defined in: [fixtures.ts:225](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L225)
 
 Create a sandbox configuration for testing.
 
@@ -28,7 +28,7 @@ Sandbox configuration
 ## Example
 
 ```typescript
-import { createSandboxConfig } from 'vitest-agentic-control';
+import { createSandboxConfig } from '/vitest-agentic';
 
 const sandbox = createSandboxConfig({
   runtime: 'cursor',

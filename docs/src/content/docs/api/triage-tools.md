@@ -475,23 +475,30 @@ const github = new TriageConnectors();
 
 // Jira
 const jira = new TriageConnectors({
-  provider: 'jira',
-  jira: {
-    host: 'company.atlassian.net',
+  provider: {
+    type: 'jira',
+    host: 'https://company.atlassian.net',
     projectKey: 'PROJ',
+    apiToken: process.env.JIRA_API_TOKEN!,
+    email: 'dev@company.com',
   },
 });
 
 // Linear
 const linear = new TriageConnectors({
-  provider: 'linear',
-  linear: { teamId: 'TEAM123' },
+  provider: {
+    type: 'linear',
+    team: 'ENG',
+    apiKey: process.env.LINEAR_API_KEY!,
+  },
 });
 
 // Beads (local-first)
 const beads = new TriageConnectors({
-  provider: 'beads',
-  beads: { workingDir: '/path/to/project' },
+  provider: {
+    type: 'beads',
+    workingDir: '/path/to/project',
+  },
 });
 ```
 

@@ -96,121 +96,135 @@ export class EscalationLadder {
     async process(task: Task): Promise<ProcessResult> {
         const trail: ProcessResult['trail'] = [];
         let totalCost = 0;
+        let currentLevel = this.initializeTask(task);
 
-        // Check for cloud agent approval in metadata
+        while (currentLevel <= 6) {
+            let state = this.stateManager.getState(task.id);
+            const execution = this.prepareLevelExecution(task.id, currentLevel, state, trail);
+            currentLevel = execution.level;
+            if (!execution.handler) {
+                continue;
+            }
+
+            this.stateManager.recordAttempt(task.id, currentLevel);
+            state = this.stateManager.getState(task.id);
+            const outcome = await this.executeLevel(task, currentLevel, state, execution.handler, trail, totalCost);
+            totalCost = outcome.totalCost;
+
+            if (outcome.result) {
+                return outcome.result;
+            }
+
+            currentLevel = outcome.nextLevel;
+        }
+
+        return this.buildFailureResult(trail, totalCost);
+    }
+
+    private initializeTask(task: Task): EscalationLevel {
         if (this.hasCloudAgentApproval(task)) {
             this.stateManager.setApproval(task.id, true);
         }
 
-        // Start from current level
-        let state = this.stateManager.getState(task.id);
-        let currentLevel = state.level;
+        return this.stateManager.getState(task.id).level;
+    }
 
-        while (currentLevel <= 6) {
-            // Refresh state to get updated attempts
-            state = this.stateManager.getState(task.id);
+    private prepareLevelExecution(
+        taskId: string,
+        currentLevel: EscalationLevel,
+        state: EscalationState,
+        trail: ProcessResult['trail']
+    ): { level: EscalationLevel; handler: LevelHandler | null } {
+        if (this.shouldSkipLevel(currentLevel, state)) {
+            return { level: this.advanceLevel(taskId, currentLevel), handler: null };
+        }
 
-            // Check if we should skip this level
-            if (this.shouldSkipLevel(currentLevel, state)) {
-                currentLevel = (currentLevel + 1) as EscalationLevel;
-                this.stateManager.updateState(task.id, { level: currentLevel });
-                continue;
-            }
+        const handler = this.handlers.get(currentLevel);
+        if (!handler) {
+            trail.push({ level: currentLevel, success: false, error: 'No handler registered' });
+            return { level: this.advanceLevel(taskId, currentLevel), handler: null };
+        }
 
-            // Get handler for this level
-            const handler = this.handlers.get(currentLevel);
-            if (!handler) {
-                // No handler registered, skip to next level
-                trail.push({
-                    level: currentLevel,
-                    success: false,
-                    error: 'No handler registered',
-                });
-                currentLevel = (currentLevel + 1) as EscalationLevel;
-                this.stateManager.updateState(task.id, { level: currentLevel });
-                continue;
-            }
+        if (this.hasExceededAttempts(currentLevel, state)) {
+            trail.push({ level: currentLevel, success: false, error: 'Max attempts exceeded' });
+            return { level: this.advanceLevel(taskId, currentLevel), handler: null };
+        }
 
-            // Check max attempts for this level
-            if (this.hasExceededAttempts(currentLevel, state)) {
-                trail.push({
-                    level: currentLevel,
-                    success: false,
-                    error: 'Max attempts exceeded',
-                });
-                currentLevel = (currentLevel + 1) as EscalationLevel;
-                this.stateManager.updateState(task.id, { level: currentLevel });
-                continue;
-            }
+        return { level: currentLevel, handler };
+    }
 
-            // Record attempt
-            this.stateManager.recordAttempt(task.id, currentLevel);
-            // Refresh state after recording attempt
-            state = this.stateManager.getState(task.id);
+    private advanceLevel(taskId: string, currentLevel: EscalationLevel): EscalationLevel {
+        const nextLevel = (currentLevel + 1) as EscalationLevel;
+        this.stateManager.updateState(taskId, { level: nextLevel });
+        return nextLevel;
+    }
 
-            try {
-                // Execute handler
-                const result = await handler(task, state);
+    private recordExecutionCost(taskId: string, level: EscalationLevel, cost?: number): number {
+        if (!cost) {
+            return 0;
+        }
 
-                // Track cost if any
-                if (result.cost) {
-                    totalCost += result.cost;
-                    this.stateManager.addCost(task.id, result.cost);
-                    if (currentLevel === 6) {
-                        // Cloud agent cost
-                        this.costTracker.record(task.id, 'cloud-agent', result.cost, `Level ${currentLevel} execution`);
-                    }
-                }
+        this.stateManager.addCost(taskId, cost);
+        if (level === 6) {
+            this.costTracker.record(taskId, 'cloud-agent', cost, `Level ${level} execution`);
+        }
 
-                // Record in trail
-                trail.push({
-                    level: currentLevel,
-                    success: result.success,
-                    error: result.error,
-                });
+        return cost;
+    }
 
-                // If successful, mark as resolved
-                if (result.success) {
-                    this.stateManager.resolve(task.id);
-                    return {
+    private async executeLevel(
+        task: Task,
+        currentLevel: EscalationLevel,
+        state: EscalationState,
+        handler: LevelHandler,
+        trail: ProcessResult['trail'],
+        totalCost: number
+    ): Promise<{ nextLevel: EscalationLevel; totalCost: number; result?: ProcessResult }> {
+        try {
+            const result = await handler(task, state);
+            totalCost += this.recordExecutionCost(task.id, currentLevel, result.cost);
+            trail.push({ level: currentLevel, success: result.success, error: result.error });
+
+            if (result.success) {
+                this.stateManager.resolve(task.id);
+                return {
+                    nextLevel: currentLevel,
+                    totalCost,
+                    result: {
                         success: true,
                         level: currentLevel,
                         data: result.data,
                         cost: totalCost,
                         attempts: trail.length,
                         trail,
-                    };
-                }
-
-                // Record error
-                if (result.error) {
-                    this.stateManager.recordError(task.id, result.error);
-                }
-
-                // Check if we should escalate
-                // Get fresh state to check attempts
-                state = this.stateManager.getState(task.id);
-                if (result.escalate || this.hasExceededAttempts(currentLevel, state)) {
-                    currentLevel = (currentLevel + 1) as EscalationLevel;
-                    this.stateManager.updateState(task.id, { level: currentLevel });
-                }
-                // If not escalating and not exceeded, we'll retry same level
-            } catch (error) {
-                const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-                this.stateManager.recordError(task.id, errorMsg);
-                trail.push({
-                    level: currentLevel,
-                    success: false,
-                    error: errorMsg,
-                });
-
-                // Escalate on exception
-                currentLevel = (currentLevel + 1) as EscalationLevel;
-                this.stateManager.updateState(task.id, { level: currentLevel });
+                    },
+                };
             }
-        }
 
-        // All levels exhausted
+            if (result.error) {
+                this.stateManager.recordError(task.id, result.error);
+            }
+
+            const freshState = this.stateManager.getState(task.id);
+            const nextLevel =
+                result.escalate || this.hasExceededAttempts(currentLevel, freshState)
+                    ? this.advanceLevel(task.id, currentLevel)
+                    : currentLevel;
+
+            return { nextLevel, totalCost };
+        } catch (error) {
+            const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+            this.stateManager.recordError(task.id, errorMsg);
+            trail.push({ level: currentLevel, success: false, error: errorMsg });
+
+            return {
+                nextLevel: this.advanceLevel(task.id, currentLevel),
+                totalCost,
+            };
+        }
+    }
+
+    private buildFailureResult(trail: ProcessResult['trail'], totalCost: number): ProcessResult {
         return {
             success: false,
             level: 6,

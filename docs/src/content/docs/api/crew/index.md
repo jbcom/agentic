@@ -626,4 +626,3 @@ agentic-crew list-runners --json
 
 - [Configuration API](/api/configuration/) -- Config schema and loading
 - [Fleet API Reference](/api/fleet-management/) -- Agent fleet management
-- [Game Generator API](/api/game-gen/) -- Rust game generator

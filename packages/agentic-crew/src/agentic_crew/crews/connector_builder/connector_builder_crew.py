@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from agentic_crew.tools.registry import resolve_tools
 from agentic_crew.utils import load_config
 from crewai import Agent, Crew, Task
 
@@ -40,10 +41,15 @@ class ConnectorBuilderCrew:
         agent_config = load_config(config_dir / "agents.yaml")
         task_config = load_config(config_dir / "tasks.yaml")
 
+        def build_agent(name: str) -> Agent:
+            config = agent_config[name].copy()
+            config["tools"] = resolve_tools(config.get("tools", []))
+            return Agent(**config)
+
         # Create Agents
-        self.doc_scraper = Agent(**agent_config["doc_scraper"])
-        self.api_analyzer = Agent(**agent_config["api_analyzer"])
-        self.code_generator = Agent(**agent_config["code_generator"])
+        self.doc_scraper = build_agent("doc_scraper")
+        self.api_analyzer = build_agent("api_analyzer")
+        self.code_generator = build_agent("code_generator")
 
         # Create Tasks
         self.scrape_docs = Task(**task_config["scrape_docs"])
@@ -56,7 +62,7 @@ class ConnectorBuilderCrew:
         self.crew = Crew(
             agents=[self.doc_scraper, self.api_analyzer, self.code_generator],
             tasks=[self.scrape_docs, self.analyze_api, self.generate_code],
-            verbose=2,
+            verbose=True,
         )
 
     def kickoff(self, inputs: dict) -> str:
@@ -69,4 +75,5 @@ class ConnectorBuilderCrew:
         Returns:
             A string representing the result of the crew's execution.
         """
-        return self.crew.kickoff(inputs=inputs)
+        result = self.crew.kickoff(inputs=inputs)
+        return result.raw if hasattr(result, "raw") else str(result)

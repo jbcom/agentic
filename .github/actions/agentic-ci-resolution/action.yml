@@ -66,6 +66,6 @@ runs:
         fi
         
         # Install peer dependencies first
-        npm install -g agentic-control@1.1.0 @ai-sdk/anthropic @ai-sdk/google ai-sdk-ollama @ai-sdk/openai
+        npm install -g @jbcom/agentic@1.2.0 @ai-sdk/anthropic @ai-sdk/google ai-sdk-ollama @ai-sdk/openai
         
         agentic triage fix "$PR_NUM" --repo "$REPO" --iterations "${{ inputs.iterations }}"

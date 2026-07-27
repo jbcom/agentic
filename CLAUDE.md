@@ -14,7 +14,6 @@ This file provides guidance to Claude Code when working with this repository.
 
 - **Python**: `uv sync`, `uv run pytest`, `uvx ruff check --fix .`
 - **Node.js**: `pnpm install`, `pnpm run check`, `pnpm run test`
-- **Commits**: Follow Conventional Commits.
 - **Triage**: Use `/jules` or `/cursor` in issue comments for delegation.
 
 ## Memory Bank

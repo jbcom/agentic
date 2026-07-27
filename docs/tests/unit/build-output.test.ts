@@ -68,11 +68,10 @@ describe('Core pages exist in build output', () => {
 
 describe('Package pages exist in build output', () => {
   const packagePages = [
-    { path: 'packages/control/index.html', label: '@jbcom/agentic (Control)' },
-    { path: 'packages/triage/index.html', label: '@jbcom/agentic (Triage)' },
+    { path: 'packages/agentic/index.html', label: '@jbcom/agentic' },
+    { path: 'packages/triage/index.html', label: '@jbcom/agentic-triage' },
     { path: 'packages/crew/index.html', label: 'agentic-crew' },
-    { path: 'packages/meshy-content-generator/index.html', label: '@agentic/meshy' },
-    { path: 'packages/game-generator/index.html', label: 'game-generator' },
+    { path: 'packages/meshy-content-generator/index.html', label: '@jbcom/agentic-meshy' },
   ];
 
   for (const { path, label } of packagePages) {
@@ -175,18 +174,17 @@ describe('Homepage content', () => {
     expect(titleTag).toContain('Agentic');
   });
 
-  it('contains the hero tagline about polyglot toolkit', () => {
+  it('contains the hero tagline about the TypeScript and Python toolkit', () => {
     const $ = loadPage('index.html');
     const bodyText = $('body').text();
-    expect(bodyText).toContain('polyglot');
+    expect(bodyText).toContain('TypeScript and Python');
   });
 
-  it('contains language badges (TypeScript, Python, Rust)', () => {
+  it('contains language badges (TypeScript and Python)', () => {
     const $ = loadPage('index.html');
     const bodyText = $('body').text();
     expect(bodyText).toContain('TypeScript');
     expect(bodyText).toContain('Python');
-    expect(bodyText).toContain('Rust');
   });
 
   it('contains the "Get Started" call-to-action link', () => {
@@ -294,11 +292,10 @@ describe('Sidebar links resolve to actual build output pages', () => {
     'getting-started/introduction',
     'getting-started/quick-start',
     'getting-started/configuration',
-    'packages/control',
+    'packages/agentic',
     'packages/triage',
     'packages/crew',
     'packages/meshy-content-generator',
-    'packages/game-generator',
     'guides/agent-spawning',
     'guides/fleet-management',
     'guides/orchestration-patterns',
@@ -317,7 +314,6 @@ describe('Sidebar links resolve to actual build output pages', () => {
     'api/token-management',
     'api/configuration',
     'api/crew',
-    'api/game-gen',
   ];
 
   for (const slug of sidebarSlugs) {
@@ -412,29 +408,29 @@ describe('Static assets in build output', () => {
 // ---------------------------------------------------------------------------
 
 describe('TypeDoc-generated API pages', () => {
-  it('control API readme page exists', () => {
-    expect(pageExists('api/control/readme/index.html')).toBe(true);
+  it('agentic API readme page exists', () => {
+    expect(pageExists('api/agentic/readme/index.html')).toBe(true);
   });
 
-  it('control API contains class documentation for Fleet', () => {
+  it('agentic API contains class documentation for Fleet', () => {
     // TypeDoc generates lowercase directory names
-    expect(pageExists('api/control/classes/fleet/index.html')).toBe(true);
+    expect(pageExists('api/agentic/classes/fleet/index.html')).toBe(true);
   });
 
-  it('control API contains class documentation for SandboxExecutor', () => {
-    expect(pageExists('api/control/classes/sandboxexecutor/index.html')).toBe(true);
+  it('agentic API contains class documentation for SandboxExecutor', () => {
+    expect(pageExists('api/agentic/classes/sandboxexecutor/index.html')).toBe(true);
   });
 
-  it('control API contains interface documentation', () => {
-    const interfaceDir = join(DIST_DIR, 'api/control/interfaces');
+  it('agentic API contains interface documentation', () => {
+    const interfaceDir = join(DIST_DIR, 'api/agentic/interfaces');
     if (existsSync(interfaceDir)) {
       const entries = readdirSync(interfaceDir);
       expect(entries.length).toBeGreaterThan(0);
     }
   });
 
-  it('control API contains enumeration documentation', () => {
-    const enumDir = join(DIST_DIR, 'api/control/enumerations');
+  it('agentic API contains enumeration documentation', () => {
+    const enumDir = join(DIST_DIR, 'api/agentic/enumerations');
     if (existsSync(enumDir)) {
       const entries = readdirSync(enumDir);
       expect(entries.length).toBeGreaterThan(0);

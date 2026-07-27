@@ -7,7 +7,7 @@ title: "createMockTaskConfig"
 
 > **createMockTaskConfig**(): `object`
 
-Defined in: [fixtures.ts:344](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L344)
+Defined in: [fixtures.ts:344](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L344)
 
 Create a mock task configuration for testing.
 

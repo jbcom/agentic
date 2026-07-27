@@ -60,7 +60,7 @@ test.describe('Heading hierarchy', () => {
     { path: '/getting-started/introduction/', label: 'Introduction' },
     { path: '/getting-started/quick-start/', label: 'Quick Start' },
     { path: '/guides/agent-spawning/', label: 'Agent Spawning guide' },
-    { path: '/packages/control/', label: 'Control package' },
+    { path: '/packages/agentic/', label: 'Agentic package' },
   ];
 
   for (const { path, label } of pagesToTest) {

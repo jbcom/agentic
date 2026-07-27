@@ -1,6 +1,6 @@
-# agentic-control Examples
+# @jbcom/agentic Examples
 
-This directory contains working examples demonstrating key features of the agentic-control package.
+This directory contains working examples demonstrating key features of the @jbcom/agentic package.
 
 ## Prerequisites
 

@@ -1,7 +1,7 @@
 /**
  * monitor-npm.ts
  *
- * Tracks npm download stats and health for agentic-control packages.
+ * Tracks npm download stats and health for @jbcom/agentic packages.
  */
 
 async function getStats(packageName: string) {
@@ -46,7 +46,7 @@ async function getRegistryData(packageName: string) {
 }
 
 async function main() {
-  const packages = ['agentic-control', 'vitest-agentic-control'];
+  const packages = ['@jbcom/agentic', '@jbcom/vitest-agentic'];
 
   console.log('📦 NPM Package Health Report\n');
   console.log(`Generated on: ${new Date().toISOString()}\n`);

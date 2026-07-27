@@ -23,7 +23,7 @@ pip install -e packages/agentic-crew
 Shows how to discover packages, load a crew configuration, and execute it using the best available framework.
 
 ```bash
-python examples/python/minimal_run.py
+python examples/crew/python/minimal_run.py
 ```
 
 ### 2. Framework Detection

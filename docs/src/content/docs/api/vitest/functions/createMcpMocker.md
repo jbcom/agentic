@@ -7,7 +7,7 @@ title: "createMcpMocker"
 
 > **createMcpMocker**(`options?`): [`McpMocker`](/api/vitest/classes/mcpmocker/)
 
-Defined in: [mcp.ts:466](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mcp.ts#L466)
+Defined in: [mcp.ts:466](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mcp.ts#L466)
 
 Factory function to create an McpMocker instance.
 

@@ -9,7 +9,7 @@ These examples are taken directly from the Agentic repositories. They demonstrat
 
 ## Agent Spawning
 
-This example from [`control/examples/01-agent-spawn.ts`](https://github.com/jbcom/agentic/blob/main/examples/01-agent-spawn.ts) shows how to spawn a Cursor Background Agent and monitor it until completion.
+This example from [`examples/01-agent-spawn.ts`](https://github.com/jbcom/agentic/blob/main/examples/01-agent-spawn.ts) shows how to spawn a Cursor Background Agent and monitor it until completion.
 
 ```typescript
 import { Fleet } from '@jbcom/agentic';
@@ -101,7 +101,7 @@ main().catch(console.error);
 
 ## Fleet Management
 
-From [`control/examples/02-fleet-management.ts`](https://github.com/jbcom/agentic/blob/main/examples/02-fleet-management.ts), this shows fleet-level operations.
+From [`examples/02-fleet-management.ts`](https://github.com/jbcom/agentic/blob/main/examples/02-fleet-management.ts), this shows fleet-level operations.
 
 ```typescript
 import type { Agent, AgentStatus } from '@jbcom/agentic';
@@ -204,7 +204,7 @@ From [`triage/examples/basic-agent.ts`](https://github.com/jbcom/agentic/blob/ma
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 async function main() {
   try {
@@ -268,7 +268,7 @@ main().catch(console.error);
 
 ## Orchestration Patterns
 
-From [`control/examples/03-orchestration-patterns.ts`](https://github.com/jbcom/agentic/blob/main/examples/03-orchestration-patterns.ts), advanced multi-agent coordination:
+From [`examples/03-orchestration-patterns.ts`](https://github.com/jbcom/agentic/blob/main/examples/03-orchestration-patterns.ts), advanced multi-agent coordination:
 
 ```typescript
 import type { DiamondConfig, SpawnOptions } from '@jbcom/agentic';

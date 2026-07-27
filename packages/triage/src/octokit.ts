@@ -10,8 +10,8 @@
  * - Repository context from git/environment
  */
 
-import { execSync } from 'node:child_process';
-import { createGitHubClient, createGraphQLClient, type MCPClient } from './mcp.js';
+import { execFileSync, execSync } from 'node:child_process';
+import { createGitHubClient, createGraphQLClient, type MCPClient } from './mcp/clients.js';
 
 // Singleton MCP clients
 let _githubClient: MCPClient | null = null;
@@ -951,9 +951,9 @@ export async function areAllChecksPassing(ref: string): Promise<{
 }
 
 export async function createCheckRun(
-    _name: string,
-    _headSha: string,
-    _options?: {
+    name: string,
+    headSha: string,
+    options?: {
         status?: 'queued' | 'in_progress' | 'completed';
         conclusion?: 'success' | 'failure' | 'neutral' | 'cancelled' | 'skipped' | 'timed_out' | 'action_required';
         title?: string;
@@ -961,19 +961,50 @@ export async function createCheckRun(
         text?: string;
     }
 ): Promise<number> {
-    throw new Error('createCheckRun not yet available via MCP. Use runAgenticTask.');
+    const { owner, repo } = getRepoContext();
+    const payload = {
+        name,
+        head_sha: headSha,
+        status: options?.status,
+        conclusion: options?.conclusion,
+        output:
+            options?.title || options?.summary || options?.text
+                ? {
+                      title: options?.title ?? name,
+                      summary: options?.summary ?? options?.text ?? '',
+                      text: options?.text,
+                  }
+                : undefined,
+    };
+
+    const result = callGhApi<{ id: number }>(`repos/${owner}/${repo}/check-runs`, payload, 'POST', [
+        'Accept: application/vnd.github+json',
+    ]);
+    return result.id;
 }
 
-export async function getCodeScanningAlerts(_state?: 'open' | 'dismissed' | 'fixed'): Promise<CodeScanningAlert[]> {
-    throw new Error('getCodeScanningAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getCodeScanningAlerts(state: 'open' | 'dismissed' | 'fixed' = 'open'): Promise<CodeScanningAlert[]> {
+    const { owner, repo } = getRepoContext();
+    const alerts = callGhApi<Array<Record<string, unknown>>>(
+        `repos/${owner}/${repo}/code-scanning/alerts?state=${state}`
+    );
+    return alerts.map(mapCodeScanningAlert);
 }
 
-export async function getPRCodeScanningAlerts(_prNumber: number): Promise<CodeScanningAlert[]> {
-    throw new Error('getPRCodeScanningAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getPRCodeScanningAlerts(prNumber: number): Promise<CodeScanningAlert[]> {
+    const alerts = await getCodeScanningAlerts('open');
+    return alerts.filter((alert) => alert.url.includes(`/code-scanning/${prNumber}`) || alert.url.includes(`/pull/${prNumber}`));
 }
 
-export async function getDependabotAlerts(_state?: 'open' | 'dismissed' | 'fixed'): Promise<DependabotAlert[]> {
-    throw new Error('getDependabotAlerts not yet available via MCP. Use runAgenticTask.');
+export async function getDependabotAlerts(state: 'open' | 'dismissed' | 'fixed' = 'open'): Promise<DependabotAlert[]> {
+    const { owner, repo } = getRepoContext();
+    const alerts = callGhApi<Array<Record<string, unknown>>>(
+        `repos/${owner}/${repo}/dependabot/alerts?state=${state}`,
+        undefined,
+        'GET',
+        ['Accept: application/vnd.github+json']
+    );
+    return alerts.map(mapDependabotAlert);
 }
 
 /**
@@ -1030,6 +1061,136 @@ export function formatAlertsForAI(codeScanning: CodeScanningAlert[], dependabot:
     }
 
     return lines.join('\n');
+}
+
+function callGhApi<T>(
+    path: string,
+    payload?: Record<string, unknown>,
+    method: 'GET' | 'POST' = 'GET',
+    headers: string[] = []
+): T {
+    const args = ['api', path, '--method', method];
+
+    for (const header of headers) {
+        args.push('--header', header);
+    }
+
+    if (payload) {
+        args.push('--input', '-');
+    }
+
+    const env = { ...process.env };
+    const token = process.env.GH_TOKEN || process.env.GITHUB_TOKEN;
+    if (token) {
+        env.GH_TOKEN = token;
+    }
+
+    const stdout = execFileSync('gh', args, {
+        encoding: 'utf-8',
+        env,
+        input: payload ? JSON.stringify(payload) : undefined,
+    });
+    return JSON.parse(stdout) as T;
+}
+
+function toRecord(value: unknown): Record<string, unknown> {
+    return typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+}
+
+function toStringValue(value: unknown, fallback = ''): string {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    return value == null ? fallback : String(value);
+}
+
+function toOptionalString(value: unknown): string | undefined {
+    return typeof value === 'string' ? value : undefined;
+}
+
+function toOptionalNumber(value: unknown): number | undefined {
+    return typeof value === 'number' ? value : undefined;
+}
+
+function mapCodeScanningLocation(location: Record<string, unknown>): CodeScanningAlert['location'] {
+    const path = toOptionalString(location.path);
+    const startLine = toOptionalNumber(location.start_line);
+
+    if (!path || startLine === undefined) {
+        return undefined;
+    }
+
+    return {
+        path,
+        startLine,
+        endLine: toOptionalNumber(location.end_line) ?? startLine,
+    };
+}
+
+function mapCodeScanningRule(rule: Record<string, unknown>): CodeScanningAlert['rule'] {
+    return {
+        id: toStringValue(rule.id, 'unknown'),
+        name: toOptionalString(rule.name),
+        severity: toStringValue(rule.severity, 'unknown'),
+        description: toStringValue(rule.description),
+    };
+}
+
+function mapDependabotDependency(dependency: Record<string, unknown>): DependabotAlert['dependency'] {
+    return {
+        package: toStringValue(dependency.package),
+        ecosystem: toStringValue(dependency.ecosystem),
+        manifestPath: toStringValue(dependency.manifest_path),
+    };
+}
+
+function mapSecurityAdvisory(securityAdvisory: Record<string, unknown>): DependabotAlert['securityAdvisory'] {
+    return {
+        ghsaId: toStringValue(securityAdvisory.ghsa_id),
+        severity: toStringValue(securityAdvisory.severity),
+        summary: toStringValue(securityAdvisory.summary),
+    };
+}
+
+function mapSecurityVulnerability(
+    securityVulnerability: Record<string, unknown>
+): DependabotAlert['securityVulnerability'] {
+    const firstPatchedVersion = toRecord(securityVulnerability.first_patched_version);
+
+    return {
+        severity: toStringValue(securityVulnerability.severity),
+        vulnerableVersionRange: toStringValue(securityVulnerability.vulnerable_version_range),
+        firstPatchedVersion: toOptionalString(firstPatchedVersion.identifier),
+    };
+}
+
+function mapCodeScanningAlert(alert: Record<string, unknown>): CodeScanningAlert {
+    const mostRecent = toRecord(alert.most_recent_instance);
+    const location = toRecord(mostRecent.location);
+    const tool = toRecord(mostRecent.analysis_tool);
+
+    return {
+        number: Number(alert.number ?? 0),
+        rule: mapCodeScanningRule(toRecord(alert.rule)),
+        state: toStringValue(alert.state, 'open'),
+        tool: toStringValue(tool.name, 'github'),
+        createdAt: toStringValue(alert.created_at),
+        url: toStringValue(alert.html_url),
+        location: mapCodeScanningLocation(location),
+    };
+}
+
+function mapDependabotAlert(alert: Record<string, unknown>): DependabotAlert {
+    return {
+        number: Number(alert.number ?? 0),
+        state: toStringValue(alert.state, 'open'),
+        dependency: mapDependabotDependency(toRecord(alert.dependency)),
+        securityAdvisory: mapSecurityAdvisory(toRecord(alert.security_advisory)),
+        securityVulnerability: mapSecurityVulnerability(toRecord(alert.security_vulnerability)),
+        createdAt: toStringValue(alert.created_at),
+        url: toStringValue(alert.html_url),
+    };
 }
 
 /**

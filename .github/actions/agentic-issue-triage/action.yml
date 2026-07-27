@@ -1,6 +1,6 @@
 name: 'Agentic Issue Triage'
 description: 'Triage a GitHub issue using an AI agent.'
-author: 'jbcom/agentic-control'
+author: 'jbcom/agentic'
 branding:
   icon: 'alert-circle'
   color: 'orange'
@@ -121,7 +121,7 @@ runs:
 
         # Fallback to standard triage if no specific command
         echo "Performing standard issue triage..."
-        # agentic-control@1.1.0 doesn't have issue-triage command yet
+        # @jbcom/agentic does not expose a dedicated issue-triage command yet
         # For now, we'll just acknowledge the issue
         # agentic triage quick "$COMMENT_BODY"
         gh issue comment "$ISSUE_NUMBER" --body "🤖 Issue received and queued for triage."

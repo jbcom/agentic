@@ -1,17 +1,17 @@
 ---
 title: Vercel AI SDK Integration
-description: Use @agentic/triage tools with the Vercel AI SDK
+description: Use @jbcom/agentic-triage tools with the Vercel AI SDK
 ---
 
 # Vercel AI SDK Integration
 
-`@agentic/triage` provides portable tools designed for the [Vercel AI SDK](https://sdk.vercel.ai/). These tools can be used with any AI provider supported by the SDK.
+`@jbcom/agentic-triage` provides portable tools designed for the [Vercel AI SDK](https://sdk.vercel.ai/). These tools can be used with any AI provider supported by the SDK.
 
 ## Installation
 
 ```bash
 # Install triage package
-npm install @jbcom/agentic
+npm install @jbcom/agentic-triage
 
 # Install an AI provider
 npm install @ai-sdk/anthropic
@@ -22,7 +22,7 @@ npm install @ai-sdk/openai
 ## Quick Start
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -41,7 +41,7 @@ console.log(result.text);
 ### All Tools
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 // Get all available tools
 const allTools = getTriageTools();
@@ -50,7 +50,7 @@ const allTools = getTriageTools();
 ### Issue Tools
 
 ```typescript
-import { getIssueTools } from '@jbcom/agentic';
+import { getIssueTools } from '@jbcom/agentic-triage';
 
 const issueTools = getIssueTools();
 // Includes: listIssues, getIssue, createIssue, updateIssue, 
@@ -60,19 +60,19 @@ const issueTools = getIssueTools();
 ### Review Tools
 
 ```typescript
-import { getReviewTools } from '@jbcom/agentic';
+import { getReviewTools } from '@jbcom/agentic-triage';
 
 const reviewTools = getReviewTools();
-// Includes: getPRComments, addPRComment, approvePR, requestChanges
+// Includes: getPRComments, submitReview
 ```
 
 ### Project Tools
 
 ```typescript
-import { getProjectTools } from '@jbcom/agentic';
+import { getProjectTools } from '@jbcom/agentic-triage';
 
 const projectTools = getProjectTools();
-// Includes: getSprints, getCurrentSprint, getSprintIssues, moveToSprint
+// Includes: getSprints, getCurrentSprint
 ```
 
 ### Individual Tools
@@ -87,7 +87,7 @@ import {
   searchIssuesTool,
   addLabelsTool,
   removeLabelsTool,
-} from '@jbcom/agentic';
+} from '@jbcom/agentic-triage';
 
 // Use only what you need
 const minimalTools = {
@@ -101,7 +101,7 @@ const minimalTools = {
 ### Basic Text Generation
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -120,7 +120,7 @@ async function triageIssues() {
 ### Streaming
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { streamText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -141,7 +141,7 @@ async function streamTriage() {
 ### With Tool Results
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -171,7 +171,7 @@ async function triageWithResults() {
 ### Combining with Custom Tools
 
 ```typescript
-import { getIssueTools } from '@jbcom/agentic';
+import { getIssueTools } from '@jbcom/agentic-triage';
 import { generateText, tool } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 import { z } from 'zod';
@@ -210,7 +210,7 @@ async function triageAndNotify() {
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -224,7 +224,7 @@ const result = await generateText({
 
 ```typescript
 import { openai } from '@ai-sdk/openai';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -238,7 +238,7 @@ const result = await generateText({
 
 ```typescript
 import { google } from '@ai-sdk/google';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 
 const result = await generateText({
@@ -271,7 +271,7 @@ const result = await generateText({
 
 ```typescript
 import { generateText } from 'ai';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 const messages = [
   { role: 'user', content: 'List all open bugs' },
@@ -299,7 +299,7 @@ result = await generateText({
 
 ```typescript
 import { generateText } from 'ai';
-import { getTriageTools } from '@jbcom/agentic';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 try {
   const result = await generateText({
@@ -405,5 +405,5 @@ Approves a pull request.
 ## Next Steps
 
 - [MCP Server Integration](/integrations/mcp-server/) - Use with Claude Desktop
-- [@agentic/triage Package](/packages/triage/) - Full package reference
+- [@jbcom/agentic-triage Package](/packages/triage/) - Full package reference
 - [TypeScript Examples](/examples/typescript/) - More examples

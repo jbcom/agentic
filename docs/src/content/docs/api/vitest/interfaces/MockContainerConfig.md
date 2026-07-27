@@ -5,7 +5,7 @@ prev: false
 title: "MockContainerConfig"
 ---
 
-Defined in: [sandbox.ts:16](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L16)
+Defined in: [sandbox.ts:16](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L16)
 
 Mock container configuration.
 
@@ -15,7 +15,7 @@ Mock container configuration.
 
 > `optional` **env**: `Record`\<`string`, `string`\>
 
-Defined in: [sandbox.ts:26](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L26)
+Defined in: [sandbox.ts:26](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L26)
 
 Environment variables
 
@@ -25,7 +25,7 @@ Environment variables
 
 > `optional` **id**: `string`
 
-Defined in: [sandbox.ts:18](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L18)
+Defined in: [sandbox.ts:18](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L18)
 
 Container ID
 
@@ -35,7 +35,7 @@ Container ID
 
 > `optional` **image**: `string`
 
-Defined in: [sandbox.ts:22](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L22)
+Defined in: [sandbox.ts:22](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L22)
 
 Image name
 
@@ -45,7 +45,7 @@ Image name
 
 > `optional` **memory**: `number`
 
-Defined in: [sandbox.ts:28](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L28)
+Defined in: [sandbox.ts:28](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L28)
 
 Memory limit in MB
 
@@ -55,7 +55,7 @@ Memory limit in MB
 
 > `optional` **name**: `string`
 
-Defined in: [sandbox.ts:20](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L20)
+Defined in: [sandbox.ts:20](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L20)
 
 Container name
 
@@ -65,7 +65,7 @@ Container name
 
 > `optional` **timeout**: `number`
 
-Defined in: [sandbox.ts:30](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L30)
+Defined in: [sandbox.ts:30](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L30)
 
 Timeout in ms
 
@@ -75,6 +75,6 @@ Timeout in ms
 
 > `optional` **workdir**: `string`
 
-Defined in: [sandbox.ts:24](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/sandbox.ts#L24)
+Defined in: [sandbox.ts:24](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/sandbox.ts#L24)
 
 Working directory

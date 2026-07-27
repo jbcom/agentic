@@ -1,0 +1,119 @@
+# Progress Log
+
+## 2026-04-15
+
+- audited the monorepo for production-stability gaps across TypeScript, Python, Rust, docs, CI, and release automation
+- corrected a large set of docs contract drift issues around package naming and fake examples
+- normalized Python workspace commands onto `uv run python -m pytest` and added missing Nx targets
+- expanded CI/release verification so Python, docs, and release jobs use stricter shared checks
+- improved `@jbcom/agentic-triage` coverage parsing and GitHub alert/check wrappers
+- cleaned and verified `game-asset-mcp` static analysis in the monorepo
+- concluded that `game-generator` and `game-asset-mcp` fit better as standalone repositories than as monorepo packages
+- created and published standalone public repositories:
+  - `https://github.com/jbcom/game-generator`
+  - `https://github.com/jbcom/game-asset-mcp`
+- cleaned the monorepo to remove the extracted package directories, Rust workspace wiring, and public docs pages
+- moved the `game-generator` public docs surface into the standalone repository and trimmed the monorepo docs site back to the retained TypeScript and Python packages
+- added ignore rules for local screenshots, Playwright output, and Meshy temp preview directories so the workspace stays cleaner after verification runs
+- reorganized the retained monorepo so package directories align with public names, support packages live under `tooling/`, and internal planning/reference material lives under `internal/`
+- updated Nx, CI, release, tox, and justfile commands to run Python verification from each package root instead of relying on repo-root imports
+- fixed reorg fallout in the vitest workspace link, docs API readme copy, and remaining old package paths in workflow configuration
+- updated agentic release-property tests and public docs references to the new `docs/src/content/docs` structure and `packages/agentic` naming
+- verified the retained monorepo end to end across TypeScript, Python, docs unit tests, and docs Playwright e2e
+- confirmed the docs duplicate-id warning was cache churn; a clean docs build now runs without that warning after clearing stale `.astro` state
+- cleared the remaining Biome warning set in `@jbcom/agentic-triage` by refactoring escalation/connectors helpers and tightening tests
+- re-ran the full TypeScript workspace gate after the triage cleanup and kept it green
+- split the `@jbcom/agentic-triage` AI helpers into narrower `src/ai/` modules and moved MCP client factories into `src/mcp/clients.ts`
+- rewired `octokit` and the tool/CLI entrypoints to consume the narrower modules so `tsup` no longer drags the broad MCP/AI helper surface into unrelated bundles
+- eliminated the remaining `tsup` unused-import build noise in `@jbcom/agentic-triage`
+- re-ran `triage` lint, build, typecheck, tests, and the full TypeScript workspace gate after the internal module split and kept everything green
+- corrected stale `@strata/triage` references and "coming soon" stub remarks in `triage` source examples and committed API docs, and added a docs contract test to keep that drift from returning
+- confirmed the docs duplicate-id warning was local `.astro` cache state again; a clean docs build runs without the warning
+- implemented real Linear label mutation support so `LinearProvider.addLabels()` and `removeLabels()` no longer no-op, and added provider tests for label creation/removal behavior
+- re-ran `triage` lint, build, typecheck, and coverage after the Linear provider work and kept the package green
+- added `agentic_crew.tools.registry` to resolve configured CrewAI tool names, aliases like `FileWriteTool`, and selected filesystem MCP-style identifiers to concrete tool instances
+- wired `CrewAIRunner`, the legacy loader path, and `ConnectorBuilderCrew` to use that resolver so declared tools are no longer silently dropped
+- made `agentic_crew.tools` lazy-loaded so importing the core package no longer forces CrewAI-only modules during test collection or non-CrewAI usage
+- added regression coverage for tool resolution and connector-builder tool wiring
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate and kept everything green
+- added `agentic_crew.tools.adapters` to adapt resolved configured tools into LangGraph `StructuredTool`s and Strands `@tool` wrappers
+- wired `LangGraphRunner` and `StrandsRunner` to collect tool declarations from agent config instead of always building with empty tool lists
+- made cross-framework tool adaptation fail soft when no tools are declared or framework-specific wrapper helpers are unavailable, so test doubles and partial installs do not crash runner construction
+- added runner regression coverage for LangGraph and Strands configured-tool resolution
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the cross-framework tool work and kept everything green
+- added direct adapter tests that exercise LangGraph and Strands wrapper behavior with mocked framework imports, covering invocation, schema forwarding, metadata naming, and passthrough behavior
+- re-ran `agentic-crew` lint, typecheck, and tests plus the repo-level Python workspace gate after the adapter execution coverage work and kept everything green
+- rewired `TriageConnectors.reviews` for GitHub to use `octokit` review comment, review summary, and review thread helpers instead of the old gh-cli approximation
+- made unresolved PR feedback filter to non-resolved, non-outdated review threads and surface the latest comment from each active thread
+- added GitHub-specific connector tests for review comment mapping and unresolved feedback filtering with mocked `octokit` helpers
+- re-ran `triage` lint, build, typecheck, and coverage plus the full TypeScript workspace gate and kept everything green
+- fixed `packages/agentic/src/triage/triage.ts` plan generation so CI-only remediation no longer creates self-referential re-review dependencies and merged or closed PRs now return empty plans
+- added `packages/agentic/tests/triage-orchestration.test.ts` to cover direct orchestration behavior for planning, resolution aggregation, review requests, ready-to-merge polling, and report formatting
+- re-ran `agentic` lint, build, typecheck, and coverage plus the full TypeScript workspace gate after the orchestration work and kept everything green
+- hardened `packages/agentic/src/triage/resolver.ts` so GitHub suggestions and fenced AI fixes now apply targeted local line replacements instead of whole-file overwrites or comment-only placeholders when safe
+- added `packages/agentic/tests/triage-resolver.test.ts` to cover safe suggestion application, unsafe-suggestion refusal, local fenced-fix application, comment fallback, and inline-comment justification replies
+- fixed `packages/agentic/src/triage/analyzer.ts` review blocker classification so mixed high-severity feedback is only auto-resolvable when every blocking item can be automated
+- added `packages/agentic/tests/triage-analyzer.test.ts` to cover blocked vs. needs-work review feedback mixes and clean ready-to-merge PR classification
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the resolver/analyzer work and kept everything green
+- fixed stale initialization-promise reuse in `packages/agentic/src/triage/agent.ts` and `packages/agentic/src/triage/pr-triage-agent.ts` so both classes can safely reinitialize after `close()`
+- added `packages/agentic/tests/triage-agent-runtime.test.ts` to cover `Agent` post-close reinitialization and concurrent initialization lock behavior
+- added `packages/agentic/tests/triage-pr-agent.test.ts` to cover MCP-backed PR analysis, ready-workflow execution, blocked-workflow exit, post-close reinitialization, concurrent initialization locking, and `triagePR()` cleanup on failure
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent-layer work; when a concurrent coverage run corrupted `packages/agentic/coverage/.tmp`, cleaned the generated coverage directory and re-ran verification sequentially to restore a green state
+- fixed `packages/agentic/src/triage/mcp-clients.ts` so per-call `enabled: false` overrides actually disable default servers and custom tokenless stdio servers can initialize without being on a hardcoded allowlist
+- added `packages/agentic/tests/triage-mcp-clients.test.ts` to cover override-based disabling, custom tokenless server initialization, override token injection, namespaced tool collection, and close-time error isolation
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the MCP client work, keeping the coverage runs sequential so generated V8 artifacts do not collide
+- fixed `packages/agentic/src/triage/agent.ts` so dangerous bash commands and `delete_file` operations always consult the approval callback instead of bypassing it when the tool name is not listed in `requireApproval`
+- switched `packages/agentic/src/triage/agent.ts` git helper tools from shell-string `execSync(...)` calls to `execFileSync('git', [...])`, removing argument interpolation risk for validated filenames with spaces or shell metacharacters
+- added `packages/agentic/tests/triage-agent-tools.test.ts` to cover dangerous bash rejection, mandatory delete approval, safe `git diff` argument handling, and editor path-traversal failures
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the tool-approval and git-execution hardening, keeping the coverage runs sequential so generated V8 artifacts do not collide
+- hardened `packages/agentic/src/triage/agent.ts` `fixFile()` helper to validate its target path up front and use `git diff -- <path>` when collecting post-fix diffs, so traversal attempts fail fast and filenames beginning with `-` are treated as pathspecs instead of git options
+- extended `packages/agentic/tests/triage-agent-tools.test.ts` with direct `fixFile()` coverage for traversal rejection and option-like filenames such as `--stat.ts`
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the `fixFile()` hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` so takeover resolves the repository's actual default branch before merging the predecessor PR instead of hardcoding `main`
+- changed the takeover sync step to check out the resolved default branch and pull it with `git pull --ff-only origin <defaultBranch>`, keeping the local base update explicit and non-merging
+- extended `packages/agentic/tests/handoff-protocol.test.ts` to cover non-`main` default branches and the fail-before-merge path when default-branch resolution fails
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the handoff default-branch hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `getCIStatus()` so it combines classic commit statuses with check runs instead of reporting status-context-only repos as green when `check_runs` is empty
+- added `packages/agentic/tests/github-client-runtime.test.ts` to cover pending and failing combined-status contexts with no GitHub Check Runs present
+- re-ran `agentic` lint, build, typecheck, tests, coverage, and the full TypeScript workspace gate after the GitHub CI-status hardening, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` review-summary feedback mapping so `CHANGES_REQUESTED` and other non-terminal review states are no longer marked addressed by default
+- added `packages/agentic/tests/github-client-runtime.test.ts` coverage for changes-requested, approved, and dismissed review-summary states
+- re-ran `agentic` tests, `agentic` coverage, and the full TypeScript workspace gate after the GitHub review-feedback fix, again keeping the coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `collectFeedback()` so it now includes top-level PR conversation comments from `issues.listComments(...)` instead of only inline review comments and review summaries
+- added `packages/agentic/tests/github-client-runtime.test.ts` coverage for top-level PR comment ingestion
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR conversation feedback fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `cloneRepo()` so GitHub SSH clone targets are rewritten onto the tokenized HTTPS path instead of bypassing token injection
+- added `packages/agentic/tests/github-client-clone.test.ts` coverage for bare repo names, HTTPS URLs, SSH URLs, token-redacted failures, and no-token early exits
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the clone-path fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/github/client.ts` `listPRComments()` so it paginates past the first 100 PR issue comments instead of dropping newer coordination comments on long-lived PRs
+- added `packages/agentic/tests/github-client-static.test.ts` coverage for multi-page PR comment retrieval
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR comment pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/fleet/fleet.ts` inbound coordination polling so `✅ DONE:` and `⚠️ BLOCKED:` agent updates are handled even without an `@cursor` mention
+- added `packages/agentic/tests/fleet-management.test.ts` coverage for DONE comments, BLOCKED comments, and unrelated coordination chatter
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/fleet/fleet.ts` outbound lifecycle handling so `PENDING` agents are kept under coordination instead of being treated as finished before they start
+- fixed `packages/agentic/src/fleet/fleet.ts` `waitFor()` so it waits through `PENDING` and `RUNNING` states until a terminal result is reached
+- added `packages/agentic/tests/fleet-management.test.ts` coverage for pending-agent retention in outbound polling and `waitFor()` progression from `PENDING` to `COMPLETED`
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- added takeover preflight safety in `packages/agentic/src/handoff/manager.ts` so dirty worktrees and pre-existing successor branches fail before any predecessor PR merge happens
+- added `packages/agentic/tests/handoff-protocol.test.ts` coverage for dirty-worktree and existing-branch fail-before-merge scenarios and updated the non-`main` default-branch test for the new git preflight calls
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover safety hardening, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` `initiateHandoff()` so spawned successors now default to the repository's actual default branch instead of hardcoding `main` when `options.ref` is omitted
+- extended `packages/agentic/tests/handoff-protocol.test.ts` with API-backed coverage for default-branch successor spawn, explicit-ref passthrough, and fail-before-write behavior when default-branch resolution fails
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the successor-ref fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- fixed `packages/agentic/src/handoff/manager.ts` health polling so successors that confirm health and then reach `COMPLETED` or `FINISHED` are still marked healthy, while `CANCELLED` now fails fast instead of timing out
+- extended `packages/agentic/tests/handoff-protocol.test.ts` with coverage for completed-after-confirmation and cancelled-before-confirmation successor states
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-check fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- removed the `packages/agentic/src/cli.ts` `handoff initiate --ref` default of `main` so the manager-level default-branch resolution now actually applies when callers omit `--ref`
+- added `packages/agentic/src/cli.ts` support for `handoff takeover --repo <repository>` and now pass that override into `HandoffManager`
+- updated `packages/agentic/src/handoff/manager.ts` successor prompts so the generated takeover command includes `--repo <owner/repo>` and does not depend on implicit local default-repository config
+- extended `packages/agentic/tests/handoff-protocol.test.ts` to assert the generated takeover command includes the repository argument
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the CLI/prompt contract fix; when coverage artifact collisions appeared during overlapping runs, cleared `packages/agentic/coverage` and reran sequentially to restore a clean green state
+- fixed `packages/agentic/src/handoff/manager.ts` health confirmation polling so it now checks the predecessor conversation for the `HANDOFF CONFIRMED` followup that `confirmHealthAndBegin()` actually posts, with a successor-conversation fallback only for compatibility
+- hardened `packages/agentic/src/handoff/manager.ts` `confirmHealthAndBegin()` so a failed Cursor followup post throws instead of silently pretending the handoff was confirmed
+- updated `packages/agentic/tests/handoff-protocol.test.ts` to use predecessor-thread confirmation and to assert followup-post failures surface as errors
+- re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the health-confirmation fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- removed the fake `successor-agent` fallback from `packages/agentic/src/cli.ts` `handoff confirm`; the command now requires a real successor id from `--successor-id` or `CURSOR_AGENT_ID`
+- added `packages/agentic/src/handoff/cli.ts` to resolve and validate successor ids so the command layer no longer invents successful-looking confirmations with bogus agent identities
+- added `packages/agentic/tests/handoff-cli.test.ts` coverage for explicit successor-id precedence, environment fallback, missing-id failure, and invalid-id rejection
+- re-ran focused handoff tests, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the confirm-identity fix, again keeping coverage runs sequential to avoid V8 artifact collisions

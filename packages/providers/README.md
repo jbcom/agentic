@@ -6,7 +6,7 @@
 
 LLM and agent provider implementations for the Agentic ecosystem. Connects the provider-agnostic primitives from `@jbcom/agentic-triage` to real services including Ollama (free, self-hosted), Google Jules (free tier, async), and Cursor (premium, last resort). Includes cost-aware routing and complexity evaluation.
 
-[Full Documentation](https://agentic.coach) | [Package Docs](https://agentic.coach/packages/control/)
+[Full Documentation](https://agentic.coach) | [Package Docs](https://agentic.coach/packages/agentic/)
 
 ## Installation
 

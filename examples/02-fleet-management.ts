@@ -14,8 +14,8 @@
  * ```
  */
 
-import type { Agent, AgentStatus } from 'agentic-control';
-import { Fleet } from 'agentic-control';
+import type { Agent, AgentStatus } from '@jbcom/agentic';
+import { Fleet } from '@jbcom/agentic';
 
 /**
  * Display agent information in a formatted table

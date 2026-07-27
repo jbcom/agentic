@@ -1,11 +1,11 @@
 /**
- * Vitest Reporter for Strata Triage
+ * Vitest reporter for Agentic Triage
  *
- * Generates test reports in Strata's custom format for AI analysis.
+ * Generates structured test reports for AI analysis.
  *
  * Usage in vitest.config.ts:
  * ```ts
- * import { StrataReporter } from '@strata/triage/reporters/vitest';
+ * import { StrataReporter } from '@jbcom/agentic-triage/reporters/vitest';
  *
  * export default defineConfig({
  *   test: {
@@ -16,7 +16,7 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import type { File, Reporter, Task, Vitest } from 'vitest';
 import type { CoverageData, TestError, TestFile, TestReport, TestResult } from '../test-results.js';
@@ -58,7 +58,7 @@ export class StrataReporter implements Reporter {
         mkdirSync(dirname(outputPath), { recursive: true });
         writeFileSync(outputPath, JSON.stringify(report, null, 2));
 
-        console.log(`\n📊 Strata test report: ${outputPath}`);
+        console.log(`\n📊 Agentic triage test report: ${outputPath}`);
     }
 
     private buildReport(files: File[]): TestReport {
@@ -188,9 +188,184 @@ export class StrataReporter implements Reporter {
     }
 
     private getCoverageData(): CoverageData | undefined {
-        // Coverage data would be read from the coverage output
-        // This is a placeholder - actual implementation would parse c8/istanbul output
+        for (const candidate of this.getCoverageCandidates()) {
+            if (!existsSync(candidate)) {
+                continue;
+            }
+
+            try {
+                const parsed = JSON.parse(readFileSync(candidate, 'utf-8')) as Record<string, unknown>;
+                if (candidate.endsWith('coverage-summary.json')) {
+                    return this.parseCoverageSummary(parsed);
+                }
+                if (candidate.endsWith('coverage-final.json')) {
+                    return this.parseCoverageFinal(parsed);
+                }
+            } catch {
+                // Ignore malformed coverage files and keep searching.
+            }
+        }
+
         return undefined;
+    }
+
+    private getCoverageCandidates(): string[] {
+        const outputDir = dirname(resolve(this.options.outputFile));
+        return [
+            resolve(process.cwd(), 'coverage/coverage-summary.json'),
+            resolve(process.cwd(), 'coverage/coverage-final.json'),
+            resolve(outputDir, 'coverage/coverage-summary.json'),
+            resolve(outputDir, 'coverage/coverage-final.json'),
+        ];
+    }
+
+    private parseCoverageSummary(data: Record<string, unknown>): CoverageData | undefined {
+        const totals = this.asCoverageMetricRecord(data.total);
+        if (!totals) {
+            return undefined;
+        }
+
+        const files = Object.entries(data)
+            .filter(([key]) => key !== 'total')
+            .map(([path, metrics]) => {
+                const coverage = this.asCoverageMetricRecord(metrics);
+                if (!coverage) {
+                    return undefined;
+                }
+
+                return {
+                    path,
+                    lines: this.metricFromSummary(coverage.lines),
+                    uncoveredLines: [],
+                    functions: this.metricFromSummary(coverage.functions),
+                    uncoveredFunctions: [],
+                };
+            })
+            .filter((file): file is NonNullable<typeof file> => Boolean(file));
+
+        return {
+            lines: this.metricFromSummary(totals.lines),
+            functions: this.metricFromSummary(totals.functions),
+            branches: this.metricFromSummary(totals.branches),
+            statements: this.metricFromSummary(totals.statements),
+            files,
+        };
+    }
+
+    private parseCoverageFinal(data: Record<string, unknown>): CoverageData | undefined {
+        const files: CoverageData['files'] = [];
+        const totals = {
+            lines: { total: 0, covered: 0, percentage: 0 },
+            functions: { total: 0, covered: 0, percentage: 0 },
+            branches: { total: 0, covered: 0, percentage: 0 },
+            statements: { total: 0, covered: 0, percentage: 0 },
+        };
+
+        for (const [path, rawCoverage] of Object.entries(data)) {
+            const coverage = this.asFinalCoverageRecord(rawCoverage);
+            if (!coverage) {
+                continue;
+            }
+
+            const statementHits = Object.values(coverage.s) as number[];
+            const functionHits = Object.values(coverage.f) as number[];
+            const branchHits = Object.values(coverage.b).flat() as number[];
+            const uncoveredLines = Object.entries(coverage.statementMap)
+                .filter(([statementId]) => (coverage.s[statementId] ?? 0) === 0)
+                .map(([, location]) => location.start.line);
+
+            const uncoveredFunctions = Object.entries(coverage.fnMap)
+                .filter(([fnId]) => (coverage.f[fnId] ?? 0) === 0)
+                .map(([, fn]) => fn.name);
+
+            const fileCoverage = {
+                path,
+                lines: this.metricFromHits(statementHits),
+                uncoveredLines,
+                functions: this.metricFromHits(functionHits),
+                uncoveredFunctions,
+            };
+
+            files.push(fileCoverage);
+            totals.lines.total += fileCoverage.lines.total;
+            totals.lines.covered += fileCoverage.lines.covered;
+            totals.functions.total += fileCoverage.functions.total;
+            totals.functions.covered += fileCoverage.functions.covered;
+            totals.branches.total += branchHits.length;
+            totals.branches.covered += branchHits.filter((hit) => hit > 0).length;
+            totals.statements.total += statementHits.length;
+            totals.statements.covered += statementHits.filter((hit) => hit > 0).length;
+        }
+
+        if (files.length === 0) {
+            return undefined;
+        }
+
+        totals.lines.percentage = this.toPercentage(totals.lines.covered, totals.lines.total);
+        totals.functions.percentage = this.toPercentage(totals.functions.covered, totals.functions.total);
+        totals.branches.percentage = this.toPercentage(totals.branches.covered, totals.branches.total);
+        totals.statements.percentage = this.toPercentage(totals.statements.covered, totals.statements.total);
+
+        return { ...totals, files };
+    }
+
+    private metricFromSummary(metric: { total: number; covered?: number; pct: number; skipped?: number }) {
+        return {
+            total: metric.total,
+            covered: metric.covered ?? metric.total - (metric.skipped ?? 0),
+            percentage: metric.pct,
+        };
+    }
+
+    private metricFromHits(hits: number[]) {
+        const total = hits.length;
+        const covered = hits.filter((hit) => hit > 0).length;
+        return {
+            total,
+            covered,
+            percentage: this.toPercentage(covered, total),
+        };
+    }
+
+    private toPercentage(covered: number, total: number): number {
+        return total === 0 ? 100 : Number(((covered / total) * 100).toFixed(2));
+    }
+
+    private asCoverageMetricRecord(
+        value: unknown
+    ): { lines: { total: number; covered?: number; pct: number; skipped?: number }; functions: { total: number; covered?: number; pct: number; skipped?: number }; branches: { total: number; covered?: number; pct: number; skipped?: number }; statements: { total: number; covered?: number; pct: number; skipped?: number } } | undefined {
+        if (!value || typeof value !== 'object') {
+            return undefined;
+        }
+        const metrics = value as Record<string, { total: number; covered?: number; pct: number; skipped?: number }>;
+        if (!metrics.lines || !metrics.functions || !metrics.branches || !metrics.statements) {
+            return undefined;
+        }
+        return {
+            lines: metrics.lines,
+            functions: metrics.functions,
+            branches: metrics.branches,
+            statements: metrics.statements,
+        };
+    }
+
+    private asFinalCoverageRecord(
+        value: unknown
+    ): { s: Record<string, number>; f: Record<string, number>; b: Record<string, number[]>; statementMap: Record<string, { start: { line: number } }>; fnMap: Record<string, { name: string }> } | undefined {
+        if (!value || typeof value !== 'object') {
+            return undefined;
+        }
+        const coverage = value as Record<string, unknown>;
+        if (!coverage.s || !coverage.f || !coverage.b || !coverage.statementMap || !coverage.fnMap) {
+            return undefined;
+        }
+        return coverage as {
+            s: Record<string, number>;
+            f: Record<string, number>;
+            b: Record<string, number[]>;
+            statementMap: Record<string, { start: { line: number } }>;
+            fnMap: Record<string, { name: string }>;
+        };
     }
 }
 

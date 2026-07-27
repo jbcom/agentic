@@ -243,6 +243,47 @@ class TestCrewAIRunner:
         assert "context" in second_task_kwargs
         assert second_task_kwargs["context"] == [mock_task1]
 
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Tool names declared in agent config should be instantiated and attached."""
+        crew_mocker.mock_crewai()
+
+        from agentic_crew.runners.crewai_runner import CrewAIRunner
+
+        crew_mocker.patch_crewai_crew()
+        MockAgent = crew_mocker.patch_crewai_agent()
+        crew_mocker.patch_crewai_task()
+        crew_mocker.patch_crewai_process()
+        crew_mocker.patch_get_llm()
+
+        resolved_tool = crew_mocker.MagicMock()
+
+        runner = CrewAIRunner()
+        runner._resolve_tools = crew_mocker.MagicMock(return_value=[resolved_tool])
+
+        crew_config = {
+            "agents": {
+                "agent1": {
+                    "role": "Agent 1",
+                    "goal": "Goal 1",
+                    "backstory": "Backstory 1",
+                    "tools": ["FileWriteTool"],
+                }
+            },
+            "tasks": {
+                "task1": {
+                    "description": "Task 1",
+                    "expected_output": "Output 1",
+                    "agent": "agent1",
+                }
+            },
+            "knowledge_paths": [],
+        }
+
+        runner.build_crew(crew_config)
+
+        runner._resolve_tools.assert_called_once_with(["FileWriteTool"])
+        assert MockAgent.call_args[1]["tools"] == [resolved_tool]
+
 
 class TestLangGraphRunner:
     """Tests for LangGraph runner implementation."""
@@ -341,7 +382,7 @@ class TestLangGraphRunner:
         runner = LangGraphRunner()
         runner.get_llm("claude-sonnet-4-20250514")
 
-        MockLLM.assert_called_once_with(model="claude-sonnet-4-20250514")
+        MockLLM.assert_called_once_with(model_name="claude-sonnet-4-20250514", timeout=None, stop=None)
 
     def test_get_llm_uses_default_model(self, crew_mocker: CrewMocker) -> None:
         """Test that get_llm uses default model when none specified."""
@@ -355,7 +396,7 @@ class TestLangGraphRunner:
         runner.get_llm()
 
         MockLLM.assert_called_once()
-        assert MockLLM.call_args[1]["model"] == "claude-haiku-4-5-20251001"
+        assert MockLLM.call_args[1]["model_name"] == "claude-haiku-4-5-20251001"
 
     def test_build_task_returns_dict(self, crew_mocker: CrewMocker) -> None:
         """Test that build_task returns task configuration dict."""
@@ -398,6 +439,33 @@ class TestLangGraphRunner:
 
         # Verify create_react_agent was called twice
         assert mock_create.call_count == 2
+
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Configured agent tools should be adapted for LangGraph crews."""
+        crew_mocker.mock_langgraph()
+
+        from agentic_crew.runners.langgraph_runner import LangGraphRunner
+
+        mock_create = crew_mocker.patch_create_react_agent()
+        crew_mocker.patch_chat_anthropic()
+        resolved_tool = crew_mocker.MagicMock()
+        crew_mocker.patch("agentic_crew.runners.langgraph_runner.resolve_langgraph_tools", return_value=[resolved_tool])
+
+        runner = LangGraphRunner()
+        crew_config = {
+            "llm": {"model": "claude-sonnet-4-20250514"},
+            "agents": {
+                "researcher": {
+                    "tools": ["ScrapeWebsiteTool"],
+                }
+            },
+            "tasks": {},
+        }
+
+        runner.build_crew(crew_config)
+
+        mock_create.assert_called_once()
+        assert mock_create.call_args[0][1] == [resolved_tool]
 
 
 class TestStrandsRunner:
@@ -598,7 +666,7 @@ class TestStrandsRunner:
         MockAgent.assert_called_once()
         call_kwargs = MockAgent.call_args[1]
         assert "system_prompt" in call_kwargs
-        assert call_kwargs["model_id"] == "claude-3-5-sonnet"
+        assert call_kwargs["model"] == "claude-3-5-sonnet"
 
     def test_build_task_returns_dict(self, crew_mocker: CrewMocker) -> None:
         """Test that build_task returns task configuration dict."""
@@ -650,6 +718,31 @@ class TestStrandsRunner:
         assert "Writer" in system_prompt
         assert "Research topics" in system_prompt
         assert "Write content" in system_prompt
+
+    def test_build_crew_resolves_declared_tools(self, crew_mocker: CrewMocker) -> None:
+        """Configured agent tools should be adapted for Strands crews."""
+        crew_mocker.mock_strands()
+
+        from agentic_crew.runners.strands_runner import StrandsRunner
+
+        MockAgent = crew_mocker.patch_strands_agent()
+        resolved_tool = crew_mocker.MagicMock()
+        crew_mocker.patch("agentic_crew.runners.strands_runner.resolve_strands_tools", return_value=[resolved_tool])
+
+        runner = StrandsRunner()
+        crew_config = {
+            "description": "Test crew",
+            "agents": {
+                "writer": {
+                    "tools": ["FileWriteTool"],
+                }
+            },
+            "tasks": {},
+        }
+
+        runner.build_crew(crew_config)
+
+        assert MockAgent.call_args[1]["tools"] == [resolved_tool]
 
 
 class TestBaseRunner:

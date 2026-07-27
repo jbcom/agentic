@@ -5,7 +5,7 @@ prev: false
 title: "TestSandboxConfig"
 ---
 
-Defined in: [fixtures.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L63)
+Defined in: [fixtures.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L63)
 
 Sandbox configuration for testing.
 
@@ -15,7 +15,7 @@ Sandbox configuration for testing.
 
 > **image**: `string`
 
-Defined in: [fixtures.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L65)
+Defined in: [fixtures.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L65)
 
 ***
 
@@ -23,7 +23,7 @@ Defined in: [fixtures.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **memory**: `number`
 
-Defined in: [fixtures.ts:66](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L66)
+Defined in: [fixtures.ts:66](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L66)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: [fixtures.ts:66](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **runtime**: `"claude"` \| `"cursor"` \| `"custom"`
 
-Defined in: [fixtures.ts:64](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L64)
+Defined in: [fixtures.ts:64](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L64)
 
 ***
 
@@ -39,7 +39,7 @@ Defined in: [fixtures.ts:64](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **timeout**: `number`
 
-Defined in: [fixtures.ts:67](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L67)
+Defined in: [fixtures.ts:67](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L67)
 
 ***
 
@@ -47,4 +47,4 @@ Defined in: [fixtures.ts:67](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **workdir**: `string`
 
-Defined in: [fixtures.ts:68](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L68)
+Defined in: [fixtures.ts:68](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L68)

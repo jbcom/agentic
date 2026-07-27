@@ -212,8 +212,8 @@ uvx ruff check src/ tests/ --fix
 - **[CrewAI](https://github.com/crewAIInc/crewAI)** — Original crew framework
 - **[LangGraph](https://github.com/langchain-ai/langgraph)** — Graph-based agents
 - **[Strands](https://github.com/strands-agents/strands-agents-python)** — AWS agent framework
-- **[@jbcom/agentic](/packages/control/)** — Fleet management and orchestration
-- **[@jbcom/agentic (Triage)](/packages/triage/)** — Triage primitives
+- **[@jbcom/agentic](/packages/agentic/)** — Fleet management and orchestration
+- **[@jbcom/agentic-triage](/packages/triage/)** — Triage primitives
 
 ## Links
 

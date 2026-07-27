@@ -1,6 +1,6 @@
 {
   "name": "agentic-docs",
-  "description": "Agentic documentation — the polyglot AI agent toolkit (Astro Starlight)",
+  "description": "Agentic documentation — the TypeScript and Python AI agent toolkit (Astro Starlight)",
   "type": "module",
   "version": "1.0.0",
   "private": true,
@@ -17,10 +17,7 @@
   "dependencies": {
     "@astrojs/starlight": "^0.37.1",
     "astro": "^5.6.1",
-    "sharp": "^0.34.2",
-    "starlight-typedoc": "^0.21.5",
-    "typedoc": "^0.28.17",
-    "typedoc-plugin-markdown": "^4.10.0"
+    "sharp": "^0.34.2"
   },
   "devDependencies": {
     "vitest": "^4.0.14",

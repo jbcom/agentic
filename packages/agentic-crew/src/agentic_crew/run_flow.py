@@ -2,62 +2,60 @@
 
 from __future__ import annotations
 
+import importlib
 import sys
-from typing import Any
+from typing import Any, cast
 
 
-def run_tdd_prototype(requirements: dict[str, Any]):
+def _load_flow(module_name: str, class_name: str) -> type[Any]:
+    module = importlib.import_module(module_name)
+    flow_class = cast(type[Any], getattr(module, class_name))
+    return flow_class
+
+
+def run_tdd_prototype(requirements: dict[str, Any]) -> Any:
     """Run TDD Prototype Flow."""
-    from agentic_crew.flows.tdd_prototype_flow import TDDPrototypeFlow
-
+    TDDPrototypeFlow = _load_flow("agentic_crew.flows.tdd_prototype_flow", "TDDPrototypeFlow")
     flow = TDDPrototypeFlow()
-    result = flow.kickoff(inputs={"requirements": requirements})
-    return result
+    return flow.kickoff(inputs={"requirements": requirements})
 
 
-def run_meshy_asset(species: str, prompt: str, retexture_prompt: str):
+def run_meshy_asset(species: str, prompt: str, retexture_prompt: str) -> Any:
     """Run Meshy Asset Flow."""
-    from agentic_crew.flows.meshy_asset_flow import MeshyAssetFlow
-
+    MeshyAssetFlow = _load_flow("agentic_crew.flows.meshy_asset_flow", "MeshyAssetFlow")
     flow = MeshyAssetFlow()
-    result = flow.kickoff(inputs={"species": species, "prompt": prompt, "retexture_prompt": retexture_prompt})
-    return result
+    return flow.kickoff(inputs={"species": species, "prompt": prompt, "retexture_prompt": retexture_prompt})
 
 
-def run_prototype_assessment(prototypes: list):
+def run_prototype_assessment(prototypes: list[Any]) -> Any:
     """Run Prototype to Production Flow."""
-    from agentic_crew.flows.prototype_to_production_flow import PrototypeToProductionFlow
-
+    PrototypeToProductionFlow = _load_flow(
+        "agentic_crew.flows.prototype_to_production_flow",
+        "PrototypeToProductionFlow",
+    )
     flow = PrototypeToProductionFlow()
-    result = flow.kickoff(inputs={"prototypes": prototypes})
-    return result
+    return flow.kickoff(inputs={"prototypes": prototypes})
 
 
-def run_asset_integration(asset_manifest: dict[str, Any]):
+def run_asset_integration(asset_manifest: dict[str, Any]) -> Any:
     """Run Asset Integration Flow."""
-    from agentic_crew.flows.asset_integration_flow import AssetIntegrationFlow
-
+    AssetIntegrationFlow = _load_flow("agentic_crew.flows.asset_integration_flow", "AssetIntegrationFlow")
     flow = AssetIntegrationFlow()
-    result = flow.kickoff(inputs={"asset_manifest": asset_manifest})
-    return result
+    return flow.kickoff(inputs={"asset_manifest": asset_manifest})
 
 
-def run_hitl_review(content_type: str, content_url: str):
+def run_hitl_review(content_type: str, content_url: str) -> Any:
     """Run HITL Review Flow."""
-    from agentic_crew.flows.hitl_review_flow import HITLReviewFlow
-
+    HITLReviewFlow = _load_flow("agentic_crew.flows.hitl_review_flow", "HITLReviewFlow")
     flow = HITLReviewFlow()
-    result = flow.kickoff(inputs={"content_type": content_type, "content_url": content_url})
-    return result
+    return flow.kickoff(inputs={"content_type": content_type, "content_url": content_url})
 
 
-def run_batch_generation(species_list: list):
+def run_batch_generation(species_list: list[str]) -> Any:
     """Run Batch Generation Flow."""
-    from agentic_crew.flows.batch_generation_flow import BatchGenerationFlow
-
+    BatchGenerationFlow = _load_flow("agentic_crew.flows.batch_generation_flow", "BatchGenerationFlow")
     flow = BatchGenerationFlow()
-    result = flow.kickoff(inputs={"species_list": species_list})
-    return result
+    return flow.kickoff(inputs={"species_list": species_list})
 
 
 if __name__ == "__main__":

@@ -5,20 +5,20 @@ prev: false
 title: "@jbcom/vitest-agentic"
 ---
 
-Vitest plugin with fixtures and utilities for agentic-control E2E testing.
+Vitest plugin with fixtures and utilities for `@jbcom/agentic` E2E testing.
 
 This package provides test utilities and mocking fixtures for building
-E2E tests with agentic-control components (MCP, providers, sandbox, fleet).
+E2E tests with `@jbcom/agentic` components (MCP, providers, sandbox, fleet).
 
 ## Examples
 
 ```bash
-pnpm add -D vitest-agentic-control
+pnpm add -D @jbcom/vitest-agentic
 ```
 
 ```typescript
 import { describe, it, expect } from 'vitest';
-import { createMcpMocker, createProviderMocker } from 'vitest-agentic-control';
+import { createMcpMocker, createProviderMocker } from '@jbcom/vitest-agentic';
 
 describe('My MCP Tests', () => {
   it('should mock MCP server', async () => {
@@ -33,7 +33,7 @@ describe('My MCP Tests', () => {
 ```
 
 ```typescript
-import { createProviderMocker } from 'vitest-agentic-control';
+import { createProviderMocker } from '@jbcom/vitest-agentic';
 
 const mocker = createProviderMocker();
 mocker.mockAnthropic({ response: 'Mocked Claude response' });

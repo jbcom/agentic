@@ -7,7 +7,7 @@ title: "createMockGitHubPR"
 
 > **createMockGitHubPR**(`overrides?`): `object`
 
-Defined in: [fixtures.ts:423](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L423)
+Defined in: [fixtures.ts:423](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L423)
 
 Create a mock GitHub pull request for testing.
 

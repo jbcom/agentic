@@ -7,7 +7,7 @@ title: "createTestConfig"
 
 > **createTestConfig**(`options?`): [`TestConfig`](/api/vitest/interfaces/testconfig/)
 
-Defined in: [fixtures.ts:102](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L102)
+Defined in: [fixtures.ts:102](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L102)
 
 Create a test configuration with sensible defaults.
 
@@ -28,7 +28,7 @@ A test configuration object
 ## Example
 
 ```typescript
-import { createTestConfig } from 'vitest-agentic-control';
+import { createTestConfig } from '/vitest-agentic';
 
 const config = createTestConfig({
   logLevel: 'debug',

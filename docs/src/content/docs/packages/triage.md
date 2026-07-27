@@ -1,9 +1,9 @@
 ---
-title: "@jbcom/agentic (Triage)"
+title: "@jbcom/agentic-triage"
 description: Portable triage primitives — Vercel AI SDK tools, MCP server, and direct TypeScript API for issue management and PR review
 ---
 
-# @jbcom/agentic — Triage
+# @jbcom/agentic-triage
 
 <div class="polyglot-bar">
   <span class="lang-badge lang-badge--ts">TypeScript</span>
@@ -11,7 +11,7 @@ description: Portable triage primitives — Vercel AI SDK tools, MCP server, and
 
 > Composable triage tools built on the Vercel AI SDK. Issue management, PR review, sprint planning — for GitHub, Jira, Linear, and Beads.
 
-[![npm version](https://img.shields.io/npm/v/@jbcom/agentic.svg)](https://www.npmjs.com/package/@jbcom/agentic)
+[![npm version](https://img.shields.io/npm/v/@jbcom/agentic-triage.svg)](https://www.npmjs.com/package/@jbcom/agentic-triage)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Three Ways to Use It
@@ -23,7 +23,7 @@ description: Portable triage primitives — Vercel AI SDK tools, MCP server, and
 ## Installation
 
 ```bash
-npm install @jbcom/agentic
+npm install @jbcom/agentic-triage
 ```
 
 ## Quick Start
@@ -31,7 +31,7 @@ npm install @jbcom/agentic
 ### Vercel AI SDK (Recommended)
 
 ```typescript
-import { getTriageTools } from '@jbcom/agentic/tools';
+import { getTriageTools } from '@jbcom/agentic-triage';
 import { generateText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
 
@@ -48,7 +48,7 @@ const result = await generateText({
 Import only what your agent needs — smaller tool space means more focused behavior:
 
 ```typescript
-import { getIssueTools, getReviewTools } from '@jbcom/agentic/tools';
+import { getIssueTools, getReviewTools } from '@jbcom/agentic-triage';
 
 const myAgentTools = {
   ...getIssueTools(),    // Issue CRUD, search, labels
@@ -65,7 +65,7 @@ Add to your Claude Desktop or Cursor MCP config:
   "mcpServers": {
     "triage": {
       "command": "npx",
-      "args": ["@jbcom/agentic", "mcp-server"]
+      "args": ["@jbcom/agentic-triage", "mcp-server"]
     }
   }
 }
@@ -76,9 +76,11 @@ Add to your Claude Desktop or Cursor MCP config:
 For scripts and CI pipelines:
 
 ```typescript
-import { TriageConnectors } from '@jbcom/agentic';
+import { TriageConnectors } from '@jbcom/agentic-triage';
 
-const triage = new TriageConnectors({ provider: 'github' });
+const triage = new TriageConnectors({
+  provider: { type: 'github', repo: 'my-org/my-repo' },
+});
 
 const issues = await triage.issues.list({ status: 'open', priority: 'high' });
 const issue = await triage.issues.create({
@@ -103,13 +105,21 @@ Auto-detected from environment — `.beads/` directory uses Beads, `.git` remote
 
 ```typescript
 const jira = new TriageConnectors({
-  provider: 'jira',
-  jira: { host: 'mycompany.atlassian.net', projectKey: 'PROJ' }
+  provider: {
+    type: 'jira',
+    host: 'https://mycompany.atlassian.net',
+    projectKey: 'PROJ',
+    apiToken: process.env.JIRA_API_TOKEN!,
+    email: 'dev@mycompany.com',
+  },
 });
 
 const linear = new TriageConnectors({
-  provider: 'linear',
-  linear: { teamId: 'TEAM123' }
+  provider: {
+    type: 'linear',
+    team: 'ENG',
+    apiKey: process.env.LINEAR_API_KEY!,
+  },
 });
 ```
 
@@ -133,9 +143,7 @@ const linear = new TriageConnectors({
 | Tool | Description |
 |------|-------------|
 | `getPRComments` | Get comments on a PR |
-| `addPRComment` | Add a comment to a PR |
-| `approvePR` | Approve a pull request |
-| `requestChanges` | Request changes on a PR |
+| `submitReview` | Submit a structured review decision |
 
 ### Project Tools — `getProjectTools()`
 
@@ -143,15 +151,14 @@ const linear = new TriageConnectors({
 |------|-------------|
 | `getSprints` | Get all sprints |
 | `getCurrentSprint` | Get the current sprint |
-| `getSprintIssues` | Get issues in a sprint |
-| `moveToSprint` | Move issue to a sprint |
+| `getEpics` | Get epic-style work items with computed progress |
 
 ## Example: Full Triage Agent
 
 ```typescript
 import { anthropic } from '@ai-sdk/anthropic';
 import { generateText } from 'ai';
-import { getTriageTools } from '@jbcom/agentic/tools';
+import { getTriageTools } from '@jbcom/agentic-triage';
 
 async function triageAgent() {
   const result = await generateText({
@@ -187,12 +194,12 @@ Previously published as `@agentic-dev-library/triage`. To migrate:
 import { getTriageTools } from '@agentic-dev-library/triage';
 
 // New
-import { getTriageTools } from '@jbcom/agentic/tools';
+import { getTriageTools } from '@jbcom/agentic-triage';
 ```
 
 ## Related
 
-- **[@jbcom/agentic (Control)](/packages/control/)** — Consumes triage tools for fleet analysis
+- **[@jbcom/agentic](/packages/agentic/)** — Consumes triage tools for fleet analysis
 - **[agentic-crew](/packages/crew/)** — Multi-agent workflows
 - **[Vercel AI SDK Integration](/integrations/vercel-ai-sdk/)** — Detailed usage patterns
 - **[MCP Server Guide](/integrations/mcp-server/)** — Claude Desktop setup
@@ -200,4 +207,4 @@ import { getTriageTools } from '@jbcom/agentic/tools';
 ## Links
 
 - [GitHub](https://github.com/jbcom/agentic/tree/main/packages/triage)
-- [npm](https://www.npmjs.com/package/@jbcom/agentic)
+- [npm](https://www.npmjs.com/package/@jbcom/agentic-triage)

@@ -7,13 +7,13 @@ default:
 # ── All Languages ──────────────────────────
 
 # Run all checks across all languages
-check: check-ts check-py check-rs
+check: check-ts check-py
 
 # Run all tests across all languages
-test: test-ts test-py test-rs
+test: test-ts test-py
 
 # Build everything
-build: build-ts build-py build-rs build-docs
+build: build-ts build-py build-docs
 
 # ── TypeScript (pnpm + Nx) ─────────────────
 
@@ -33,12 +33,15 @@ build-ts:
 
 # Lint Python packages
 check-py:
-    uvx ruff check packages/agentic-crew/ packages/pytest-agentic-crew/
-    uvx ruff format --check packages/agentic-crew/ packages/pytest-agentic-crew/
+    uv run --project packages/agentic-crew --extra dev python -m ruff check .
+    uv run --project packages/agentic-crew --extra dev python -m ruff format --check .
+    uv run --project tooling/pytest-agentic-crew --with ruff python -m ruff check .
+    uv run --project tooling/pytest-agentic-crew --with ruff python -m ruff format --check .
 
 # Run Python tests
 test-py:
-    uv run pytest packages/agentic-crew/tests/ packages/pytest-agentic-crew/tests/ -v --tb=short
+    uv run --project packages/agentic-crew --extra tests python -m pytest tests -v --tb=short
+    uv run --project tooling/pytest-agentic-crew python -m pytest tests -v --tb=short
 
 # Run Python test matrix via tox
 test-py-matrix:
@@ -47,34 +50,17 @@ test-py-matrix:
 # Build Python packages
 build-py:
     uv build --package agentic-crew
-
-# ── Rust (cargo) ────────────────────────────
-
-# Check and lint Rust crates
-check-rs:
-    cargo clippy --workspace -- -D warnings
-
-# Run Rust tests
-test-rs:
-    cargo test --workspace
-
-# Build Rust crates
-build-rs:
-    cargo build --workspace
-
-# Build Rust in release mode
-build-rs-release:
-    cargo build --workspace --release
+    uv build --package pytest-agentic-crew
 
 # ── Documentation ───────────────────────────
 
-# Build Python API docs via Sphinx, then build Starlight site
+# Build internal Sphinx references, then build the Starlight site
 build-docs: build-sphinx
     pnpm --filter agentic-docs build
 
-# Build Sphinx markdown output for Python API docs
+# Build internal Sphinx markdown output for Python API docs
 build-sphinx:
-    uv run sphinx-build -b markdown docs/sphinx docs/src/content/docs/api/_generated
+    uv run sphinx-build -b markdown internal/sphinx docs/src/content/docs/api/_generated
 
 # Start docs dev server
 docs-dev:
@@ -99,4 +85,3 @@ ci: check test build
 setup:
     pnpm install
     uv sync
-    cargo fetch

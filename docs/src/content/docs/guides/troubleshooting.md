@@ -214,37 +214,6 @@ const tool = new CrewTool({
 });
 ```
 
-### Rust: "error[E0433]: failed to resolve: use of undeclared crate"
-
-**Cause:** Rust dependencies are not downloaded.
-
-**Fix:**
-
-```bash
-cargo build -p game-generator
-```
-
-Cargo will fetch all dependencies automatically. Ensure you have Rust >= 1.85 installed.
-
-### Rust: `cargo build` fails on macOS
-
-Ensure you have the latest Xcode Command Line Tools:
-
-```bash
-xcode-select --install
-```
-
-### Rust: Missing system dependencies on Linux
-
-```bash
-# Ubuntu/Debian
-sudo apt-get install -y pkg-config libssl-dev
-```
-
-### Rust: Bevy requires a GPU
-
-The `game-generator` uses Bevy for rendering and requires GPU support. Ensure you have up-to-date graphics drivers. On headless servers, Bevy cannot run the GUI wizard -- use the library API instead.
-
 ## CI/CD Integration
 
 ### GitHub Actions: "Resource not accessible by integration"

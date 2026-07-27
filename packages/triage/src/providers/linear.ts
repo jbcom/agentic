@@ -1,4 +1,4 @@
-import { type Issue, LinearClient } from '@linear/sdk';
+import { type Issue, type IssueLabel, LinearClient } from '@linear/sdk';
 import {
     type CreateIssueOptions,
     type IssuePriority,
@@ -45,6 +45,59 @@ export class LinearProvider implements TriageProvider {
         } catch {
             return false;
         }
+    }
+
+    private normalizeLabelName(label: string): string {
+        return label.trim().toLowerCase();
+    }
+
+    private async getIssueOrThrow(id: string): Promise<Issue> {
+        const issue = await this.client.issue(id);
+        if (!issue) {
+            throw new Error(`Issue ${id} not found`);
+        }
+        return issue;
+    }
+
+    private async getTeamLabels(): Promise<Map<string, IssueLabel>> {
+        const team = await this.client.team(this.teamId);
+        const labels = await team.labels();
+
+        return new Map(
+            labels.nodes.map((label) => [this.normalizeLabelName(label.name), label] as const)
+        );
+    }
+
+    private async resolveLabelIds(labels: string[]): Promise<string[]> {
+        const existingLabels = await this.getTeamLabels();
+        const resolvedIds: string[] = [];
+
+        for (const rawLabel of labels) {
+            const trimmed = rawLabel.trim();
+            if (!trimmed) {
+                continue;
+            }
+
+            const normalized = this.normalizeLabelName(trimmed);
+            let label = existingLabels.get(normalized);
+
+            if (!label) {
+                const created = await this.client.createIssueLabel({
+                    teamId: this.teamId,
+                    name: trimmed,
+                    color: '#6B7280',
+                });
+                label = await created.issueLabel;
+                if (!label) {
+                    throw new Error(`Failed to create Linear label "${trimmed}"`);
+                }
+                existingLabels.set(normalized, label);
+            }
+
+            resolvedIds.push(label.id);
+        }
+
+        return Array.from(new Set(resolvedIds));
     }
 
     private async mapIssue(issue: Issue): Promise<TriageIssue> {
@@ -161,12 +214,13 @@ export class LinearProvider implements TriageProvider {
     }
 
     async createIssue(options: CreateIssueOptions): Promise<TriageIssue> {
+        const labelIds = options.labels?.length ? await this.resolveLabelIds(options.labels) : undefined;
         const response = await this.client.createIssue({
             teamId: this.teamId,
             title: options.title,
             description: options.description,
             priority: this.mapPriorityToLinear(options.priority),
-            // Note: labelIds would be better but requires more lookups
+            labelIds,
         });
 
         const newIssue = await response.issue;
@@ -178,11 +232,23 @@ export class LinearProvider implements TriageProvider {
     }
 
     async updateIssue(id: string, options: UpdateIssueOptions): Promise<TriageIssue> {
+        const existingIssue = options.labels?.length ? await this.getIssueOrThrow(id) : null;
+        const existingIssueLabels = existingIssue ? await existingIssue.labels() : null;
+        const mergedLabelIds =
+            options.labels?.length && existingIssueLabels
+                ? Array.from(
+                      new Set([
+                          ...existingIssueLabels.nodes.map((label) => label.id),
+                          ...(await this.resolveLabelIds(options.labels)),
+                      ])
+                  )
+                : undefined;
+
         const response = await this.client.updateIssue(id, {
             title: options.title,
             description: options.description,
             priority: options.priority ? this.mapPriorityToLinear(options.priority) : undefined,
-            // mapping back other fields if needed
+            labelIds: mergedLabelIds,
         });
 
         const updatedIssue = await response.issue;
@@ -250,12 +316,25 @@ export class LinearProvider implements TriageProvider {
     }
 
     async addLabels(_id: string, _labels: string[]): Promise<void> {
-        // Linear uses labelIds. This would require mapping names to IDs.
-        // For now, this is a placeholder.
+        const issue = await this.getIssueOrThrow(_id);
+        const currentLabels = await issue.labels();
+        const labelIds = await this.resolveLabelIds(_labels);
+
+        await this.client.updateIssue(_id, {
+            labelIds: Array.from(new Set([...currentLabels.nodes.map((label) => label.id), ...labelIds])),
+        });
     }
 
     async removeLabels(_id: string, _labels: string[]): Promise<void> {
-        // Placeholder
+        const issue = await this.getIssueOrThrow(_id);
+        const currentLabels = await issue.labels();
+        const labelsToRemove = new Set(_labels.map((label) => this.normalizeLabelName(label)).filter(Boolean));
+
+        await this.client.updateIssue(_id, {
+            labelIds: currentLabels.nodes
+                .filter((label) => !labelsToRemove.has(this.normalizeLabelName(label.name)))
+                .map((label) => label.id),
+        });
     }
 
     async getStats(): Promise<ProviderStats> {

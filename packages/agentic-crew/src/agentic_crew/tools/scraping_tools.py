@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 import logging
+from typing import Any
 from urllib.parse import urljoin, urlparse
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from crewai_tools import ScrapeWebsiteTool
 
 logging.basicConfig(level=logging.INFO)
@@ -21,17 +22,20 @@ class CrawlWebsiteTool(ScrapeWebsiteTool):
     name: str = "CrawlWebsiteTool"
     description: str = "Crawl a website from a given URL and scrape its content."
 
-    def _run(self, url: str) -> str:
+    def _run(self, **kwargs: Any) -> str:
         """Crawls a website and returns the scraped content.
 
         Args:
-            url: The URL to start crawling from.
+            **kwargs: Tool call arguments. Requires ``url``, the URL to
+                start crawling from — matches the base ScrapeWebsiteTool's
+                permissive ``_run(self, **kwargs)`` signature.
 
         Returns:
             The scraped content of the website.
         """
+        url: str = kwargs["url"]
         scraped_content = ""
-        visited_urls = set()
+        visited_urls: set[str] = set()
         urls_to_visit = [url]
         base_netloc = urlparse(url).netloc
 
@@ -49,7 +53,12 @@ class CrawlWebsiteTool(ScrapeWebsiteTool):
                 scraped_content += self._scrape_content(soup)
 
                 for link in soup.find_all("a", href=True):
-                    next_url = urljoin(current_url, link["href"])
+                    if not isinstance(link, Tag):
+                        continue
+                    href = link["href"]
+                    if not isinstance(href, str):
+                        continue
+                    next_url = urljoin(current_url, href)
                     if urlparse(next_url).netloc == base_netloc and next_url not in visited_urls:
                         urls_to_visit.append(next_url)
 

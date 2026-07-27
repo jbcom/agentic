@@ -5,17 +5,17 @@ prev: false
 title: "AgenticMocker"
 ---
 
-Defined in: [mocking.ts:59](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L59)
+Defined in: [mocking.ts:59](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L59)
 
-Main mocker class for comprehensive agentic-control testing.
+Main mocker class for comprehensive /agentic testing.
 
-This class provides a unified interface for mocking all agentic-control
+This class provides a unified interface for mocking all /agentic
 components: MCP servers, AI providers, sandbox execution, and more.
 
 ## Example
 
 ```typescript
-import { AgenticMocker } from 'vitest-agentic-control';
+import { AgenticMocker } from '/vitest-agentic';
 
 const mocker = new AgenticMocker();
 
@@ -40,7 +40,7 @@ mocker.restoreAll();
 
 > **new AgenticMocker**(`options?`): `AgenticMocker`
 
-Defined in: [mocking.ts:77](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L77)
+Defined in: [mocking.ts:77](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L77)
 
 Creates a new AgenticMocker instance.
 
@@ -62,7 +62,7 @@ Configuration options for the mocker
 
 > `readonly` **mcp**: [`McpMocker`](/api/vitest/classes/mcpmocker/)
 
-Defined in: [mocking.ts:61](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L61)
+Defined in: [mocking.ts:61](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L61)
 
 MCP mocking utilities
 
@@ -72,7 +72,7 @@ MCP mocking utilities
 
 > `readonly` **providers**: [`ProviderMocker`](/api/vitest/classes/providermocker/)
 
-Defined in: [mocking.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L63)
+Defined in: [mocking.ts:63](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L63)
 
 AI provider mocking utilities
 
@@ -82,7 +82,7 @@ AI provider mocking utilities
 
 > `readonly` **sandbox**: [`SandboxMocker`](/api/vitest/classes/sandboxmocker/)
 
-Defined in: [mocking.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L65)
+Defined in: [mocking.ts:65](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L65)
 
 Sandbox execution mocking utilities
 
@@ -92,7 +92,7 @@ Sandbox execution mocking utilities
 
 > **createSpy**\<`T`\>(`implementation?`): `Mock`\<`T`\>
 
-Defined in: [mocking.ts:102](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L102)
+Defined in: [mocking.ts:102](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L102)
 
 Create a spy on a function.
 
@@ -122,11 +122,11 @@ The mock function
 
 > **mockAllFrameworks**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [mocking.ts:116](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L116)
+Defined in: [mocking.ts:116](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L116)
 
-Mock all agentic-control framework modules.
+Mock all /agentic framework modules.
 
-This mocks the common modules used in agentic-control:
+This mocks the common modules used in /agentic:
 - MCP SDK modules
 - AI SDK modules
 - GitHub client modules
@@ -143,7 +143,7 @@ Dictionary of all mocked modules
 
 > **mockEnv**(`env`): () => `void`
 
-Defined in: [mocking.ts:167](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L167)
+Defined in: [mocking.ts:167](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L167)
 
 Mock environment variables temporarily.
 
@@ -171,7 +171,7 @@ Cleanup function to restore original values
 
 > **mockGitHubClient**(`options?`): `unknown`
 
-Defined in: [mocking.ts:136](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L136)
+Defined in: [mocking.ts:136](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L136)
 
 Mock the GitHub client.
 
@@ -205,7 +205,7 @@ The mock GitHub client
 
 > **mockModule**\<`T`\>(`modulePath`, `mockValue`): `T`
 
-Defined in: [mocking.ts:90](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L90)
+Defined in: [mocking.ts:90](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L90)
 
 Mock a module by path.
 
@@ -241,7 +241,7 @@ The mock value for chaining
 
 > **resetAll**(): `void`
 
-Defined in: [mocking.ts:207](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L207)
+Defined in: [mocking.ts:207](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L207)
 
 Reset all mocks without restoring.
 
@@ -255,7 +255,7 @@ Reset all mocks without restoring.
 
 > **restoreAll**(): `void`
 
-Defined in: [mocking.ts:189](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/mocking.ts#L189)
+Defined in: [mocking.ts:189](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/mocking.ts#L189)
 
 Restore all mocked modules to their original values.
 

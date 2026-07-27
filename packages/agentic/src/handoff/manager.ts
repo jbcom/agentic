@@ -1,0 +1,565 @@
+/**
+ * Station-to-Station Handoff Protocol
+ *
+ * Enables seamless agent continuity:
+ * 1. Current agent completes scope of work
+ * 2. Spawns successor agent (not sub-agent - its own master)
+ * 3. Successor confirms health via fleet tooling
+ * 4. Successor retrieves predecessor's conversation
+ * 5. Successor merges predecessor's PR
+ * 6. Successor opens own PR and continues work
+ *
+ * All configuration is user-provided - no hardcoded values.
+ */
+
+import { spawnSync } from 'node:child_process';
+import { randomUUID } from 'node:crypto';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { getConfig, log } from '../core/config.js';
+import { getEnvForRepo } from '../core/tokens.js';
+import type { HandoffContext, HandoffOptions, HandoffResult, Result } from '../core/types.js';
+import { CursorAPI } from '../fleet/cursor-api.js';
+import { GitHubClient } from '../github/client.js';
+import { AIAnalyzer } from '../triage/analyzer.js';
+
+// ============================================
+// Types
+// ============================================
+
+export type MergeMethod = 'merge' | 'squash' | 'rebase';
+
+export interface TakeoverOptions {
+  admin?: boolean;
+  auto?: boolean;
+  mergeMethod?: MergeMethod;
+  deleteBranch?: boolean;
+}
+
+function conversationHasHealthConfirmation(
+  messages: Array<{ text?: string }>,
+  successorId: string
+): boolean {
+  return messages.some((msg) => {
+    const text = msg.text ?? '';
+    return (
+      text.includes(`HANDOFF: ${successorId} confirmed healthy`) ||
+      (text.includes('HANDOFF CONFIRMED') && text.includes(successorId))
+    );
+  });
+}
+
+// ============================================
+// Validation Helpers
+// ============================================
+
+/**
+ * Validate branch name to prevent injection
+ */
+function isValidBranchName(branch: string): boolean {
+  return /^[a-zA-Z0-9._/-]+$/.test(branch) && branch.length <= 200;
+}
+
+// isValidGitRef is available from github/client.ts if needed
+
+// ============================================
+// Handoff Manager
+// ============================================
+
+export class HandoffManager {
+  private api: CursorAPI | null;
+  private analyzer: AIAnalyzer | null;
+  private repo: string | undefined;
+
+  constructor(options?: { cursorApiKey?: string; anthropicKey?: string; repo?: string }) {
+    // Initialize Cursor API if available
+    try {
+      this.api = new CursorAPI({ apiKey: options?.cursorApiKey });
+    } catch {
+      this.api = null;
+      log.warn('Cursor API not available for handoff operations');
+    }
+
+    // Initialize AI Analyzer if available
+    try {
+      this.analyzer = new AIAnalyzer({ apiKey: options?.anthropicKey });
+    } catch {
+      this.analyzer = null;
+      log.warn('AI Analyzer not available for handoff analysis');
+    }
+
+    // No hardcoded default - repo must be explicitly configured
+    this.repo = options?.repo ?? getConfig().defaultRepository;
+  }
+
+  /**
+   * Set the repository for GitHub operations
+   */
+  setRepo(repo: string): void {
+    this.repo = repo;
+  }
+
+  private async resolveDefaultBranch(repoOverride?: string): Promise<Result<string>> {
+    const repository = repoOverride ?? this.repo;
+
+    if (!repository) {
+      return {
+        success: false,
+        error: 'Repository is required. Set via constructor options or setRepo()',
+      };
+    }
+
+    const [owner, repo] = repository.split('/');
+    if (!owner || !repo) {
+      return {
+        success: false,
+        error: `Repository must be in owner/repo format: ${repository}`,
+      };
+    }
+
+    const repoResult = await GitHubClient.getRepo(owner, repo);
+    if (!repoResult.success || !repoResult.data?.defaultBranch) {
+      return {
+        success: false,
+        error: `Failed to resolve default branch for ${repository}: ${repoResult.error ?? 'unknown error'}`,
+      };
+    }
+
+    return {
+      success: true,
+      data: repoResult.data.defaultBranch,
+    };
+  }
+
+  private validateLocalTakeoverState(newBranchName: string): Result<void> {
+    const statusProc = spawnSync('git', ['status', '--porcelain'], { encoding: 'utf-8' });
+    if (statusProc.error || statusProc.status !== 0) {
+      return {
+        success: false,
+        error: `Failed to inspect local git status: ${statusProc.stderr || statusProc.error}`,
+      };
+    }
+
+    if (statusProc.stdout.trim() !== '') {
+      return {
+        success: false,
+        error: 'Working tree must be clean before takeover',
+      };
+    }
+
+    const branchCheckProc = spawnSync(
+      'git',
+      ['rev-parse', '--verify', '--quiet', `refs/heads/${newBranchName}`],
+      { encoding: 'utf-8' }
+    );
+    if (branchCheckProc.error) {
+      return {
+        success: false,
+        error: `Failed to inspect local branches: ${branchCheckProc.stderr || branchCheckProc.error}`,
+      };
+    }
+
+    if (branchCheckProc.status === 0) {
+      return {
+        success: false,
+        error: `Branch already exists locally: ${newBranchName}`,
+      };
+    }
+
+    if (branchCheckProc.status !== 1) {
+      return {
+        success: false,
+        error: `Failed to inspect local branches: ${branchCheckProc.stderr || branchCheckProc.stdout}`,
+      };
+    }
+
+    return { success: true };
+  }
+
+  /**
+   * Initiate handoff to successor agent
+   */
+  async initiateHandoff(predecessorId: string, options: HandoffOptions): Promise<HandoffResult> {
+    log.info('=== Station-to-Station Handoff Initiated ===');
+
+    if (!this.api) {
+      return { success: false, error: 'Cursor API not available' };
+    }
+
+    // 1. Analyze predecessor's conversation
+    log.info('📊 Analyzing predecessor conversation...');
+    const convResult = await this.api.getAgentConversation(predecessorId);
+    if (!convResult.success || !convResult.data) {
+      return { success: false, error: `Failed to get conversation: ${convResult.error}` };
+    }
+
+    let completedWork: string[] = [];
+    let outstandingTasks: string[] = options.tasks ?? [];
+    let decisions: string[] = [];
+
+    // Use AI analysis if available
+    if (this.analyzer) {
+      try {
+        const analysis = await this.analyzer.analyzeConversation(convResult.data);
+        completedWork = analysis.completedTasks.map((t) => t.title);
+        outstandingTasks = [
+          ...analysis.outstandingTasks.map((t) => `[${t.priority}] ${t.title}`),
+          ...outstandingTasks,
+        ];
+        decisions = analysis.recommendations;
+      } catch (err) {
+        log.warn('AI analysis failed, using minimal context:', err);
+      }
+    }
+
+    let successorRef = options.ref;
+    if (!successorRef) {
+      const branchResult = await this.resolveDefaultBranch(options.repository);
+      if (!branchResult.success || !branchResult.data) {
+        return {
+          success: false,
+          error: branchResult.error ?? 'Failed to resolve repository default branch',
+        };
+      }
+      successorRef = branchResult.data;
+    }
+
+    // 2. Build handoff context - use crypto.randomUUID() for unique IDs
+    const handoffContext: HandoffContext = {
+      predecessorId,
+      predecessorPr: options.currentPr,
+      predecessorBranch: options.currentBranch,
+      handoffTime: new Date().toISOString(),
+      completedWork: completedWork.map((w) => ({
+        id: `completed-${randomUUID()}`,
+        title: w,
+        description: w,
+        priority: 'medium' as const,
+        category: 'other' as const,
+        status: 'completed' as const,
+      })),
+      outstandingTasks: outstandingTasks.map((t) => ({
+        id: `task-${randomUUID()}`,
+        title: t,
+        description: t,
+        priority: 'medium' as const,
+        category: 'other' as const,
+        status: 'pending' as const,
+      })),
+      decisions,
+    };
+
+    // 3. Save handoff context
+    const handoffDir = join('.cursor', 'handoff', predecessorId);
+    if (!existsSync(handoffDir)) {
+      mkdirSync(handoffDir, { recursive: true });
+    }
+    writeFileSync(join(handoffDir, 'context.json'), JSON.stringify(handoffContext, null, 2));
+
+    // 4. Build successor prompt
+    const successorPrompt = this.buildSuccessorPrompt(handoffContext, options);
+
+    // 5. Spawn successor agent
+    log.info('🚀 Spawning successor agent...');
+    const spawnResult = await this.api.launchAgent({
+      prompt: { text: successorPrompt },
+      source: {
+        repository: options.repository,
+        ref: successorRef,
+      },
+    });
+
+    if (!spawnResult.success || !spawnResult.data) {
+      return { success: false, error: `Failed to spawn successor: ${spawnResult.error}` };
+    }
+
+    const successorId = spawnResult.data.id;
+    log.info(`✅ Successor spawned: ${successorId}`);
+
+    // 6. Wait for health check
+    log.info('⏳ Waiting for successor health confirmation...');
+    const healthCheckResult = await this.waitForHealthCheck(
+      successorId,
+      predecessorId,
+      options.healthCheckTimeout ?? 300000
+    );
+
+    return {
+      success: true,
+      successorId,
+      successorHealthy: healthCheckResult.healthy,
+    };
+  }
+
+  /**
+   * Called by successor to confirm health
+   */
+  async confirmHealthAndBegin(successorId: string, predecessorId: string): Promise<void> {
+    if (!this.api) {
+      throw new Error('Cursor API not available');
+    }
+
+    const followupResult = await this.api.addFollowup(predecessorId, {
+      text: `🤝 HANDOFF CONFIRMED
+
+Successor agent ${successorId} is healthy and beginning work.
+
+I will now:
+1. Review your conversation history
+2. Merge your PR
+3. Open my own PR
+4. Continue the outstanding tasks
+
+You can safely conclude your session.
+
+@cursor 🤝 HANDOFF: ${successorId} confirmed healthy`,
+    });
+
+    if (!followupResult.success) {
+      throw new Error(`Failed to post health confirmation: ${followupResult.error}`);
+    }
+  }
+
+  /**
+   * Called by successor to merge predecessor and take over
+   */
+  async takeover(
+    predecessorId: string,
+    predecessorPr: number,
+    newBranchName: string,
+    options?: TakeoverOptions
+  ): Promise<Result<void>> {
+    log.info('=== Successor Takeover ===');
+
+    if (!this.repo) {
+      return {
+        success: false,
+        error: 'Repository is required. Set via constructor options or setRepo()',
+      };
+    }
+
+    // Validate inputs to prevent injection
+    if (!isValidBranchName(newBranchName)) {
+      return { success: false, error: 'Invalid branch name format' };
+    }
+
+    if (options?.admin && options?.auto) {
+      return { success: false, error: 'Cannot use --admin and --auto simultaneously' };
+    }
+
+    const branchResult = await this.resolveDefaultBranch();
+    if (!branchResult.success || !branchResult.data) {
+      return {
+        success: false,
+        error: branchResult.error ?? 'Failed to resolve repository default branch',
+      };
+    }
+    const defaultBranch = branchResult.data;
+
+    const localStateResult = this.validateLocalTakeoverState(newBranchName);
+    if (!localStateResult.success) {
+      return localStateResult;
+    }
+
+    // Use appropriate token for the repo
+    const env = { ...process.env, ...getEnvForRepo(this.repo) };
+
+    // 1. Merge predecessor's PR using spawnSync (no shell injection)
+    log.info(`📥 Merging predecessor PR #${predecessorPr}...`);
+    try {
+      const mergeMethod = options?.mergeMethod ?? 'squash';
+      const deleteBranch = options?.deleteBranch !== false;
+
+      // Build args array safely
+      const mergeArgs = [
+        'pr',
+        'merge',
+        String(predecessorPr),
+        `--${mergeMethod}`,
+        '--repo',
+        this.repo,
+      ];
+
+      if (deleteBranch) {
+        mergeArgs.push('--delete-branch');
+      }
+
+      if (options?.admin) {
+        mergeArgs.push('--admin');
+      } else if (options?.auto) {
+        mergeArgs.push('--auto');
+      }
+
+      const mergeProc = spawnSync('gh', mergeArgs, { encoding: 'utf-8', env });
+      if (mergeProc.error || mergeProc.status !== 0) {
+        return {
+          success: false,
+          error: `Failed to merge PR: ${mergeProc.stderr || mergeProc.error}`,
+        };
+      }
+      log.info('✅ Predecessor PR merged');
+    } catch (err) {
+      return { success: false, error: `Failed to merge PR: ${err}` };
+    }
+
+    // 2. Pull latest default branch using spawnSync
+    log.info(`📥 Pulling latest ${defaultBranch}...`);
+    try {
+      // First checkout the repository default branch
+      const checkoutMain = spawnSync('git', ['checkout', defaultBranch], { encoding: 'utf-8' });
+      if (checkoutMain.error || checkoutMain.status !== 0) {
+        return {
+          success: false,
+          error: `Failed to checkout ${defaultBranch}: ${checkoutMain.stderr || checkoutMain.error}`,
+        };
+      }
+
+      // Then fast-forward from origin/defaultBranch explicitly
+      const pullProc = spawnSync('git', ['pull', '--ff-only', 'origin', defaultBranch], {
+        encoding: 'utf-8',
+      });
+      if (pullProc.error || pullProc.status !== 0) {
+        return {
+          success: false,
+          error: `Failed to pull ${defaultBranch}: ${pullProc.stderr || pullProc.error}`,
+        };
+      }
+    } catch (err) {
+      return { success: false, error: `Failed to pull ${defaultBranch}: ${err}` };
+    }
+
+    // 3. Create own branch using spawnSync (with validated branch name)
+    log.info(`🌿 Creating branch: ${newBranchName}...`);
+    try {
+      const branchProc = spawnSync('git', ['checkout', '-b', newBranchName], {
+        encoding: 'utf-8',
+      });
+      if (branchProc.error || branchProc.status !== 0) {
+        return {
+          success: false,
+          error: `Failed to create branch: ${branchProc.stderr || branchProc.error}`,
+        };
+      }
+    } catch (err) {
+      return { success: false, error: `Failed to create branch: ${err}` };
+    }
+
+    // 4. Notify predecessor
+    if (this.api) {
+      await this.api.addFollowup(predecessorId, {
+        text: `✅ TAKEOVER COMPLETE
+
+I have:
+1. Merged your PR #${predecessorPr}
+2. Created my own branch: ${newBranchName}
+3. Loaded your context
+
+Your session is now complete. Thank you!
+
+@cursor ✅ DONE: ${predecessorId} successfully handed off`,
+      });
+    }
+
+    log.info('✅ Takeover complete');
+    return { success: true };
+  }
+
+  /**
+   * Build successor prompt
+   */
+  private buildSuccessorPrompt(context: HandoffContext, options: HandoffOptions): string {
+    return `# STATION-TO-STATION HANDOFF
+
+You are a SUCCESSOR AGENT taking over from predecessor ${context.predecessorId}.
+
+## CRITICAL FIRST STEPS
+
+1. **IMMEDIATELY** send health confirmation:
+   \`\`\`
+   agentic handoff confirm ${context.predecessorId}
+   \`\`\`
+
+2. **LOAD** predecessor context from:
+   \`.cursor/handoff/${context.predecessorId}/\`
+
+3. **TAKEOVER** from predecessor:
+   \`\`\`
+   agentic handoff takeover ${context.predecessorId} ${context.predecessorPr} successor/continue-work-$(date +%Y%m%d) --repo ${options.repository}
+   \`\`\`
+
+4. **CREATE YOUR OWN HOLD-OPEN PR** and continue work.
+
+## PREDECESSOR SUMMARY
+
+### Completed Work
+${context.completedWork.map((t) => `- ${t.title}`).join('\n')}
+
+### Outstanding Tasks (YOUR WORK)
+${context.outstandingTasks.map((t) => `- ${t.title}`).join('\n')}
+
+### Recommendations
+${context.decisions.map((d) => `- ${d}`).join('\n')}
+
+## IMPORTANT
+
+- You are NOT a sub-agent - you are an independent master agent
+- Predecessor PR #${context.predecessorPr} on branch \`${context.predecessorBranch}\`
+- Repository: ${options.repository}
+- Handoff time: ${context.handoffTime}
+
+BEGIN by sending health confirmation NOW.
+`;
+  }
+
+  /**
+   * Wait for health check from successor
+   */
+  private async waitForHealthCheck(
+    successorId: string,
+    predecessorId: string,
+    timeout: number
+  ): Promise<{ healthy: boolean }> {
+    if (!this.api) {
+      return { healthy: false };
+    }
+
+    const start = Date.now();
+    const interval = 15000;
+    const confirmableStatuses = new Set(['PENDING', 'RUNNING', 'COMPLETED', 'FINISHED']);
+    const terminalUnhealthyStatuses = new Set(['FAILED', 'CANCELLED', 'COMPLETED', 'FINISHED']);
+
+    while (Date.now() - start < timeout) {
+      const status = await this.api.getAgentStatus(successorId);
+
+      if (status.success && status.data) {
+        if (confirmableStatuses.has(status.data.status)) {
+          const predecessorConv = await this.api.getAgentConversation(predecessorId);
+          if (
+            predecessorConv.success &&
+            predecessorConv.data &&
+            conversationHasHealthConfirmation(predecessorConv.data.messages || [], successorId)
+          ) {
+            return { healthy: true };
+          }
+
+          const successorConv = await this.api.getAgentConversation(successorId);
+          if (
+            successorConv.success &&
+            successorConv.data &&
+            conversationHasHealthConfirmation(successorConv.data.messages || [], successorId)
+          ) {
+            return { healthy: true };
+          }
+        }
+
+        if (terminalUnhealthyStatuses.has(status.data.status)) {
+          return { healthy: false };
+        }
+      }
+
+      await new Promise((r) => setTimeout(r, interval));
+    }
+
+    return { healthy: false };
+  }
+}

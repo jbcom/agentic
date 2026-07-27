@@ -5,7 +5,7 @@ prev: false
 title: "ProviderMocker"
 ---
 
-Defined in: [providers.ts:140](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L140)
+Defined in: [providers.ts:140](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L140)
 
 AI Provider mocking utilities class.
 
@@ -14,7 +14,7 @@ Provides methods for mocking AI provider responses during testing.
 ## Example
 
 ```typescript
-import { ProviderMocker } from 'vitest-agentic-control';
+import { ProviderMocker } from '/vitest-agentic';
 
 const mocker = new ProviderMocker();
 
@@ -40,7 +40,7 @@ const model = mocker.createMockModel('anthropic', 'claude-sonnet-4-20250514');
 
 > **new ProviderMocker**(`options?`): `ProviderMocker`
 
-Defined in: [providers.ts:153](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L153)
+Defined in: [providers.ts:153](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L153)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [providers.ts:153](https://github.com/jbcom/agentic/blob/3e0fc0dae3f
 
 > `readonly` **models**: `Map`\<`string`, `MockModel`\>
 
-Defined in: [providers.ts:151](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L151)
+Defined in: [providers.ts:151](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L151)
 
 Track mock models
 
@@ -68,7 +68,7 @@ Track mock models
 
 > **createMockModel**(`provider`, `modelId`, `config?`): `MockModel`
 
-Defined in: [providers.ts:330](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L330)
+Defined in: [providers.ts:330](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L330)
 
 Create a mock model for a provider.
 
@@ -104,7 +104,7 @@ Mock model instance
 
 > **getProviderConfig**(`provider`): [`MockProviderResponse`](/api/vitest/interfaces/mockproviderresponse/) \| `undefined`
 
-Defined in: [providers.ts:446](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L446)
+Defined in: [providers.ts:446](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L446)
 
 Get the configuration for a provider.
 
@@ -128,7 +128,7 @@ The configuration or undefined
 
 > **mockAiSdk**(): `void`
 
-Defined in: [providers.ts:392](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L392)
+Defined in: [providers.ts:392](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L392)
 
 Mock the core AI SDK module.
 
@@ -142,7 +142,7 @@ Mock the core AI SDK module.
 
 > **mockAllModules**(): `Record`\<`string`, `unknown`\>
 
-Defined in: [providers.ts:414](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L414)
+Defined in: [providers.ts:414](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L414)
 
 Mock all provider modules.
 
@@ -158,7 +158,7 @@ Dictionary of mocked modules
 
 > **mockAnthropic**(`config?`): `void`
 
-Defined in: [providers.ts:168](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L168)
+Defined in: [providers.ts:168](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L168)
 
 Mock the Anthropic provider.
 
@@ -180,7 +180,7 @@ Response configuration
 
 > **mockAzure**(`config?`): `void`
 
-Defined in: [providers.ts:208](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L208)
+Defined in: [providers.ts:208](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L208)
 
 Mock the Azure provider.
 
@@ -202,7 +202,7 @@ Response configuration
 
 > **mockGoogle**(`config?`): `void`
 
-Defined in: [providers.ts:188](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L188)
+Defined in: [providers.ts:188](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L188)
 
 Mock the Google provider.
 
@@ -224,7 +224,7 @@ Response configuration
 
 > **mockMistral**(`config?`): `void`
 
-Defined in: [providers.ts:198](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L198)
+Defined in: [providers.ts:198](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L198)
 
 Mock the Mistral provider.
 
@@ -246,7 +246,7 @@ Response configuration
 
 > **mockOllama**(`config?`): `void`
 
-Defined in: [providers.ts:218](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L218)
+Defined in: [providers.ts:218](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L218)
 
 Mock the Ollama provider.
 
@@ -268,7 +268,7 @@ Response configuration
 
 > **mockOpenAI**(`config?`): `void`
 
-Defined in: [providers.ts:178](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L178)
+Defined in: [providers.ts:178](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L178)
 
 Mock the OpenAI provider.
 
@@ -290,7 +290,7 @@ Response configuration
 
 > **resetAll**(): `void`
 
-Defined in: [providers.ts:462](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L462)
+Defined in: [providers.ts:462](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L462)
 
 Reset all mocks.
 
@@ -304,7 +304,7 @@ Reset all mocks.
 
 > **restoreAll**(): `void`
 
-Defined in: [providers.ts:453](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L453)
+Defined in: [providers.ts:453](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L453)
 
 Restore all mocked modules.
 
@@ -318,7 +318,7 @@ Restore all mocked modules.
 
 > **setProviderResponse**(`provider`, `config`): `void`
 
-Defined in: [providers.ts:436](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/providers.ts#L436)
+Defined in: [providers.ts:436](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/providers.ts#L436)
 
 Set a response for a specific provider.
 

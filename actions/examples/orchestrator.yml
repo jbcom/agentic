@@ -13,7 +13,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 'Run Agentic Orchestrator'
-        uses: jbcom/agentic-control/actions/agentic-orchestrator@v1
+        uses: jbcom/agentic/actions/agentic-orchestrator@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           config_path: '.github/workflows/orchestrator-config.yml'

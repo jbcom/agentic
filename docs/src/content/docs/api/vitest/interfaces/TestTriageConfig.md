@@ -5,7 +5,7 @@ prev: false
 title: "TestTriageConfig"
 ---
 
-Defined in: [fixtures.ts:53](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L53)
+Defined in: [fixtures.ts:53](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L53)
 
 Triage configuration for testing.
 
@@ -15,7 +15,7 @@ Triage configuration for testing.
 
 > **maxTokens**: `number`
 
-Defined in: [fixtures.ts:56](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L56)
+Defined in: [fixtures.ts:56](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L56)
 
 ***
 
@@ -23,7 +23,7 @@ Defined in: [fixtures.ts:56](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **model**: `string`
 
-Defined in: [fixtures.ts:55](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L55)
+Defined in: [fixtures.ts:55](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L55)
 
 ***
 
@@ -31,7 +31,7 @@ Defined in: [fixtures.ts:55](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **provider**: `"anthropic"` \| `"openai"` \| `"google"` \| `"mistral"` \| `"azure"` \| `"ollama"`
 
-Defined in: [fixtures.ts:54](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L54)
+Defined in: [fixtures.ts:54](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L54)
 
 ***
 
@@ -39,4 +39,4 @@ Defined in: [fixtures.ts:54](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16
 
 > **temperature**: `number`
 
-Defined in: [fixtures.ts:57](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/vitest-agentic-control/src/fixtures.ts#L57)
+Defined in: [fixtures.ts:57](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/tooling/vitest-agentic/src/fixtures.ts#L57)

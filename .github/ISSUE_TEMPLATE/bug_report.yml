@@ -55,9 +55,9 @@ body:
   - type: input
     id: version
     attributes:
-      label: agentic-control Version
-      description: What version of agentic-control are you using?
-      placeholder: "1.1.0"
+      label: Agentic Version
+      description: What version of `@jbcom/agentic` are you using?
+      placeholder: "1.2.0"
     validations:
       required: true
 
