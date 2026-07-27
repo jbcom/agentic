@@ -41,8 +41,9 @@
   },
   "engines": {
     "node": ">=22.0.0",
-    "pnpm": ">=9.0.0"
+    "pnpm": ">=11.0.0"
   },
+  "packageManager": "pnpm@11.17.0",
   "keywords": [
     "ai",
     "agent",
