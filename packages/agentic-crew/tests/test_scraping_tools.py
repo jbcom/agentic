@@ -25,7 +25,7 @@ def test_crawl_website_tool(mock_get: MagicMock):
     mock_get.side_effect = [mock_response_page1, mock_response_page2]
 
     tool = CrawlWebsiteTool()
-    result = tool._run("http://example.com")
+    result = tool._run(url="http://example.com")
 
     assert "Content 1" in result
     assert "Page 2" in result

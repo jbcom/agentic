@@ -51,16 +51,7 @@ class StrandsRunner(BaseRunner):
         llm_config = crew_config.get("llm", {})
         model_provider = self._get_model_provider(llm_config)
 
-        agent_kwargs = {
-            "system_prompt": system_prompt,
-            "tools": tools,
-        }
-
-        # Add model provider if configured
-        if model_provider:
-            agent_kwargs["model_id"] = model_provider
-
-        return Agent(**agent_kwargs)
+        return Agent(system_prompt=system_prompt, tools=tools, model=model_provider)
 
     def _get_model_provider(self, llm_config: dict | str | None) -> str | None:
         """Get Strands-compatible model provider from LLM config.

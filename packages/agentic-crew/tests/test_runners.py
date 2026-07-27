@@ -382,7 +382,7 @@ class TestLangGraphRunner:
         runner = LangGraphRunner()
         runner.get_llm("claude-sonnet-4-20250514")
 
-        MockLLM.assert_called_once_with(model="claude-sonnet-4-20250514")
+        MockLLM.assert_called_once_with(model_name="claude-sonnet-4-20250514", timeout=None, stop=None)
 
     def test_get_llm_uses_default_model(self, crew_mocker: CrewMocker) -> None:
         """Test that get_llm uses default model when none specified."""
@@ -396,7 +396,7 @@ class TestLangGraphRunner:
         runner.get_llm()
 
         MockLLM.assert_called_once()
-        assert MockLLM.call_args[1]["model"] == "claude-haiku-4-5-20251001"
+        assert MockLLM.call_args[1]["model_name"] == "claude-haiku-4-5-20251001"
 
     def test_build_task_returns_dict(self, crew_mocker: CrewMocker) -> None:
         """Test that build_task returns task configuration dict."""
@@ -666,7 +666,7 @@ class TestStrandsRunner:
         MockAgent.assert_called_once()
         call_kwargs = MockAgent.call_args[1]
         assert "system_prompt" in call_kwargs
-        assert call_kwargs["model_id"] == "claude-3-5-sonnet"
+        assert call_kwargs["model"] == "claude-3-5-sonnet"
 
     def test_build_task_returns_dict(self, crew_mocker: CrewMocker) -> None:
         """Test that build_task returns task configuration dict."""

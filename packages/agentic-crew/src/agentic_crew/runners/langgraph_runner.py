@@ -91,9 +91,9 @@ class LangGraphRunner(BaseRunner):
         """
         from langchain_anthropic import ChatAnthropic
 
-        # Default to Claude 3.5 Sonnet if no model specified
+        # Default to Claude Haiku if no model specified
         default_model = "claude-haiku-4-5-20251001"
-        return ChatAnthropic(model=model or default_model)
+        return ChatAnthropic(model_name=model or default_model, timeout=None, stop=None)
 
     def build_agent(self, agent_config: dict[str, Any], tools: list | None = None) -> Any:
         """Build a LangGraph-compatible agent.

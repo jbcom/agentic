@@ -62,7 +62,7 @@ class ConnectorBuilderCrew:
         self.crew = Crew(
             agents=[self.doc_scraper, self.api_analyzer, self.code_generator],
             tasks=[self.scrape_docs, self.analyze_api, self.generate_code],
-            verbose=2,
+            verbose=True,
         )
 
     def kickoff(self, inputs: dict) -> str:

@@ -337,7 +337,7 @@ class BaseRunner(ABC):
             is not available (framework may have its own default).
                 - CrewAI: LiteLLM-compatible LLM
                 - LangGraph: langchain ChatModel
-                - Strands: Uses model_id directly
+                - Strands: Uses model directly
 
         Example:
             ```python
