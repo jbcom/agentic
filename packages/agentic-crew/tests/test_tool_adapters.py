@@ -6,9 +6,8 @@ import sys
 from types import ModuleType, SimpleNamespace
 from unittest.mock import MagicMock, patch
 
-from pydantic import BaseModel
-
 from agentic_crew.tools.adapters import resolve_langgraph_tools, resolve_strands_tools
+from pydantic import BaseModel
 
 
 class WriteFileArgs(BaseModel):
@@ -59,7 +58,7 @@ class FakeStructuredTool:
         description: str,
         args_schema: type[BaseModel] | None,
         infer_schema: bool,
-    ) -> "FakeStructuredTool":
+    ) -> FakeStructuredTool:
         return cls(
             func=func,
             name=name,
