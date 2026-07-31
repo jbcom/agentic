@@ -91,31 +91,31 @@
         "registry": "https://registry.npmjs.org/"
     },
     "dependencies": {
-        "@actions/core": "^2.0.1",
-        "@ai-sdk/anthropic": "^3.0.1",
-        "@ai-sdk/google": "^3.0.1",
-        "@ai-sdk/mcp": "^1.0.1",
-        "@linear/sdk": "^68.1.0",
-        "@modelcontextprotocol/sdk": "^1.26.0",
+        "@actions/core": "^3.0.1",
+        "@ai-sdk/anthropic": "^4.0.23",
+        "@ai-sdk/google": "^4.0.26",
+        "@ai-sdk/mcp": "^2.0.18",
+        "@linear/sdk": "^88.3.0",
+        "@modelcontextprotocol/sdk": "^1.30.0",
         "@playwright/mcp": "latest",
-        "ai": "^6.0.0",
-        "ai-sdk-ollama": "^3.0.0",
-        "commander": "^14.0.2",
-        "glob": "^13.0.0",
+        "ai": "^7.0.40",
+        "ai-sdk-ollama": "^4.1.0",
+        "commander": "^15.0.0",
+        "glob": "^13.0.6",
         "octokit": "^5.0.5",
         "ollama": "^0.6.3",
         "picocolors": "^1.1.1",
-        "zod": "^4.2.1"
+        "zod": "^4.4.3"
     },
     "devDependencies": {
-        "@playwright/test": "^1.57.0",
-        "@types/node": "^25.0.3",
+        "@playwright/test": "^1.62.0",
+        "@types/node": "^26.1.2",
         "@vitest/coverage-v8": "^4.1.0",
         "rimraf": "^6.1.2",
         "tsup": "^8.5.0",
-        "tsx": "^4.21.0",
-        "typedoc": "^0.28.15",
-        "typescript": "^5.9.3",
+        "tsx": "^4.23.1",
+        "typedoc": "^0.28.20",
+        "typescript": "^7.0.2",
         "vitest": "^4.1.0"
     }
 }
