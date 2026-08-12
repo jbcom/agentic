@@ -82,8 +82,6 @@ jobs:
             name: '@jbcom/agentic'
           - dir: packages/triage
             name: '@jbcom/agentic-triage'
-          - dir: packages/meshy-content-generator
-            name: '@jbcom/agentic-meshy'
           - dir: packages/providers
             name: '@jbcom/agentic-providers'
           - dir: tooling/vitest-agentic

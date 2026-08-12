@@ -604,6 +604,22 @@ describe('Property 7: Multi-architecture support', () => {
     expect(releaseWorkflow).toContain('platforms: linux/amd64,linux/arm64');
   });
 });
+
+describe('Extracted package release ownership', () => {
+  it('does not publish or scan the standalone Meshy package from this monorepo', async () => {
+    const [releaseWorkflow, ciWorkflow] = await Promise.all([
+      import('node:fs').then((fs) =>
+        fs.promises.readFile(join(WORKSPACE_ROOT, '.github/workflows/release.yml'), 'utf-8')
+      ),
+      import('node:fs').then((fs) =>
+        fs.promises.readFile(join(WORKSPACE_ROOT, '.github/workflows/ci.yml'), 'utf-8')
+      ),
+    ]);
+
+    expect(releaseWorkflow).not.toContain('packages/meshy-content-generator');
+    expect(ciWorkflow).not.toContain('packages/meshy-content-generator');
+  });
+});
 describe('Docker non-root user example', () => {
   /**
    * **Validates: Requirements 2.6, 7.4**
