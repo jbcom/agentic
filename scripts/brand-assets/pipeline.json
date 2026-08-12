@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "name": "agentic-brand-assets",
+  "source": "scripts/brand-assets/catalogue.json",
+  "records": "assets",
+  "generation": {
+    "id": "{id}",
+    "prompt": "{prompt}",
+    "model": "{model}",
+    "aspect_ratio": "{aspect}",
+    "output": "scripts/brand-assets/generated/{id}.png"
+  },
+  "postprocess": []
+}
+

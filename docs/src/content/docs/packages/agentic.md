@@ -193,7 +193,7 @@ src/
 
 - **[@jbcom/agentic-triage](/packages/triage/)** — Triage primitives consumed by Agentic fleets
 - **[agentic-crew](/packages/crew/)** — Framework-agnostic crew orchestration
-- **[@jbcom/agentic-meshy](/packages/meshy-content-generator/)** — 3D asset pipelines
+- **[meshy-content-generator](/packages/meshy-content-generator/)** — standalone image pipelines backed by vendor-fabric
 
 ## Links
 

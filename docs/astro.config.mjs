@@ -65,7 +65,7 @@ export default defineConfig({
 						{ label: '@jbcom/agentic', slug: 'packages/agentic' },
 						{ label: '@jbcom/agentic-triage', slug: 'packages/triage' },
 						{ label: 'agentic-crew', slug: 'packages/crew' },
-						{ label: '@jbcom/agentic-meshy', slug: 'packages/meshy-content-generator' },
+						{ label: 'meshy-content-generator', slug: 'packages/meshy-content-generator' },
 					],
 				},
 				{

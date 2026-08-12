@@ -62,7 +62,7 @@ from agentic_crew import run_crew
 result = run_crew("my-app", "reviewer", inputs={"pr": 42})
 ```
 
-### @jbcom/agentic-meshy
+### meshy-content-generator
 
 <span class="lang-badge lang-badge--ts">TypeScript</span>
 
