@@ -71,7 +71,7 @@ describe('Package pages exist in build output', () => {
     { path: 'packages/agentic/index.html', label: '@jbcom/agentic' },
     { path: 'packages/triage/index.html', label: '@jbcom/agentic-triage' },
     { path: 'packages/crew/index.html', label: 'agentic-crew' },
-    { path: 'packages/meshy-content-generator/index.html', label: '@jbcom/agentic-meshy' },
+    { path: 'packages/meshy-content-generator/index.html', label: 'meshy-content-generator' },
   ];
 
   for (const { path, label } of packagePages) {

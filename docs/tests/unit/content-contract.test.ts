@@ -62,7 +62,7 @@ describe('Documentation contract', () => {
   });
 
   it('uses the canonical meshy package name in product pages', () => {
-    expect(readDoc('packages/meshy-content-generator.md')).toContain('@jbcom/agentic-meshy');
+    expect(readDoc('packages/meshy-content-generator.md')).toContain('jbcom/meshy-content-generator');
   });
 
   it('does not ship stale triage source examples or stub remarks', () => {

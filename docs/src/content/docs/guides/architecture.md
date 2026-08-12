@@ -37,7 +37,7 @@ The Agentic toolkit spans TypeScript and Python. Each language targets the domai
    |                  |   +----------------------+   +----------------------+
    | - Ollama agent   |
    | - Jules agent    |   +----------------------+
-   | - Cursor agent   |   | @jbcom/agentic-meshy |
+   | - Cursor agent   |   | meshy-content-generator |
    +---------+--------+   |  (3D Asset Pipelines)|
              |             +----------------------+
              |
@@ -94,7 +94,7 @@ Framework-agnostic crew orchestration:
 @jbcom/agentic-providers  --->  @jbcom/agentic-triage  (peer dependency)
 @jbcom/vitest-agentic  (standalone, mocks agentic components)
 pytest-agentic-crew  (standalone, fixtures for agentic-crew)
-@jbcom/agentic-meshy  (standalone)
+meshy-content-generator  (standalone Python package; vendor-fabric transport)
 agentic-crew  (standalone Python package)
 ```
 

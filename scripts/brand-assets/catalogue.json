@@ -1,0 +1,22 @@
+{
+  "assets": [
+    {
+      "id": "agentic-hero",
+      "prompt": "Abstract digital command center visualization, warm amber and deep orange energy streams connecting geometric nodes against a dark background, representing AI agent orchestration and fleet coordination, minimal clean tech aesthetic, dark moody atmosphere with amber glow highlights, no text, no faces, professional brand imagery",
+      "model": "nano-banana",
+      "aspect": "16:9"
+    },
+    {
+      "id": "agentic-icon",
+      "prompt": "Minimalist geometric logo mark for an AI orchestration platform called Agentic, central node with radiating connections to satellite nodes forming a command network, warm amber and deep orange on transparent dark background, flat vector style, clean precise lines, professional tech brand icon, single mark centered",
+      "model": "nano-banana",
+      "aspect": "1:1"
+    },
+    {
+      "id": "agentic-og-bg",
+      "prompt": "Abstract dark background texture with subtle amber and orange geometric patterns, hexagonal grid dissolving into warm light particles, dark near-black base with warm amber energy accents, suitable for text overlay, professional tech brand background, no text",
+      "model": "nano-banana",
+      "aspect": "16:9"
+    }
+  ]
+}
