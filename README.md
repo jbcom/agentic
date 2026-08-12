@@ -25,7 +25,6 @@
 | [`@jbcom/agentic`](packages/agentic) | TypeScript | Fleet management, multi-agent routing, CI resolution, GitHub Actions | [Docs](https://agentic.coach/packages/agentic/) |
 | [`@jbcom/agentic-triage`](packages/triage) | TypeScript | AI-powered issue triage, PR review, sprint planning (Vercel AI SDK + MCP) | [Docs](https://agentic.coach/packages/triage/) |
 | [`agentic-crew`](packages/agentic-crew) | Python | Framework-agnostic crew orchestration (CrewAI, LangGraph, Strands) | [Docs](https://agentic.coach/packages/crew/) |
-| [`@jbcom/agentic-meshy`](packages/meshy-content-generator) | TypeScript | Declarative Meshy 3D asset generation pipelines | [Docs](https://agentic.coach/packages/meshy-content-generator/) |
 | [`@jbcom/agentic-providers`](packages/providers) | TypeScript | LLM provider implementations (Ollama, Jules, Cursor) | [Docs](https://agentic.coach/packages/agentic/) |
 
 ### Testing Plugins
@@ -39,6 +38,7 @@
 
 - [`jbcom/game-generator`](https://github.com/jbcom/game-generator) — experimental Bevy-based retro-RPG design sandbox
 - [`jbcom/game-asset-mcp`](https://github.com/jbcom/game-asset-mcp) — MCP server for local 3D asset libraries and PolyHaven ingestion
+- [`jbcom/meshy-content-generator`](https://github.com/jbcom/meshy-content-generator) — declarative image pipelines backed by vendor-fabric
 
 ## Quick Start
 
@@ -123,7 +123,6 @@ agentic/
 │   ├── agentic/                  # @jbcom/agentic (TypeScript)
 │   ├── triage/                   # @jbcom/agentic-triage (TypeScript)
 │   ├── agentic-crew/             # agentic-crew (Python)
-│   ├── meshy-content-generator/  # @jbcom/agentic-meshy (TypeScript)
 │   ├── providers/                # @jbcom/agentic-providers (TypeScript)
 ├── tooling/
 │   ├── vitest-agentic/           # @jbcom/vitest-agentic (TypeScript)

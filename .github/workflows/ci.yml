@@ -193,9 +193,3 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v6
         with:
           projectBaseDir: packages/agentic-crew
-
-      - name: SonarCloud Scan - meshy
-        if: env.SONAR_TOKEN != ''
-        uses: SonarSource/sonarqube-scan-action@v6
-        with:
-          projectBaseDir: packages/meshy-content-generator
