@@ -6,4 +6,3 @@ the standalone OSS repository
 The replacement is a Python package whose only Meshy transport is
 `vendor-fabric`. This tombstone is intentionally not a workspace package and
 can be removed after downstream links have aged out.
-

@@ -18,4 +18,3 @@ uvx --from meshy-content-generator content-gen run pipeline.json --root . --dry-
 ```
 
 The old npm package is retired and must not be used for new work.
-
