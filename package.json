@@ -32,7 +32,7 @@
     "@types/node": "^22.15.0",
     "@vitest/coverage-v8": "^4.1.0",
     "fast-check": "^4.5.2",
-    "nx": "^22.5.2",
+    "nx": "^22.7.7",
     "semantic-release": "^25.0.2",
     "tsx": "4.21.0",
     "typedoc": "^0.28.0",
