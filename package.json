@@ -24,20 +24,20 @@
     "postinstall": "node scripts/build-deps.js || true"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.0.0",
-    "@nx/js": "^22.5.2",
-    "@semantic-release/changelog": "^6.0.3",
+    "@biomejs/biome": "^2.5.10",
+    "@nx/js": "^23.1.1",
+    "@semantic-release/changelog": "^7.0.0",
     "@semantic-release/exec": "^7.1.0",
-    "@semantic-release/git": "^10.0.1",
-    "@types/node": "^22.15.0",
-    "@vitest/coverage-v8": "^4.1.0",
-    "fast-check": "^4.5.2",
-    "nx": "^22.5.2",
-    "semantic-release": "^25.0.2",
-    "tsx": "4.21.0",
-    "typedoc": "^0.28.0",
-    "typescript": "^5.7.0",
-    "vitest": "^4.1.0"
+    "@semantic-release/git": "^11.0.1",
+    "@types/node": "^26.3.0",
+    "@vitest/coverage-v8": "^4.1.11",
+    "fast-check": "^4.9.0",
+    "nx": "^23.1.1",
+    "semantic-release": "^25.0.9",
+    "tsx": "4.23.12",
+    "typedoc": "^0.28.20",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=22.0.0",
