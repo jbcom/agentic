@@ -139,16 +139,47 @@ class TestFileTargetSafety:
     def tools(self):
         pytest.importorskip("crewai")
 
-    @pytest.mark.parametrize("deep", [False, True])
-    def test_pydantic_tool_copy_retains_private_binding(self, tmp_path, deep):
+    def test_pydantic_tool_copy_retains_private_binding(self, tmp_path):
         from agentic_crew.tools.file_tools import GameCodeWriterTool
 
         with bind_file_root(tmp_path):
             tool = GameCodeWriterTool()
-        copied = tool.model_copy(deep=deep)
+        copied = tool.model_copy()
         assert "_bound_root" not in copied.model_dump()
         assert "Successfully wrote" in copied._run("src/ecs/demo.ts", "selected")
         assert (tmp_path / "src/ecs/demo.ts").read_text() == "selected"
+
+    def test_deep_copy_preserves_upstream_contract(self, tmp_path):
+        from agentic_crew.tools.file_tools import GameCodeWriterTool
+        from crewai.tools import BaseTool
+
+        class PlainTool(BaseTool):
+            name: str = "Plain Tool"
+            description: str = "Upstream copy contract baseline"
+
+            def _run(self) -> str:
+                return "plain"
+
+        with bind_file_root(tmp_path):
+            selected = GameCodeWriterTool()
+        try:
+            PlainTool().model_copy(deep=True)
+        except TypeError as baseline_error:
+            # CrewAI 1.15.25 carries a non-pickleable _usage_lock.
+            # Preserve that upstream behavior; do not override framework locks.
+            assert "lock" in str(baseline_error)
+            with pytest.raises(TypeError) as actual_error:
+                selected.model_copy(deep=True)
+            assert str(actual_error.value) == str(baseline_error)
+            assert not (tmp_path / "src").exists()
+            assert selected._file_root() == tmp_path
+        else:
+            # If upstream adds deep-copy support, require the same root safety.
+            copied = selected.model_copy(deep=True)
+            assert "_bound_root" not in copied.model_dump()
+            assert "Successfully wrote" in copied._run("src/ecs/demo.ts", "selected")
+            assert (tmp_path / "src/ecs/demo.ts").read_text() == "selected"
+        assert construction_root() is None
 
     def test_discovered_auto_runner_binds_registry_tools(self, tmp_path, monkeypatch):
         from agentic_crew.core.decomposer import run_crew_auto
