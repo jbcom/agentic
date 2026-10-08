@@ -1,5 +1,17 @@
 # Progress Log
 
+## 2026-10-07: Explicit Crew File Targets
+
+- Replaced legacy implicit package selection with explicit `--package` on build
+  and knowledge inspection, preserving crew input payloads and explicit targets.
+- Bound built-in file tools to discovered project roots through execution-local
+  construction scopes and per-instance snapshots; scope resets on failure and
+  worker threads retain the selected root.
+- Added fail-closed target resolution, unknown explicit runner-target rejection,
+  symlink containment, migration notes, and real CrewAI filesystem/concurrency
+  tests without model calls. Public identifiers and organization scopes remain
+  unchanged. Full validation is tracked in the change's review evidence.
+
 ## 2026-04-15
 
 - audited the monorepo for production-stability gaps across TypeScript, Python, Rust, docs, CI, and release automation

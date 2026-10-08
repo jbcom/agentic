@@ -30,6 +30,7 @@ import sys
 import time
 from pathlib import Path
 
+from agentic_crew._targets import bind_file_root, validate_package_name
 from agentic_crew.core.discovery import discover_packages, get_crew_config, list_crews
 from agentic_crew.core.runner import run_crew
 
@@ -165,11 +166,13 @@ def cmd_run(args):
             else:
                 print(f"📋 Framework: {framework_used} (auto-detected)")
 
-        result = run_crew_auto(
-            crew_config,
-            inputs=inputs,
-            framework=requested,
-        )
+        validate_package_name(args.package)
+        with bind_file_root(config_dir.parent):
+            result = run_crew_auto(
+                crew_config,
+                inputs=inputs,
+                framework=requested,
+            )
 
         duration_ms = int((time.time() - start_time) * 1000)
 
@@ -239,10 +242,22 @@ def _cmd_run_single_agent(args, use_json: bool, start_time: float):
     # Get working directory if package specified
     working_dir = None
     if hasattr(args, "package") and args.package:
-        packages = discover_packages()
-        if args.package in packages:
-            # Use package directory as working dir
+        try:
+            validate_package_name(args.package)
+            packages = discover_packages()
+            if args.package not in packages:
+                raise ValueError(f"Package '{args.package}' not found. See: agentic-crew list")
             working_dir = str(packages[args.package].parent)
+        except ValueError as e:
+            if use_json:
+                print(
+                    json.dumps(
+                        {"success": False, "error": str(e), "duration_ms": int((time.time() - start_time) * 1000)}
+                    )
+                )
+            else:
+                print(f"Error: {e}", file=sys.stderr)
+            sys.exit(2)
 
     try:
         # Get runner
@@ -321,9 +336,10 @@ def _cmd_run_single_agent(args, use_json: bool, start_time: float):
 
 
 def cmd_build(args):
-    """Legacy build command using the original game_builder package."""
+    """Build with the selected package's game_builder crew."""
+    package = _selected_legacy_package(args)
     print("=" * 60)
-    print("🎮 OTTERFALL GAME BUILDER")
+    print(f"🎮 GAME BUILDER: {package}")
     print("=" * 60)
     print()
     print(f"Building: {args.spec[:100]}...")
@@ -331,15 +347,42 @@ def cmd_build(args):
     inputs = {"spec": args.spec, "component_spec": args.spec}
 
     try:
-        result = run_crew("otterfall", "game_builder", inputs)
+        result = run_crew(package, "game_builder", inputs)
         print("\n" + "=" * 60)
         print("📄 RESULT")
         print("=" * 60)
         print(result)
     except ValueError as e:
         print(f"❌ Error: {e}")
-        print("\nNote: The 'build' command requires packages/otterfall/.crewai/")
+        print("\nSelect a package with a game_builder crew. See: agentic-crew list")
         sys.exit(1)
+
+
+def _selected_legacy_package(args) -> str:
+    """Resolve a named legacy-command target before constructing any crew."""
+    try:
+        if not args.package:
+            raise ValueError("Select --package NAME. See: agentic-crew list")
+        package = validate_package_name(args.package)
+        if package not in discover_packages():
+            raise ValueError(f"Package '{package}' not found. See: agentic-crew list")
+        return package
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(2)
+
+
+def cmd_list_knowledge(args):
+    """Inspect knowledge for an explicitly selected package and crew."""
+    package = _selected_legacy_package(args)
+    try:
+        config = get_crew_config(discover_packages()[package], args.crew)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(2)
+    print("Knowledge sources:")
+    for path in config.get("knowledge_paths", []):
+        print(f"  • {path}")
 
 
 def cmd_info(args):
@@ -542,7 +585,7 @@ Exit codes:
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Run a crew or single-agent task")
-    run_parser.add_argument("package", nargs="?", help="Package name (e.g., otterfall)")
+    run_parser.add_argument("package", nargs="?", help="Package name (e.g., example-game)")
     run_parser.add_argument("crew", nargs="?", help="Crew name (e.g., game_builder)")
     run_parser.add_argument("--input", "-i", help="Input specification")
     run_parser.add_argument("--file", "-f", help="Read input from file")
@@ -579,9 +622,12 @@ Exit codes:
     # Legacy build command (for backwards compatibility)
     build_parser = subparsers.add_parser("build", help="Build a game component (legacy)")
     build_parser.add_argument("spec", help="Component specification")
+    build_parser.add_argument("--package", help="Target package name (required)")
 
     # Legacy commands
-    subparsers.add_parser("list-knowledge", help="List knowledge sources (legacy)")
+    knowledge_parser = subparsers.add_parser("list-knowledge", help="List knowledge sources (legacy)")
+    knowledge_parser.add_argument("--package", help="Target package name (required)")
+    knowledge_parser.add_argument("--crew", default="game_builder", help="Crew name (default: game_builder)")
     subparsers.add_parser("test-tools", help="Test file tools (legacy)")
 
     args = parser.parse_args()
@@ -597,15 +643,7 @@ Exit codes:
     elif args.command == "build":
         cmd_build(args)
     elif args.command == "list-knowledge":
-        # Legacy - list knowledge from example-game
-        packages = discover_packages()
-        if "otterfall" in packages:
-            config = get_crew_config(packages["otterfall"], "game_builder")
-            print("Knowledge sources:")
-            for kp in config.get("knowledge_paths", []):
-                print(f"  • {kp}")
-        else:
-            print("No otterfall package found.")
+        cmd_list_knowledge(args)
     elif args.command == "test-tools":
         from agentic_crew.tools.file_tools import DirectoryListTool, get_workspace_root
 

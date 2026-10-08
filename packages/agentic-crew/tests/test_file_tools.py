@@ -40,13 +40,11 @@ class TestGetWorkspaceRoot:
 
         assert root == other_pkg
 
-    def test_defaults_to_otterfall(self, temp_workspace: Path) -> None:
-        """Test that package defaults to 'otterfall'."""
+    def test_no_implicit_package_selection(self, temp_workspace: Path, monkeypatch) -> None:
+        """A workspace never selects a writable package implicitly."""
         from agentic_crew.tools.file_tools import get_workspace_root
 
-        # Create otterfall package
-        otterfall = temp_workspace / "packages" / "otterfall"
-        otterfall.mkdir(parents=True, exist_ok=True)
+        monkeypatch.chdir(temp_workspace)
 
         with patch(
             "agentic_crew.tools.file_tools._find_workspace_root",
@@ -55,10 +53,10 @@ class TestGetWorkspaceRoot:
             # Remove TARGET_PACKAGE if set
             env = os.environ.copy()
             env.pop("TARGET_PACKAGE", None)
-            with patch.dict(os.environ, env, clear=True):
-                root = get_workspace_root()
+            with patch.dict(os.environ, env, clear=True), pytest.raises(ValueError, match="explicit package_name"):
+                get_workspace_root()
 
-        assert root.name == "otterfall"
+        assert not (temp_workspace / "src").exists()
 
     def test_explicit_package_name(self, temp_workspace: Path) -> None:
         """Test explicit package name parameter."""

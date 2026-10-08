@@ -1,5 +1,16 @@
 # Active Context
 
+## Explicit Crew File Targets
+
+The legacy `build` and `list-knowledge` commands now require `--package`.
+Discovered crews bind built-in file tools to their selected project's root at
+construction, retaining that root in later worker threads without changing
+process environment variables. Direct tools retain explicit argument and
+environment selection; ambiguous or missing targets fail instead of silently
+writing to the current directory. Identifiable standalone projects retain cwd
+support. README migration guidance and focused filesystem/concurrency coverage
+accompany the change. Custom tools and public report identifiers are unchanged.
+
 ## Monorepo Reality
 
 `agentic` is now organized around a clearer TypeScript + Python core:
