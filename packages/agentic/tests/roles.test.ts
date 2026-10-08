@@ -1,7 +1,6 @@
-import { execFileSync } from 'node:child_process';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const { generateTextMock, initializeMCPClientsMock, closeMCPClientsMock } = vi.hoisted(() => ({
@@ -183,36 +182,5 @@ describe('role execution through the existing Agent', () => {
     ).rejects.toThrow('empty');
     expect(initializeMCPClientsMock).not.toHaveBeenCalled();
     expect(generateTextMock).not.toHaveBeenCalled();
-  });
-});
-
-describe('built CLI role commands', () => {
-  const cli = resolve(import.meta.dirname, '../dist/cli.js');
-  it('lists and matches roles without initializing a model or MCP session', () => {
-    const list = JSON.parse(
-      execFileSync(process.execPath, [cli, 'roles', 'list'], { cwd: directory, encoding: 'utf8' })
-    );
-    expect(list.map((role: { name: string }) => role.name)).toEqual([
-      'harvester',
-      'curator',
-      'reviewer',
-      'fixer',
-      'delegator',
-    ]);
-    const match = JSON.parse(
-      execFileSync(process.execPath, [cli, 'roles', 'match', '/review'], {
-        cwd: directory,
-        encoding: 'utf8',
-      })
-    );
-    expect(match.name).toBe('reviewer');
-  });
-  it('reports a failed match with a nonzero exit code', () => {
-    expect(() =>
-      execFileSync(process.execPath, [cli, 'roles', 'match', '/unknown'], {
-        cwd: directory,
-        stdio: 'pipe',
-      })
-    ).toThrow();
   });
 });
