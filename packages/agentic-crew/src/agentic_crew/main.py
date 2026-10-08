@@ -542,7 +542,7 @@ Exit codes:
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Run a crew or single-agent task")
-    run_parser.add_argument("package", nargs="?", help="Package name (e.g., otterfall)")
+    run_parser.add_argument("package", nargs="?", help="Package name (e.g., example-game)")
     run_parser.add_argument("crew", nargs="?", help="Crew name (e.g., game_builder)")
     run_parser.add_argument("--input", "-i", help="Input specification")
     run_parser.add_argument("--file", "-f", help="Read input from file")
