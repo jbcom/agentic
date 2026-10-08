@@ -32,6 +32,8 @@ import { assessCommandSafety, validatePath } from './security.js';
 // ─────────────────────────────────────────────────────────────────
 
 export interface AgentConfig {
+  /** Additional persona instructions; existing tool and approval guidelines remain. */
+  systemPrompt?: string;
   /** Working directory for file operations (sandbox root) */
   workingDirectory?: string;
   /** Maximum steps for multi-step tool calls */
@@ -130,6 +132,7 @@ export class Agent {
       maxSteps: config.maxSteps ?? 25,
       model: config.model ?? 'claude-sonnet-4-20250514',
       verbose: config.verbose ?? false,
+      systemPrompt: config.systemPrompt ?? '',
       mcp: config.mcp,
       reasoning: config.reasoning,
       webSearch: config.webSearch,
@@ -511,7 +514,7 @@ Process:
   }> {
     const result = await this.execute(
       `Stage all changes and commit with message: "${message}"
-      
+
 Use these commands:
 1. git add -A
 2. git commit -m "${message}"
@@ -859,7 +862,7 @@ ${this.config.approval?.requireApproval?.length ? '\n6. **Respect approval polic
 2. Identify all blockers and unaddressed feedback
 3. Fix issues systematically, starting with CI failures
 4. Commit and push changes
-5. Verify CI passes after your changes`;
+5. Verify CI passes after your changes${this.config.systemPrompt ? `\n\n## Agent Persona\n${this.config.systemPrompt}` : ''}`;
   }
 
   private log(message: string): void {

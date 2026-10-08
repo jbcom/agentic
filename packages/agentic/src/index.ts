@@ -18,13 +18,10 @@
 
 // GitHub Actions integration
 export * from './actions/index.js';
-
 // Core exports (maintaining existing API surface)
 export * from './core/index.js';
-
 // Crew tool (agentic-crew CLI integration)
 export * from './crews/index.js';
-
 // Fleet management
 export {
   type CoordinationConfig,
@@ -41,6 +38,7 @@ export { HandoffManager, type TakeoverOptions } from './handoff/index.js';
 export * from './orchestrators/index.js';
 // Pipeline automation - CI resolution, PR lifecycle
 export * from './pipelines/index.js';
+export * from './roles/index.js';
 
 // Sandbox execution
 export type { ContainerConfig, ContainerResult, SandboxOptions } from './sandbox/index.js';

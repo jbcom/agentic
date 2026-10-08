@@ -6,9 +6,10 @@
  * using property-based testing with fast-check.
  */
 
-import { execSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { execFileSync, execSync, spawnSync } from 'node:child_process';
+import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { extname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -27,31 +28,72 @@ describe('Production Release Properties', () => {
      * For any build execution, all files in the dist directory should be
      * JavaScript (.js) or TypeScript declaration (.d.ts) files, with no Python files present.
      */
-    it('should produce only TypeScript artifacts in dist directory', { timeout: 30_000 }, async () => {
-      const distDir = join(PACKAGE_ROOT, 'dist');
+    it(
+      'should produce only TypeScript artifacts in dist directory',
+      { timeout: 30_000 },
+      async () => {
+        const distDir = join(PACKAGE_ROOT, 'dist');
 
-      // Ensure we have a clean build
-      if (existsSync(distDir)) {
-        execSync('rm -rf dist', { cwd: PACKAGE_ROOT });
+        // Ensure we have a clean build
+        if (existsSync(distDir)) {
+          execSync('rm -rf dist', { cwd: PACKAGE_ROOT });
+        }
+
+        // Build the project (scoped to this package)
+        execSync('npx tsc', { cwd: PACKAGE_ROOT });
+
+        // Property: All files in dist should be .js, .d.ts, or .js.map files
+        const distFiles = await getAllFiles(distDir);
+
+        for (const file of distFiles) {
+          const ext = extname(file);
+          const isValidExtension = ['.js', '.ts', '.map'].includes(ext) || file.endsWith('.d.ts');
+          const isPythonFile = ext === '.py' || ext === '.pyc' || file.includes('__pycache__');
+
+          expect(isPythonFile, `Found Python file in dist: ${file}`).toBe(false);
+          expect(isValidExtension, `Invalid file type in dist: ${file}`).toBe(true);
+        }
+
+        // Ensure we actually have some output
+        expect(distFiles.length).toBeGreaterThan(0);
       }
+    );
 
-      // Build the project (scoped to this package)
-      execSync('npx tsc', { cwd: PACKAGE_ROOT });
-
-      // Property: All files in dist should be .js, .d.ts, or .js.map files
-      const distFiles = await getAllFiles(distDir);
-
-      for (const file of distFiles) {
-        const ext = extname(file);
-        const isValidExtension = ['.js', '.ts', '.map'].includes(ext) || file.endsWith('.d.ts');
-        const isPythonFile = ext === '.py' || ext === '.pyc' || file.includes('__pycache__');
-
-        expect(isPythonFile, `Found Python file in dist: ${file}`).toBe(false);
-        expect(isValidExtension, `Invalid file type in dist: ${file}`).toBe(true);
+    it('should run compiled role CLI commands without credentials', { timeout: 30_000 }, () => {
+      // This suite owns the shared build directory; keep compiled CLI assertions
+      // next to its sequential build test to avoid cross-suite rebuild races.
+      const directory = mkdtempSync(join(tmpdir(), 'agentic-cli-'));
+      const cli = join(PACKAGE_ROOT, 'dist/cli.js');
+      const options = {
+        cwd: directory,
+        encoding: 'utf8' as const,
+        timeout: 10_000,
+        env: { ...process.env, ANTHROPIC_API_KEY: '', OPENAI_API_KEY: '', GITHUB_TOKEN: '' },
+      };
+      try {
+        const list = JSON.parse(execFileSync(process.execPath, [cli, 'roles', 'list'], options));
+        expect(list.map((role: { name: string }) => role.name)).toEqual([
+          'harvester',
+          'curator',
+          'reviewer',
+          'fixer',
+          'delegator',
+        ]);
+        const match = JSON.parse(
+          execFileSync(process.execPath, [cli, 'roles', 'match', '/review'], options)
+        );
+        expect(match.name).toBe('reviewer');
+        const info = JSON.parse(
+          execFileSync(process.execPath, [cli, 'roles', 'info', 'fixer'], options)
+        );
+        expect(info.name).toBe('fixer');
+        const unmatched = spawnSync(process.execPath, [cli, 'roles', 'match', '/unknown'], options);
+        expect(unmatched.error).toBeUndefined();
+        expect(unmatched.status).toBe(1);
+        expect(unmatched.stderr).toContain('No enabled role matches this trigger');
+      } finally {
+        rmSync(directory, { recursive: true, force: true });
       }
-
-      // Ensure we actually have some output
-      expect(distFiles.length).toBeGreaterThan(0);
     });
   });
 
@@ -156,26 +198,30 @@ describe('Production Release Properties', () => {
      * For any import of crew-related exports from the package, TypeScript should
      * provide complete type information without any 'any' types.
      */
-    it('should provide complete TypeScript types for crew operations', { timeout: 30_000 }, async () => {
-      const distDir = join(PACKAGE_ROOT, 'dist');
+    it(
+      'should provide complete TypeScript types for crew operations',
+      { timeout: 30_000 },
+      async () => {
+        const distDir = join(PACKAGE_ROOT, 'dist');
 
-      // Check that TypeScript compilation succeeds with strict mode
-      try {
-        execSync('npx tsc --noEmit', { cwd: PACKAGE_ROOT, stdio: 'pipe' });
-      } catch (error) {
-        throw new Error(`TypeScript compilation failed: ${error}`);
+        // Check that TypeScript compilation succeeds with strict mode
+        try {
+          execSync('npx tsc --noEmit', { cwd: PACKAGE_ROOT, stdio: 'pipe' });
+        } catch (error) {
+          throw new Error(`TypeScript compilation failed: ${error}`);
+        }
+
+        // Verify that declaration files are generated
+        const distFiles = await getAllFiles(distDir);
+        const declarationFiles = distFiles.filter((f) => f.endsWith('.d.ts'));
+
+        expect(declarationFiles.length).toBeGreaterThan(0);
+
+        // Check that main exports have declaration files
+        const mainDeclaration = distFiles.find((f) => f.endsWith('index.d.ts'));
+        expect(mainDeclaration).toBeDefined();
       }
-
-      // Verify that declaration files are generated
-      const distFiles = await getAllFiles(distDir);
-      const declarationFiles = distFiles.filter((f) => f.endsWith('.d.ts'));
-
-      expect(declarationFiles.length).toBeGreaterThan(0);
-
-      // Check that main exports have declaration files
-      const mainDeclaration = distFiles.find((f) => f.endsWith('index.d.ts'));
-      expect(mainDeclaration).toBeDefined();
-    });
+    );
   });
 
   describe('Property 14: Configuration generation validity', () => {
@@ -422,41 +468,45 @@ describe('Production Release Properties', () => {
      * For any TypeScript build output, all public exports should have corresponding
      * declaration files with complete type information.
      */
-    it('should generate complete declaration files for all exports', { timeout: 30_000 }, async () => {
-      const distDir = join(PACKAGE_ROOT, 'dist');
+    it(
+      'should generate complete declaration files for all exports',
+      { timeout: 30_000 },
+      async () => {
+        const distDir = join(PACKAGE_ROOT, 'dist');
 
-      // Ensure we have a fresh build
-      execSync('npx tsc', { cwd: PACKAGE_ROOT });
+        // Ensure we have a fresh build
+        execSync('npx tsc', { cwd: PACKAGE_ROOT });
 
-      const distFiles = await getAllFiles(distDir);
-      const declarationFiles = distFiles.filter((f) => f.endsWith('.d.ts'));
+        const distFiles = await getAllFiles(distDir);
+        const declarationFiles = distFiles.filter((f) => f.endsWith('.d.ts'));
 
-      // Should have declaration files for main modules
-      const expectedDeclarations = [
-        'index.d.ts',
-        'cli.d.ts',
-        'core/index.d.ts',
-        'fleet/index.d.ts',
-        'triage/index.d.ts',
-        'github/index.d.ts',
-        'handoff/index.d.ts',
-        'sandbox/index.d.ts',
-      ];
+        // Should have declaration files for main modules
+        const expectedDeclarations = [
+          'index.d.ts',
+          'cli.d.ts',
+          'core/index.d.ts',
+          'fleet/index.d.ts',
+          'triage/index.d.ts',
+          'github/index.d.ts',
+          'handoff/index.d.ts',
+          'sandbox/index.d.ts',
+        ];
 
-      for (const expected of expectedDeclarations) {
-        const found = declarationFiles.some((f) => f.endsWith(expected));
-        expect(found, `Missing declaration file: ${expected}`).toBe(true);
+        for (const expected of expectedDeclarations) {
+          const found = declarationFiles.some((f) => f.endsWith(expected));
+          expect(found, `Missing declaration file: ${expected}`).toBe(true);
+        }
+
+        // Check that declaration files have content
+        for (const declFile of declarationFiles) {
+          const content = await import('node:fs').then((fs) =>
+            fs.promises.readFile(declFile, 'utf-8')
+          );
+          expect(content.length).toBeGreaterThan(10);
+          expect(content).toMatch(/export|declare/); // Should have exports or declarations
+        }
       }
-
-      // Check that declaration files have content
-      for (const declFile of declarationFiles) {
-        const content = await import('node:fs').then((fs) =>
-          fs.promises.readFile(declFile, 'utf-8')
-        );
-        expect(content.length).toBeGreaterThan(10);
-        expect(content).toMatch(/export|declare/); // Should have exports or declarations
-      }
-    });
+    );
   });
 
   describe('Property 23: JSDoc completeness', () => {
@@ -500,7 +550,11 @@ describe('Production Release Properties', () => {
       // This test verifies that the TypeScript compiler can infer types correctly
       // by checking that the build succeeds with strict type checking
 
-      const result = execSync('npx tsc --noEmit', { cwd: PACKAGE_ROOT, stdio: 'pipe', encoding: 'utf-8' });
+      const result = execSync('npx tsc --noEmit', {
+        cwd: PACKAGE_ROOT,
+        stdio: 'pipe',
+        encoding: 'utf-8',
+      });
 
       // If typecheck passes, type inference is working correctly
       expect(result).toBeDefined();
@@ -839,7 +893,10 @@ describe('Documentation files example tests', () => {
   });
 
   it('should have quickstart tutorial with code examples', async () => {
-    const quickstartPath = join(WORKSPACE_ROOT, 'docs/src/content/docs/getting-started/quick-start.md');
+    const quickstartPath = join(
+      WORKSPACE_ROOT,
+      'docs/src/content/docs/getting-started/quick-start.md'
+    );
     expect(existsSync(quickstartPath)).toBe(true);
 
     const content = await import('node:fs').then((fs) =>

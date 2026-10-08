@@ -29,6 +29,7 @@
  */
 
 import { cosmiconfigSync } from 'cosmiconfig';
+import type { RolesConfig } from '../roles/types.js';
 import { setTokenConfig } from './tokens.js';
 import type { TokenConfig } from './types.js';
 import { validateConfig } from './validation.js';
@@ -86,6 +87,8 @@ export interface MCPConfig {
 }
 
 export interface AgenticConfig {
+  /** Per-persona overrides; omitted roles retain their built-in definitions. */
+  roles?: RolesConfig;
   /** Token configuration for multi-org access */
   tokens?: Partial<TokenConfig>;
 
@@ -199,6 +202,20 @@ function mergeConfig(base: AgenticConfig, overrides: Partial<AgenticConfig>): Ag
 
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) continue;
+
+    if (key === 'roles') validateConfig({ roles: value });
+
+    if (key === 'roles' && value && typeof value === 'object') {
+      const roleUpdates = value as RolesConfig;
+      result.roles = { ...base.roles };
+      for (const [name, update] of Object.entries(roleUpdates)) {
+        const roleName = name as keyof RolesConfig;
+        if (update !== undefined) {
+          result.roles[roleName] = { ...base.roles?.[roleName], ...update };
+        }
+      }
+      continue;
+    }
 
     if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
       const baseValue = (base as Record<string, unknown>)[key];

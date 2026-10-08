@@ -25,6 +25,7 @@ import { Fleet } from './fleet/index.js';
 import { resolveSuccessorAgentId } from './handoff/cli.js';
 import { HandoffManager } from './handoff/index.js';
 import { VERSION } from './index.js';
+import { findRoleByTrigger, getEffectiveRole, listRoles } from './roles/index.js';
 import { AIAnalyzer } from './triage/index.js';
 
 const program = new Command();
@@ -1454,6 +1455,32 @@ program
 // ============================================
 
 // Initialize config
+const rolesCmd = program.command('roles').description('Inspect configured agent personas');
+rolesCmd
+  .command('list')
+  .description('List built-in roles and their effective configuration')
+  .action(() => console.log(JSON.stringify(listRoles(), null, 2)));
+rolesCmd
+  .command('info <role>')
+  .description('Show effective configuration for a role')
+  .action((name: string) => {
+    const role = getEffectiveRole(name);
+    if (!role) rolesCmd.error(`Unknown agent role: ${name}`);
+    console.log(JSON.stringify(role, null, 2));
+  });
+rolesCmd
+  .command('match <trigger>')
+  .description('Find an enabled role for a command, event, or schedule')
+  .action((trigger: string) => {
+    const role = findRoleByTrigger(trigger);
+    if (!role) {
+      process.exitCode = 1;
+      console.error('No enabled role matches this trigger');
+      return;
+    }
+    console.log(JSON.stringify(role, null, 2));
+  });
+
 initConfig();
 
 // Parse CLI
