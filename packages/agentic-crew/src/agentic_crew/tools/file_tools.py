@@ -7,6 +7,7 @@ in game package codebases (e.g., packages/example-game).
 from __future__ import annotations
 
 import os
+from contextlib import suppress
 from pathlib import Path
 
 from crewai.tools import BaseTool
@@ -105,6 +106,32 @@ class _ProjectFileTool(BaseTool):
             raise ValueError("Path traversal outside the selected project is not allowed.")
         return path
 
+    def _write_file(self, path: Path, content: str) -> None:
+        """Walk and write relative to directory descriptors, never symlinks."""
+        if (
+            not hasattr(os, "O_NOFOLLOW")
+            or not hasattr(os, "O_DIRECTORY")
+            or os.open not in os.supports_dir_fd
+            or os.mkdir not in os.supports_dir_fd
+        ):
+            raise RuntimeError("Safe file writes require directory-relative no-follow support on this platform.")
+        root = self._file_root().resolve()
+        parts = path.relative_to(root).parts
+        directory_flags = os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW
+        parent_fd = os.open(root, directory_flags)
+        try:
+            for part in parts[:-1]:
+                with suppress(FileExistsError):
+                    os.mkdir(part, dir_fd=parent_fd)
+                next_fd = os.open(part, directory_flags, dir_fd=parent_fd)
+                os.close(parent_fd)
+                parent_fd = next_fd
+            file_fd = os.open(parts[-1], os.O_WRONLY | os.O_CREAT | os.O_TRUNC | os.O_NOFOLLOW, 0o666, dir_fd=parent_fd)
+            with os.fdopen(file_fd, "w", encoding="utf-8") as output:
+                output.write(content)
+        finally:
+            os.close(parent_fd)
+
 
 # Allowed directories for writing (relative to the target package)
 ALLOWED_WRITE_DIRS = [
@@ -186,12 +213,7 @@ class GameCodeWriterTool(_ProjectFileTool):
             # Construct full path
             full_path = self._file_path(clean_path)
 
-            # Create parent directories
-            full_path.parent.mkdir(parents=True, exist_ok=True)
-
-            # Write content
-            with open(full_path, "w", encoding="utf-8") as f:
-                f.write(content)
+            self._write_file(full_path, content)
 
             return f"Successfully wrote {len(content)} bytes to {clean_path}"
 

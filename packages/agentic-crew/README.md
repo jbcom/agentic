@@ -82,7 +82,11 @@ Built-in file tools constructed by `run`, `build`, `run_crew`,
 that selected project's root. Each tool keeps its root after construction and
 when used in a worker thread. The selected root takes precedence over a
 conflicting `TARGET_PACKAGE`; these commands do not modify process environment
-variables. File paths cannot escape the selected root through symlinks.
+variables. Resolved file paths must remain inside the selected root.
+Writes use directory-relative no-follow operations to reject symlinks swapped
+in after validation. On platforms without those operations, writes return an
+actionable error before creating files or directories; macOS and Linux support
+this safe write path.
 
 For file tools used directly, `get_workspace_root(package_name)` still takes
 precedence over `TARGET_PACKAGE`. A named package resolves within the detected

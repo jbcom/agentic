@@ -340,6 +340,41 @@ class TestFileTargetSafety:
         assert "Error" in writer._run("src/ecs/demo.ts", "unsafe")
         assert not (sibling / "demo.ts").exists()
 
+    @pytest.mark.parametrize("swapped", ["parent", "file"])
+    def test_symlink_swap_after_resolution_cannot_redirect_write(self, tmp_path, monkeypatch, swapped):
+        from agentic_crew.tools.file_tools import GameCodeWriterTool
+
+        selected, sibling = tmp_path / "selected", tmp_path / "sibling"
+        (selected / "src/ecs").mkdir(parents=True)
+        sibling.mkdir()
+        outside = sibling / "demo.ts"
+        outside.write_text("untouched")
+        with bind_file_root(selected):
+            writer = GameCodeWriterTool()
+        original = GameCodeWriterTool._file_path
+
+        def swap_after_resolution(tool, relative):
+            path = original(tool, relative)
+            if swapped == "parent":
+                path.parent.symlink_to(sibling, target_is_directory=True)
+            else:
+                path.symlink_to(outside)
+            return path
+
+        monkeypatch.setattr(GameCodeWriterTool, "_file_path", swap_after_resolution)
+        relative = "src/ecs/data/demo.ts" if swapped == "parent" else "src/ecs/demo.ts"
+        assert "Error" in writer._run(relative, "unsafe")
+        assert outside.read_text() == "untouched"
+
+    def test_unsupported_safe_write_platform_fails_without_io(self, tmp_path, monkeypatch):
+        from agentic_crew.tools.file_tools import GameCodeWriterTool
+
+        with bind_file_root(tmp_path):
+            writer = GameCodeWriterTool()
+        monkeypatch.setattr(os, "supports_dir_fd", set())
+        assert "no-follow support" in writer._run("src/ecs/demo.ts", "unsafe")
+        assert not (tmp_path / "src").exists()
+
     def test_failed_selection_creates_no_files(self, tmp_path, monkeypatch):
         from agentic_crew.tools.file_tools import GameCodeWriterTool
 
