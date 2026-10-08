@@ -294,5 +294,14 @@ def run_crew_auto(
         framework = required_framework
 
     runner = get_runner(framework)
+    config_dir = crew_config.get("config_dir")
+    if config_dir is not None:
+        from pathlib import Path
+
+        from agentic_crew._targets import bind_file_root
+
+        with bind_file_root(Path(config_dir).parent):
+            crew = runner.build_crew(crew_config)
+            return runner.run(crew, inputs or {})
     crew = runner.build_crew(crew_config)
     return runner.run(crew, inputs or {})

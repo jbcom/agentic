@@ -62,6 +62,41 @@ Or from the CLI:
 agentic-crew run my-package analyzer --input "Review this code: ..."
 ```
 
+### File Targets and Legacy Command Migration
+
+The legacy convenience commands now require an explicit package:
+
+```bash
+agentic-crew build "Create a component" --package my-package
+agentic-crew list-knowledge --package my-package
+agentic-crew list-knowledge --package my-package --crew analyzer
+```
+
+`build` still uses the `game_builder` crew and passes the same specification
+inputs. Previously these commands selected a fixed package. Existing projects
+remain valid when named explicitly; use `agentic-crew list` to find their names.
+Missing, unknown, or path-like package selections fail before crew construction.
+
+Built-in file tools constructed by `run`, `build`, `run_crew`,
+`run_crew_from_path`, or `run_crew_auto` with a discovered `config_dir` capture
+that selected project's root. Each tool keeps its root after construction and
+when used in a worker thread. The selected root takes precedence over a
+conflicting `TARGET_PACKAGE`; these commands do not modify process environment
+variables. File paths cannot escape the selected root through symlinks.
+
+For file tools used directly, `get_workspace_root(package_name)` still takes
+precedence over `TARGET_PACKAGE`. A named package resolves within the detected
+workspace, or through its existing `<PACKAGE_NAME_IN_UPPERCASE>_ROOT` environment
+variable. An invalid name or a missing target raises an error instead of
+silently using the current directory.
+
+Without an explicit target, the current directory is supported only when it
+identifies a standalone project through `pyproject.toml` or a framework manifest
+and has no package ambiguity. A monorepo never selects a writable package
+automatically. Set `TARGET_PACKAGE` and, for projects outside the detected
+workspace, the corresponding root environment variable. Custom tools and
+external CLI runners retain their own target-selection contracts.
+
 ### 3. Use a Specific Runner
 
 ```python

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from agentic_crew._targets import bind_file_root, validate_package_name
 from agentic_crew.core.discovery import discover_packages, get_crew_config
 from agentic_crew.core.loader import load_crew_from_config
 
@@ -28,6 +29,7 @@ def run_crew(
     Raises:
         ValueError: If package or crew not found.
     """
+    validate_package_name(package_name)
     # Discover packages
     packages = discover_packages(workspace_root)
 
@@ -41,10 +43,9 @@ def run_crew(
     crew_config = get_crew_config(crewai_dir, crew_name)
 
     # Build the crew
-    crew = load_crew_from_config(crew_config)
-
-    # Run it
-    result = crew.kickoff(inputs=inputs or {})
+    with bind_file_root(crewai_dir.parent):
+        crew = load_crew_from_config(crew_config)
+        result = crew.kickoff(inputs=inputs or {})
 
     return result.raw if hasattr(result, "raw") else str(result)
 
@@ -65,6 +66,7 @@ def run_crew_from_path(
         The crew's output as a string.
     """
     crew_config = get_crew_config(crewai_dir, crew_name)
-    crew = load_crew_from_config(crew_config)
-    result = crew.kickoff(inputs=inputs or {})
+    with bind_file_root(crewai_dir.parent):
+        crew = load_crew_from_config(crew_config)
+        result = crew.kickoff(inputs=inputs or {})
     return result.raw if hasattr(result, "raw") else str(result)

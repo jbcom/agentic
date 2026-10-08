@@ -10,7 +10,9 @@ import os
 from pathlib import Path
 
 from crewai.tools import BaseTool
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
+
+from agentic_crew._targets import construction_root, validate_package_name
 
 
 def _find_workspace_root() -> Path | None:
@@ -36,29 +38,72 @@ def get_workspace_root(package_name: str | None = None) -> Path:
 
     Args:
         package_name: Name of the target package. If not provided,
-            uses TARGET_PACKAGE environment variable, or the legacy package default.
+            uses TARGET_PACKAGE or an identifiable standalone current directory.
 
     Returns:
         Path to packages/<package_name> directory.
     """
-    # Determine the target package name
+    # An execution-selected project wins over process environment defaults.
+    selected_root = construction_root()
+    if package_name is None and selected_root is not None:
+        return selected_root
     if package_name is None:
-        package_name = os.environ.get("TARGET_PACKAGE", "otterfall")
+        package_name = os.environ.get("TARGET_PACKAGE")
 
-    # Find workspace root using marker file search
+    if package_name is not None:
+        validate_package_name(package_name)
+
     workspace_root = _find_workspace_root()
-    if workspace_root:
-        target_dir = workspace_root / "packages" / package_name
-        if target_dir.exists():
-            return target_dir
+    cwd = Path.cwd().resolve()
+    if package_name is not None:
+        if workspace_root:
+            packages_dir = (workspace_root / "packages").resolve()
+            target_dir = (packages_dir / package_name).resolve()
+            if target_dir.is_dir() and target_dir.is_relative_to(packages_dir):
+                return target_dir
 
-    # Fallback: try environment variable for root directory
-    env_root_var = f"{package_name.upper()}_ROOT"
-    if env_root_var in os.environ:
-        return Path(os.environ[env_root_var]).resolve()
+        env_root_var = f"{package_name.upper()}_ROOT"
+        if env_root_var in os.environ:
+            value = os.environ[env_root_var]
+            target_dir = Path(value).resolve()
+            if value.strip() and target_dir.is_dir():
+                return target_dir
+            raise ValueError(f"{env_root_var} must name an existing project directory.")
+        if cwd.name == package_name and _is_standalone(cwd, workspace_root):
+            return cwd
+        raise ValueError(f"Package '{package_name}' not found. Set TARGET_PACKAGE and {env_root_var} explicitly.")
 
-    # Last fallback - current directory (shouldn't happen in normal use)
-    return Path.cwd()
+    if _is_standalone(cwd, workspace_root):
+        return cwd
+    raise ValueError("No unambiguous file target. Set TARGET_PACKAGE or pass an explicit package_name.")
+
+
+def _is_standalone(cwd: Path, workspace_root: Path | None) -> bool:
+    """Recognize a standalone cwd without choosing a monorepo package."""
+    if workspace_root and cwd.is_relative_to((workspace_root / "packages").resolve()):
+        return False
+    packages = cwd / "packages"
+    if packages.is_dir() and any(path.is_dir() for path in packages.iterdir()):
+        return False
+    return (cwd / "pyproject.toml").is_file() or any(
+        (cwd / directory / "manifest.yaml").is_file() for directory in (".crew", ".crewai", ".langgraph", ".strands")
+    )
+
+
+class _ProjectFileTool(BaseTool):
+    """Capture execution binding so a tool keeps its root in worker threads."""
+
+    _bound_root: Path | None = PrivateAttr(default_factory=construction_root)
+
+    def _file_root(self) -> Path:
+        return self._bound_root if self._bound_root is not None else get_workspace_root()
+
+    def _file_path(self, relative_path: str) -> Path:
+        root = self._file_root().resolve()
+        path = (root / relative_path).resolve()
+        if not path.is_relative_to(root):
+            raise ValueError("Path traversal outside the selected project is not allowed.")
+        return path
 
 
 # Allowed directories for writing (relative to the target package)
@@ -85,7 +130,7 @@ class WriteFileInput(BaseModel):
     content: str = Field(description="The TypeScript/TSX code content to write")
 
 
-class GameCodeWriterTool(BaseTool):
+class GameCodeWriterTool(_ProjectFileTool):
     """Tool for writing code files to a game package codebase.
 
     This tool is restricted to specific directories to ensure agents
@@ -138,8 +183,7 @@ class GameCodeWriterTool(BaseTool):
                 return f"Error: Extension '{ext}' not allowed. Allowed: {ALLOWED_EXTENSIONS}"
 
             # Construct full path
-            workspace_root = get_workspace_root()
-            full_path = workspace_root / clean_path
+            full_path = self._file_path(clean_path)
 
             # Create parent directories
             full_path.parent.mkdir(parents=True, exist_ok=True)
@@ -162,7 +206,7 @@ class ReadFileInput(BaseModel):
     file_path: str = Field(description="Relative path from workspace root (e.g., 'src/ecs/components.ts')")
 
 
-class GameCodeReaderTool(BaseTool):
+class GameCodeReaderTool(_ProjectFileTool):
     """Tool for reading code files from a game package codebase.
 
     Use this to understand existing patterns before writing new code.
@@ -192,8 +236,7 @@ class GameCodeReaderTool(BaseTool):
             if ".." in clean_path:
                 return f"Error: Path traversal not allowed in '{clean_path}'"
 
-            workspace_root = get_workspace_root()
-            full_path = workspace_root / clean_path
+            full_path = self._file_path(clean_path)
 
             if not full_path.exists():
                 return f"Error: File not found: {clean_path}"
@@ -222,7 +265,7 @@ class ListDirInput(BaseModel):
     directory: str = Field(description="Relative directory path from workspace root (e.g., 'src/ecs')")
 
 
-class DirectoryListTool(BaseTool):
+class DirectoryListTool(_ProjectFileTool):
     """Tool for listing files in a directory.
 
     Use this to discover existing files and understand project structure.
@@ -252,8 +295,7 @@ class DirectoryListTool(BaseTool):
             if ".." in clean_path:
                 return "Error: Path traversal not allowed"
 
-            workspace_root = get_workspace_root()
-            full_path = workspace_root / clean_path
+            full_path = self._file_path(clean_path)
 
             if not full_path.exists():
                 return f"Error: Directory not found: {clean_path}"
