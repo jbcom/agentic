@@ -3,6 +3,7 @@
  */
 
 import { z } from 'zod';
+import { ROLE_NAMES } from '../roles/types.js';
 import { ConfigErrorCode, ConfigurationError } from './errors.js';
 
 // ============================================
@@ -61,6 +62,19 @@ const CursorConfigSchema = z.object({
 // ============================================
 
 export const AgenticConfigSchema = z.object({
+  roles: z
+    .partialRecord(
+      z.enum(ROLE_NAMES),
+      z
+        .object({
+          enabled: z.boolean().optional(),
+          model: z.string().trim().min(1).optional(),
+          systemPrompt: z.string().trim().min(1).optional(),
+          maxSteps: z.number().int().positive().optional(),
+        })
+        .strict()
+    )
+    .optional(),
   tokens: TokenConfigSchema.optional(),
   defaultRepository: z.string().optional(),
   coordinationPr: z.number().int().positive().optional(),

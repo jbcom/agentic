@@ -86,6 +86,43 @@ agentic triage review --base main --head feature-branch
 
 ## Key Features
 
+### Configurable Agent Roles
+
+Five personas compose the existing Agent execution engine: Harvester manages PR lifecycle, Curator assesses issues, Reviewer reviews code, Fixer diagnoses CI failures, and Delegator routes work to agents.
+
+```bash
+agentic roles list
+agentic roles info reviewer
+agentic roles match /review
+```
+
+Configure individual personas in `agentic.config.json`:
+
+```json
+{
+  "roles": {
+    "reviewer": { "model": "your-anthropic-model-id", "maxSteps": 10 },
+    "harvester": { "enabled": false }
+  }
+}
+```
+
+```typescript
+import { executeRole } from '@jbcom/agentic';
+
+const result = await executeRole('reviewer', 'Review the current changes', {
+  agent: {
+    workingDirectory: '.',
+    approval: { requireApproval: ['bash'], onApprovalRequest: async () => false },
+  },
+});
+console.log(result.result);
+```
+
+Optional `systemPrompt` instructions customize the persona while retaining the Agent's existing guidelines. Per-call role overrides preserve other configured fields. Disabled roles cannot execute or match a trigger unless explicitly enabled by an override. Execution uses the existing Anthropic-backed Agent; model IDs must be compatible with that provider. The global triage model is inherited only when its provider is Anthropic (or unspecified).
+
+Trigger metadata describes schedules, events, and command routing; it does not install a scheduler, register webhooks, or grant tool permissions. Capabilities describe the persona's purpose. Use the existing Agent approval callback to authorize tool operations; role execution rejects require-approval settings without a callback. Listing and matching roles do not create model or MCP sessions.
+
 - **Fleet orchestration** -- spawn and coordinate multiple Cursor Background Agents simultaneously
 - **Intelligent token switching** -- routes GitHub operations to the correct org-specific tokens automatically
 - **Sandbox execution** -- run AI agents in isolated Docker containers with resource limits
