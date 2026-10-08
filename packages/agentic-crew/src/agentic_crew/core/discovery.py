@@ -117,7 +117,7 @@ def discover_all_framework_configs(
 
     Returns:
         Dict mapping package name to dict of framework -> config_dir.
-        Example: {"otterfall": {"crewai": Path(...), "strands": Path(...)}}
+        Example: {"example-game": {"crewai": Path(...), "strands": Path(...)}}
         Framework can be None for framework-agnostic .crew/ directories.
     """
     if workspace_root is None:

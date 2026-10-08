@@ -17,7 +17,7 @@ def run_crew(
     """Run a crew from a package with the given inputs.
 
     Args:
-        package_name: Name of the package (e.g., 'otterfall').
+        package_name: Name of the package (e.g., 'example-game').
         crew_name: Name of the crew to run (e.g., 'game_builder').
         inputs: Optional dict of inputs to pass to the crew.
         workspace_root: Optional workspace root path.

@@ -28,7 +28,7 @@ export interface CrewListResult {
  * Summary information about a crew
  */
 export interface CrewSummary {
-  /** Package containing the crew (e.g., "otterfall", "vendor-connectors") */
+  /** Package containing the crew (e.g., "example-game", "vendor-connectors") */
   package: string;
 
   /** Crew name (e.g., "game_builder", "connector_builder") */
@@ -113,7 +113,7 @@ export interface TaskInfo {
  *
  * @example
  * ```bash
- * agentic-crew run otterfall game_builder --input "Create a QuestComponent" --json
+ * agentic-crew run example-game game_builder --input "Create a QuestComponent" --json
  * ```
  */
 export interface CrewRunResult {

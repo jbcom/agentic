@@ -17,23 +17,23 @@ class TestDiscovery:
 
         packages = discover_packages(workspace_root=temp_workspace)
 
-        assert "otterfall" in packages
-        assert packages["otterfall"].exists()
+        assert "example-game" in packages
+        assert packages["example-game"].exists()
 
     def test_discover_packages_finds_crew_directories(self, tmp_path: Path) -> None:
         """Test that discover_packages finds framework-agnostic .crew directories."""
         from agentic_crew.core.discovery import discover_packages
 
         # Create packages with .crew directory
-        pkg_dir = tmp_path / "packages" / "strata"
+        pkg_dir = tmp_path / "packages" / "demo"
         crew_dir = pkg_dir / ".crew"
         crew_dir.mkdir(parents=True)
-        (crew_dir / "manifest.yaml").write_text("name: strata\ncrews: {}")
+        (crew_dir / "manifest.yaml").write_text("name: demo\ncrews: {}")
 
         packages = discover_packages(workspace_root=tmp_path)
 
-        assert "strata" in packages
-        assert packages["strata"].name == ".crew"
+        assert "demo" in packages
+        assert packages["demo"].name == ".crew"
 
     def test_discover_packages_prefers_crew_over_crewai(self, tmp_path: Path) -> None:
         """Test that .crew takes priority over .crewai when both exist."""
@@ -88,12 +88,12 @@ class TestDiscovery:
 
         with patch(
             "agentic_crew.core.discovery.discover_packages",
-            return_value={"otterfall": temp_workspace / "packages" / "otterfall" / ".crewai"},
+            return_value={"example-game": temp_workspace / "packages" / "example-game" / ".crewai"},
         ):
             crews_by_package = list_crews()
 
-        assert "otterfall" in crews_by_package
-        crews = crews_by_package["otterfall"]
+        assert "example-game" in crews_by_package
+        crews = crews_by_package["example-game"]
         assert len(crews) == 1
         assert crews[0]["name"] == "test_crew"
 
@@ -103,11 +103,11 @@ class TestDiscovery:
 
         with patch(
             "agentic_crew.core.discovery.discover_packages",
-            return_value={"otterfall": temp_workspace / "packages" / "otterfall" / ".crewai"},
+            return_value={"example-game": temp_workspace / "packages" / "example-game" / ".crewai"},
         ):
-            crews_by_package = list_crews(package_name="otterfall")
+            crews_by_package = list_crews(package_name="example-game")
 
-        assert "otterfall" in crews_by_package
+        assert "example-game" in crews_by_package
         assert len(crews_by_package) == 1
 
     def test_list_crews_returns_empty_for_nonexistent_package(self, temp_workspace: Path) -> None:
@@ -116,7 +116,7 @@ class TestDiscovery:
 
         with patch(
             "agentic_crew.core.discovery.discover_packages",
-            return_value={"otterfall": temp_workspace / "packages" / "otterfall" / ".crewai"},
+            return_value={"example-game": temp_workspace / "packages" / "example-game" / ".crewai"},
         ):
             crews_by_package = list_crews(package_name="nonexistent")
 
@@ -126,11 +126,11 @@ class TestDiscovery:
         """Test that load_manifest parses YAML correctly."""
         from agentic_crew.core.discovery import load_manifest
 
-        crewai_dir = temp_workspace / "packages" / "otterfall" / ".crewai"
+        crewai_dir = temp_workspace / "packages" / "example-game" / ".crewai"
         manifest = load_manifest(crewai_dir)
 
         assert manifest is not None
-        assert manifest.get("name") == "otterfall"
+        assert manifest.get("name") == "example-game"
         assert "crews" in manifest
 
     def test_get_workspace_root_finds_root(self) -> None:
@@ -156,7 +156,7 @@ class TestDiscovery:
         """Test that get_crew_config includes required_framework field."""
         from agentic_crew.core.discovery import get_crew_config
 
-        crewai_dir = temp_workspace / "packages" / "otterfall" / ".crewai"
+        crewai_dir = temp_workspace / "packages" / "example-game" / ".crewai"
         config = get_crew_config(crewai_dir, "test_crew")
 
         assert config["required_framework"] == "crewai"

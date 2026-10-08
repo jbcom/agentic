@@ -24,8 +24,8 @@ The Rust `game-generator` package and the Python `game-asset-mcp` package were j
 
 Standalone repositories were created locally and published publicly:
 
-- `/Users/jbogaty/src/jbcom/game-generator`
-- `/Users/jbogaty/src/jbcom/game-asset-mcp`
+- `../game-generator`
+- `../game-asset-mcp`
 
 GitHub remotes:
 
@@ -85,7 +85,7 @@ Additional cleanup completed in `@jbcom/agentic-triage`:
 - rewired `cli`, `mcp`, `octokit`, `sage`, and `visual` to depend on the narrower modules
 - eliminated the remaining build-time `tsup` unused-import noise while keeping lint, typecheck, tests, and the full TypeScript workspace gate green
 - corrected stale `triage` contract text in source examples and committed API docs so project/review APIs are no longer described as "coming soon" stubs
-- added docs contract coverage for stale `@strata/triage` branding and old stub remarks
+- added docs contract coverage for stale `legacy triage package` branding and old stub remarks
 - implemented real Linear label mutation support in `LinearProvider` for create/add/remove label flows and covered it with provider tests
 
 Remaining work should now focus on:
@@ -228,7 +228,7 @@ Additional runtime work completed in `packages/agentic/src/github/client.ts` clo
 Additional runtime work completed in `packages/agentic/src/github/client.ts` static PR comment pagination:
 
 - fixed `listPRComments()` so it now paginates through all PR issue-comment pages instead of returning only the first 100 comments
-- this closes a fleet coordination failure mode where new `@cursor` instructions on long-lived coordination PRs could disappear once the PR exceeded 100 comments
+- this closes a agent coordination failure mode where new `@cursor` instructions on long-lived coordination PRs could disappear once the PR exceeded 100 comments
 - added direct static-client coverage in `packages/agentic/tests/github-client-static.test.ts` for multi-page PR comment retrieval across page 1 and page 2
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 
@@ -236,15 +236,15 @@ Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` coord
 
 - fixed inbound coordination polling so agent status comments like `✅ DONE:` and `⚠️ BLOCKED:` are processed even when they do not include an `@cursor` mention
 - extracted the single-pass inbound poll into `pollCoordinationComments()` and added explicit coordination-signal detection so the loop can distinguish actionable DONE/BLOCKED comments from ordinary chatter
-- added direct fleet coordination coverage in `packages/agentic/tests/fleet-management.test.ts` for DONE comments, BLOCKED comments, and unrelated comments
-- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- added direct agent coordination coverage in `packages/agentic/tests/fleet-management.test.ts` for DONE comments, BLOCKED comments, and unrelated comments
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 
 Additional runtime work completed in `packages/agentic/src/fleet/fleet.ts` agent lifecycle handling:
 
 - fixed outbound coordination polling so agents in `PENDING` state are no longer dropped from the monitored set before they ever start running
 - fixed `waitFor()` so it now treats both `PENDING` and `RUNNING` as non-terminal states, instead of returning early while a newly launched agent is still pending
 - extracted the single-pass outbound work into `pollAgentStatuses()` and added direct fleet coverage for pending-agent retention and `waitFor()` progression from `PENDING` to `RUNNING` to `COMPLETED`
-- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 
 Additional runtime work completed in `packages/agentic/src/handoff/manager.ts` takeover safety:
 

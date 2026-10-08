@@ -124,14 +124,14 @@ class TestGameCodeWriterTool:
         from agentic_crew.tools.file_tools import GameCodeWriterTool
 
         # Create the allowed directory structure
-        ecs_dir = temp_workspace / "packages" / "otterfall" / "src" / "ecs"
+        ecs_dir = temp_workspace / "packages" / "example-game" / "src" / "ecs"
         ecs_dir.mkdir(parents=True)
 
         tool = GameCodeWriterTool()
 
         with patch(
             "agentic_crew.tools.file_tools.get_workspace_root",
-            return_value=temp_workspace / "packages" / "otterfall",
+            return_value=temp_workspace / "packages" / "example-game",
         ):
             result = tool._run(
                 file_path="src/ecs/TestComponent.ts",
@@ -160,7 +160,7 @@ class TestGameCodeReaderTool:
         from agentic_crew.tools.file_tools import GameCodeReaderTool
 
         # Create a test file
-        test_file = temp_workspace / "packages" / "otterfall" / "src" / "test.ts"
+        test_file = temp_workspace / "packages" / "example-game" / "src" / "test.ts"
         test_file.parent.mkdir(parents=True, exist_ok=True)
         test_file.write_text("export const Test = 'hello';")
 
@@ -168,7 +168,7 @@ class TestGameCodeReaderTool:
 
         with patch(
             "agentic_crew.tools.file_tools.get_workspace_root",
-            return_value=temp_workspace / "packages" / "otterfall",
+            return_value=temp_workspace / "packages" / "example-game",
         ):
             result = tool._run(file_path="src/test.ts")
 
@@ -182,7 +182,7 @@ class TestGameCodeReaderTool:
 
         with patch(
             "agentic_crew.tools.file_tools.get_workspace_root",
-            return_value=temp_workspace / "packages" / "otterfall",
+            return_value=temp_workspace / "packages" / "example-game",
         ):
             result = tool._run(file_path="src/nonexistent.ts")
 
@@ -198,7 +198,7 @@ class TestDirectoryListTool:
         from agentic_crew.tools.file_tools import DirectoryListTool
 
         # Create some test files
-        src_dir = temp_workspace / "packages" / "otterfall" / "src"
+        src_dir = temp_workspace / "packages" / "example-game" / "src"
         src_dir.mkdir(parents=True)
         (src_dir / "index.ts").write_text("export {};")
         (src_dir / "utils").mkdir()
@@ -207,7 +207,7 @@ class TestDirectoryListTool:
 
         with patch(
             "agentic_crew.tools.file_tools.get_workspace_root",
-            return_value=temp_workspace / "packages" / "otterfall",
+            return_value=temp_workspace / "packages" / "example-game",
         ):
             result = tool._run(directory="src")
 

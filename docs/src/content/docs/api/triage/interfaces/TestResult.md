@@ -7,7 +7,7 @@ title: "TestResult"
 
 Defined in: [packages/triage/src/test-results.ts:8](https://github.com/jbcom/agentic/blob/3e0fc0dae3f16f8cce14665d77f819f138b021fa/packages/triage/src/test-results.ts#L8)
 
-Strata Test Results Format
+Agentic Test Results Format
 
 Custom test result format designed for AI-powered triage and diagnosis.
 Used by both Vitest and Playwright reporters.

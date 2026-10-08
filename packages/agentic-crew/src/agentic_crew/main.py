@@ -9,17 +9,17 @@ Usage:
     agentic-crew list --json  # JSON output for external tools
 
     # List crews in a specific package
-    agentic-crew list otterfall
+    agentic-crew list example-game
 
     # Run a crew
-    agentic-crew run otterfall game_builder --input "Create a BiomeComponent"
-    agentic-crew run otterfall game_builder --input "..." --json  # JSON output
+    agentic-crew run example-game game_builder --input "Create a BiomeComponent"
+    agentic-crew run example-game game_builder --input "..." --json  # JSON output
 
     # Run with input from file
-    agentic-crew run otterfall game_builder --file tasks.md
+    agentic-crew run example-game game_builder --file tasks.md
 
     # Show crew details
-    agentic-crew info otterfall game_builder --json
+    agentic-crew info example-game game_builder --json
 """
 
 from __future__ import annotations
@@ -321,7 +321,7 @@ def _cmd_run_single_agent(args, use_json: bool, start_time: float):
 
 
 def cmd_build(args):
-    """Legacy build command - runs otterfall game_builder."""
+    """Legacy build command using the original game_builder package."""
     print("=" * 60)
     print("🎮 OTTERFALL GAME BUILDER")
     print("=" * 60)
@@ -499,15 +499,15 @@ Examples:
     agentic-crew list --json  # JSON output for external tools
 
     # List crews in a package
-    agentic-crew list otterfall
+    agentic-crew list example-game
 
     # List available single-agent runners
     agentic-crew list-runners
     agentic-crew list-runners --json
 
     # Run a multi-agent crew
-    agentic-crew run otterfall game_builder --input "Create a QuestComponent"
-    agentic-crew run otterfall game_builder --input "..." --json  # JSON output
+    agentic-crew run example-game game_builder --input "Create a QuestComponent"
+    agentic-crew run example-game game_builder --input "..." --json  # JSON output
 
     # Run with single-agent CLI runner
     agentic-crew run --runner aider --input "Add error handling to auth.py"
@@ -515,7 +515,7 @@ Examples:
     agentic-crew run --runner ollama --input "Fix the bug" --model deepseek-coder
 
     # Show crew details
-    agentic-crew info otterfall game_builder --json
+    agentic-crew info example-game game_builder --json
 
 Exit codes:
     0 - Success
@@ -597,7 +597,7 @@ Exit codes:
     elif args.command == "build":
         cmd_build(args)
     elif args.command == "list-knowledge":
-        # Legacy - list knowledge from otterfall
+        # Legacy - list knowledge from example-game
         packages = discover_packages()
         if "otterfall" in packages:
             config = get_crew_config(packages["otterfall"], "game_builder")
