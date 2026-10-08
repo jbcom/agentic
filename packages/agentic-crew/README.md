@@ -96,6 +96,8 @@ and has no package ambiguity. A monorepo never selects a writable package
 automatically. Set `TARGET_PACKAGE` and, for projects outside the detected
 workspace, the corresponding root environment variable. Custom tools and
 external CLI runners retain their own target-selection contracts.
+When a package is explicitly supplied to a CLI runner, an unknown target is
+rejected before the runner starts; it cannot silently fall back to another cwd.
 
 ### 3. Use a Specific Runner
 

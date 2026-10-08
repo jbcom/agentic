@@ -41,7 +41,7 @@ def get_workspace_root(package_name: str | None = None) -> Path:
             uses TARGET_PACKAGE or an identifiable standalone current directory.
 
     Returns:
-        Path to packages/<package_name> directory.
+        Path to the explicitly selected or standalone project directory.
     """
     # An execution-selected project wins over process environment defaults.
     selected_root = construction_root()
@@ -141,7 +141,8 @@ class GameCodeWriterTool(_ProjectFileTool):
     description: str = """
     Write a code file to the target game codebase (e.g., packages/<target_package>).
 
-    The target package is configurable via TARGET_PACKAGE environment variable.
+    Discovered crews bind this tool to their selected project at construction.
+    Direct use supports TARGET_PACKAGE or an identifiable standalone directory.
 
     ALLOWED DIRECTORIES:
     - src/ecs - ECS components, world definition
@@ -216,7 +217,8 @@ class GameCodeReaderTool(_ProjectFileTool):
     description: str = """
     Read a code file from the target package's codebase.
 
-    The target package is determined by the TARGET_PACKAGE environment variable.
+    Discovered crews bind this tool to their selected project at construction.
+    Direct use supports TARGET_PACKAGE or an identifiable standalone directory.
 
     Use this tool to:
     - Understand existing patterns
@@ -275,7 +277,8 @@ class DirectoryListTool(_ProjectFileTool):
     description: str = """
     List files and subdirectories in the target package codebase.
 
-    The target package is determined by the TARGET_PACKAGE environment variable.
+    Discovered crews bind this tool to their selected project at construction.
+    Direct use supports TARGET_PACKAGE or an identifiable standalone directory.
 
     Use this to:
     - Discover existing components

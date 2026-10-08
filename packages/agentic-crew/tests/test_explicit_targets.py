@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import socket
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -10,6 +11,16 @@ from unittest.mock import patch
 import pytest
 from agentic_crew._targets import bind_file_root, construction_root, validate_package_name
 from agentic_crew.main import main
+
+
+@pytest.fixture(autouse=True)
+def reject_network(monkeypatch):
+    """These filesystem contracts must never call a model or other service."""
+
+    def deny(*_args, **_kwargs):
+        raise AssertionError("Network access is forbidden in target tests")
+
+    monkeypatch.setattr(socket.socket, "connect", deny)
 
 
 @pytest.mark.parametrize("name", ["", "../demo", "/demo", "a/b", "a\\b", ".", "..", "demo..name"])
@@ -127,6 +138,17 @@ class TestFileTargetSafety:
     @pytest.fixture(autouse=True)
     def tools(self):
         pytest.importorskip("crewai")
+
+    @pytest.mark.parametrize("deep", [False, True])
+    def test_pydantic_tool_copy_retains_private_binding(self, tmp_path, deep):
+        from agentic_crew.tools.file_tools import GameCodeWriterTool
+
+        with bind_file_root(tmp_path):
+            tool = GameCodeWriterTool()
+        copied = tool.model_copy(deep=deep)
+        assert "_bound_root" not in copied.model_dump()
+        assert "Successfully wrote" in copied._run("src/ecs/demo.ts", "selected")
+        assert (tmp_path / "src/ecs/demo.ts").read_text() == "selected"
 
     def test_discovered_auto_runner_binds_registry_tools(self, tmp_path, monkeypatch):
         from agentic_crew.core.decomposer import run_crew_auto
