@@ -203,6 +203,8 @@ function mergeConfig(base: AgenticConfig, overrides: Partial<AgenticConfig>): Ag
   for (const [key, value] of Object.entries(overrides)) {
     if (value === undefined) continue;
 
+    if (key === 'roles') validateConfig({ roles: value });
+
     if (key === 'roles' && value && typeof value === 'object') {
       const roleUpdates = value as RolesConfig;
       result.roles = { ...base.roles };

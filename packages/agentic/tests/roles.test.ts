@@ -34,6 +34,7 @@ import {
   getEffectiveRole,
   listRoles,
 } from '../src/roles/index.js';
+import type { RolesConfig } from '../src/roles/types.js';
 
 let directory: string;
 beforeEach(() => {
@@ -74,6 +75,8 @@ describe('role configuration and routing', () => {
     { unknown: { enabled: true } },
   ])('rejects invalid role settings: %j', (roles) => {
     expect(() => validateConfig({ roles })).toThrow();
+    expect(() => setConfig({ roles: roles as RolesConfig })).toThrow();
+    expect(getConfig().roles).toBeUndefined();
   });
 
   it('returns independent snapshots without mutating built-in definitions', () => {
