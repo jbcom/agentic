@@ -6,7 +6,7 @@
  * using property-based testing with fast-check.
  */
 
-import { execFileSync, execSync } from 'node:child_process';
+import { execFileSync, execSync, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -59,7 +59,7 @@ describe('Production Release Properties', () => {
       }
     );
 
-    it('should run compiled role CLI commands without credentials', () => {
+    it('should run compiled role CLI commands without credentials', { timeout: 30_000 }, () => {
       // This suite owns the shared build directory; keep compiled CLI assertions
       // next to its sequential build test to avoid cross-suite rebuild races.
       const directory = mkdtempSync(join(tmpdir(), 'agentic-cli-'));
@@ -67,6 +67,7 @@ describe('Production Release Properties', () => {
       const options = {
         cwd: directory,
         encoding: 'utf8' as const,
+        timeout: 10_000,
         env: { ...process.env, ANTHROPIC_API_KEY: '', OPENAI_API_KEY: '', GITHUB_TOKEN: '' },
       };
       try {
@@ -86,12 +87,10 @@ describe('Production Release Properties', () => {
           execFileSync(process.execPath, [cli, 'roles', 'info', 'fixer'], options)
         );
         expect(info.name).toBe('fixer');
-        expect(() =>
-          execFileSync(process.execPath, [cli, 'roles', 'match', '/unknown'], {
-            ...options,
-            stdio: 'pipe',
-          })
-        ).toThrow();
+        const unmatched = spawnSync(process.execPath, [cli, 'roles', 'match', '/unknown'], options);
+        expect(unmatched.error).toBeUndefined();
+        expect(unmatched.status).toBe(1);
+        expect(unmatched.stderr).toContain('No enabled role matches this trigger');
       } finally {
         rmSync(directory, { recursive: true, force: true });
       }
