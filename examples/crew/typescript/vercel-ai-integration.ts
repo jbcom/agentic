@@ -13,11 +13,11 @@
  * @see https://github.com/jbcom/agentic-crew/blob/main/docs/INTEGRATION.md
  */
 
-import { tool, generateText, streamText } from 'ai';
 import { anthropic } from '@ai-sdk/anthropic';
+import { generateText, streamText, tool } from 'ai';
 import { z } from 'zod';
-import { CrewTool } from './crew-tool';
 import type { CrewRunResult, CrewSummary } from './agentic-crew-types';
+import { CrewTool } from './crew-tool';
 
 // ============================================================================
 // TOOL DEFINITIONS
@@ -42,7 +42,9 @@ export const listCrewsTool = tool({
     packageFilter: z
       .string()
       .optional()
-      .describe('Optional: filter to a specific package (e.g., "otterfall", "vendor-connectors")'),
+      .describe(
+        'Optional: filter to a specific package (e.g., "example-game", "vendor-connectors")'
+      ),
   }),
   execute: async ({ packageFilter }) => {
     const result = await crewTool.listCrews(packageFilter);
@@ -75,7 +77,7 @@ export const invokeCrewTool = tool({
   parameters: z.object({
     package: z
       .string()
-      .describe('Package containing the crew (e.g., "otterfall", "vendor-connectors")'),
+      .describe('Package containing the crew (e.g., "example-game", "vendor-connectors")'),
     crew: z.string().describe('Crew name (e.g., "game_builder", "connector_builder")'),
     input: z
       .string()
@@ -127,7 +129,7 @@ async function basicExample() {
     maxSteps: 5,
     prompt:
       'First, list the available crews. Then, using the game_builder crew from ' +
-      'the otterfall package, create a simple HealthComponent for an ECS system.',
+      'the example-game package, create a simple HealthComponent for an ECS system.',
   });
 
   console.log('\n--- Result ---');
@@ -235,9 +237,7 @@ export function createCachedCrewTools(cacheTtlMs = 60000) {
       parameters: z.object({}),
       execute: async () => {
         const crews = await getCachedList();
-        return crews
-          .map((c) => `- ${c.package}/${c.name}: ${c.description}`)
-          .join('\n');
+        return crews.map((c) => `- ${c.package}/${c.name}: ${c.description}`).join('\n');
       },
     }),
 
@@ -251,17 +251,11 @@ export function createCachedCrewTools(cacheTtlMs = 60000) {
       execute: async ({ package: pkg, crew, input }) => {
         // Validate crew exists before invoking
         const crews = await getCachedList();
-        const exists = crews.some(
-          (c) => c.package === pkg && c.name === crew
-        );
+        const exists = crews.some((c) => c.package === pkg && c.name === crew);
 
         if (!exists) {
-          const available = crews
-            .map((c) => `${c.package}/${c.name}`)
-            .join(', ');
-          throw new Error(
-            `Crew ${pkg}/${crew} not found. Available: ${available}`
-          );
+          const available = crews.map((c) => `${c.package}/${c.name}`).join(', ');
+          throw new Error(`Crew ${pkg}/${crew} not found. Available: ${available}`);
         }
 
         const result = await crewTool.invokeCrew({ package: pkg, crew, input });
@@ -292,8 +286,7 @@ export function createSpecializedCrewTool(
       input: inputSchema,
     }),
     execute: async ({ input }) => {
-      const inputStr =
-        typeof input === 'string' ? input : JSON.stringify(input, null, 2);
+      const inputStr = typeof input === 'string' ? input : JSON.stringify(input, null, 2);
 
       const result = await crewTool.invokeCrew({
         package: packageName,

@@ -27,7 +27,7 @@
 - rewired `octokit` and the tool/CLI entrypoints to consume the narrower modules so `tsup` no longer drags the broad MCP/AI helper surface into unrelated bundles
 - eliminated the remaining `tsup` unused-import build noise in `@jbcom/agentic-triage`
 - re-ran `triage` lint, build, typecheck, tests, and the full TypeScript workspace gate after the internal module split and kept everything green
-- corrected stale `@strata/triage` references and "coming soon" stub remarks in `triage` source examples and committed API docs, and added a docs contract test to keep that drift from returning
+- corrected stale triage branding and "coming soon" stub remarks in source examples and committed API docs, and added a docs contract test to keep that drift from returning
 - confirmed the docs duplicate-id warning was local `.astro` cache state again; a clean docs build runs without the warning
 - implemented real Linear label mutation support so `LinearProvider.addLabels()` and `removeLabels()` no longer no-op, and added provider tests for label creation/removal behavior
 - re-ran `triage` lint, build, typecheck, and coverage after the Linear provider work and kept the package green
@@ -90,11 +90,11 @@
 - re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the PR comment pagination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 - fixed `packages/agentic/src/fleet/fleet.ts` inbound coordination polling so `✅ DONE:` and `⚠️ BLOCKED:` agent updates are handled even without an `@cursor` mention
 - added `packages/agentic/tests/fleet-management.test.ts` coverage for DONE comments, BLOCKED comments, and unrelated coordination chatter
-- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent coordination fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 - fixed `packages/agentic/src/fleet/fleet.ts` outbound lifecycle handling so `PENDING` agents are kept under coordination instead of being treated as finished before they start
 - fixed `packages/agentic/src/fleet/fleet.ts` `waitFor()` so it waits through `PENDING` and `RUNNING` states until a terminal result is reached
 - added `packages/agentic/tests/fleet-management.test.ts` coverage for pending-agent retention in outbound polling and `waitFor()` progression from `PENDING` to `COMPLETED`
-- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the fleet lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
+- re-ran `agentic` lint, typecheck, tests, coverage, and the full TypeScript workspace gate after the agent lifecycle fix, again keeping coverage runs sequential to avoid V8 artifact collisions
 - added takeover preflight safety in `packages/agentic/src/handoff/manager.ts` so dirty worktrees and pre-existing successor branches fail before any predecessor PR merge happens
 - added `packages/agentic/tests/handoff-protocol.test.ts` coverage for dirty-worktree and existing-branch fail-before-merge scenarios and updated the non-`main` default-branch test for the new git preflight calls
 - re-ran the focused handoff test file, `agentic` lint, typecheck, tests, standalone coverage, and the full TypeScript workspace gate after the takeover safety hardening, again keeping coverage runs sequential to avoid V8 artifact collisions

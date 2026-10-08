@@ -61,7 +61,7 @@ const SIGKILL_GRACE_PERIOD_MS = 5000;
  *
  * // Run a crew
  * const result = await crewTool.invokeCrew({
- *   package: 'otterfall',
+ *   package: 'example-game',
  *   crew: 'game_builder',
  *   input: 'Create a QuestComponent',
  * });

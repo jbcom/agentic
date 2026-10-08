@@ -22,7 +22,7 @@ export interface CrewToolConfig {
  * Options for invoking a crew
  */
 export interface InvokeCrewOptions {
-  /** Package name (e.g., 'otterfall') */
+  /** Package name (e.g., 'example-game') */
   package: string;
   /** Crew name (e.g., 'game_builder') */
   crew: string;

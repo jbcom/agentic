@@ -1,7 +1,7 @@
 # jbcom Control Center - Agent Operating Manual
 
 > **This is the single source of truth for AI agents operating in the jbcom ecosystem.**
-> 
+>
 > Synced automatically from `jbcom/control-center` → org control-centers → all repositories.
 
 ---
@@ -14,7 +14,7 @@
 CONFIGURATION (↓ downward)
 jbcom/control-center → org/control-center → individual repos
 
-DOCUMENTATION (↑ upward)  
+DOCUMENTATION (↑ upward)
 individual repos → org.github.io → jbcom.github.io
 ```
 
@@ -34,9 +34,9 @@ You are **autonomous**. When assigned to a PR or issue:
 | Type | Pattern | Examples |
 |------|---------|----------|
 | **Enterprise Control** | `jbcom/control-center` | The hub |
-| **Org Control** | `{org}/control-center` | `strata-game-library/control-center` |
-| **Org Docs** | `{org}.github.io` | `strata-game-library.github.io` |
-| **Code Repo** | `{org}/{name}` | `strata-game-library/core` |
+| **Org Control** | `{org}/control-center` | `example-org/control-center` |
+| **Org Docs** | `{org}.github.io` | `example-org.github.io` |
+| **Code Repo** | `{org}/{name}` | `example-org/core` |
 
 ---
 

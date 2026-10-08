@@ -1,5 +1,5 @@
 /**
- * Strata Test Results Format
+ * Agentic Test Results Format
  *
  * Custom test result format designed for AI-powered triage and diagnosis.
  * Used by both Vitest and Playwright reporters.

@@ -77,6 +77,12 @@ packages/meshy-content-generator/.tmp-preview/
 packages/meshy-content-generator/.tmp-test/
 
 # AI / Agents
+.agent-state/
+.claude/
+.mcp.json
+opencode.json
+.augment/
+.agents/
 memory-bank/
 # .cursor/ is managed below
 ! .cursor/rules/

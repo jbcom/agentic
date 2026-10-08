@@ -233,7 +233,7 @@ def run_crew(
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `package_name` | `str` | Yes | Package name (e.g., `"otterfall"`) |
+| `package_name` | `str` | Yes | Package name (e.g., `"example-game"`) |
 | `crew_name` | `str` | Yes | Crew name from manifest (e.g., `"game_builder"`) |
 | `inputs` | `dict` | No | Input variables for task templates |
 | `workspace_root` | `Path` | No | Workspace root (auto-detected if not provided) |
@@ -244,7 +244,7 @@ def run_crew(
 from agentic_crew.core.runner import run_crew
 
 result = run_crew(
-    package_name="otterfall",
+    package_name="example-game",
     crew_name="game_builder",
     inputs={
         "spec": "Create a BiomeComponent with temperature and humidity",
@@ -271,7 +271,7 @@ from pathlib import Path
 from agentic_crew.core.runner import run_crew_from_path
 
 result = run_crew_from_path(
-    crewai_dir=Path("packages/otterfall/.crewai"),
+    crewai_dir=Path("packages/example-game/.crewai"),
     crew_name="game_builder",
     inputs={"spec": "Create a new QuestComponent"},
 )
@@ -305,7 +305,7 @@ def discover_packages(
 from agentic_crew.core.discovery import discover_packages
 
 packages = discover_packages()
-# {"otterfall": Path("packages/otterfall/.crewai")}
+# {"example-game": Path("packages/example-game/.crewai")}
 
 # Filter by framework
 crewai_only = discover_packages(framework="crewai")
@@ -326,9 +326,9 @@ from agentic_crew.core.discovery import discover_all_framework_configs
 
 configs = discover_all_framework_configs()
 # {
-#   "otterfall": {
-#     "crewai": Path("packages/otterfall/.crewai"),
-#     "strands": Path("packages/otterfall/.strands"),
+#   "example-game": {
+#     "crewai": Path("packages/example-game/.crewai"),
+#     "strands": Path("packages/example-game/.strands"),
 #   }
 # }
 ```
@@ -351,7 +351,7 @@ from agentic_crew.core.discovery import list_crews
 
 crews = list_crews()
 # {
-#   "otterfall": [
+#   "example-game": [
 #     {
 #       "name": "game_builder",
 #       "description": "Build game components",
@@ -585,18 +585,18 @@ agentic-crew list
 agentic-crew list --json
 
 # List crews in a specific package
-agentic-crew list otterfall
+agentic-crew list example-game
 
 # List crews filtered by framework
 agentic-crew list --framework crewai
 
 # Run a multi-agent crew
-agentic-crew run otterfall game_builder --input "Create a QuestComponent"
-agentic-crew run otterfall game_builder --file tasks.md
-agentic-crew run otterfall game_builder --input "..." --json
+agentic-crew run example-game game_builder --input "Create a QuestComponent"
+agentic-crew run example-game game_builder --file tasks.md
+agentic-crew run example-game game_builder --input "..." --json
 
 # Specify framework explicitly
-agentic-crew run otterfall game_builder --input "..." --framework crewai
+agentic-crew run example-game game_builder --input "..." --framework crewai
 
 # Run with single-agent CLI runner
 agentic-crew run --runner aider --input "Add error handling to auth.py"
@@ -604,8 +604,8 @@ agentic-crew run --runner claude-code --input "Refactor the database module"
 agentic-crew run --runner ollama --input "Fix the bug" --model deepseek-coder
 
 # Show crew details
-agentic-crew info otterfall game_builder
-agentic-crew info otterfall game_builder --json
+agentic-crew info example-game game_builder
+agentic-crew info example-game game_builder --json
 
 # List available single-agent runners
 agentic-crew list-runners

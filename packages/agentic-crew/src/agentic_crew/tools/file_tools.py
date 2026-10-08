@@ -1,7 +1,7 @@
 """File manipulation tools for CrewAI agents.
 
 These tools enable agents to read and write code to specific directories
-in game package codebases (e.g., packages/otterfall).
+in game package codebases (e.g., packages/example-game).
 """
 
 from __future__ import annotations
@@ -36,7 +36,7 @@ def get_workspace_root(package_name: str | None = None) -> Path:
 
     Args:
         package_name: Name of the target package. If not provided,
-            uses TARGET_PACKAGE environment variable, or defaults to "otterfall".
+            uses TARGET_PACKAGE environment variable, or the legacy package default.
 
     Returns:
         Path to packages/<package_name> directory.
@@ -61,7 +61,7 @@ def get_workspace_root(package_name: str | None = None) -> Path:
     return Path.cwd()
 
 
-# Allowed directories for writing (relative to packages/otterfall)
+# Allowed directories for writing (relative to the target package)
 ALLOWED_WRITE_DIRS = [
     "src/ecs",  # ECS components, world, data
     "src/ecs/data",  # Species definitions, etc.

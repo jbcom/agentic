@@ -19,7 +19,7 @@ const crews = await crewTool.listCrews();
 
 // Run a crew
 const result = await crewTool.invokeCrew({
-  package: 'otterfall',
+  package: 'example-game',
   crew: 'game_builder',
   input: 'Create a QuestComponent',
 });
